@@ -1,0 +1,515 @@
+Screens:
+  AllProjectsScreen:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: =Set(gStatusFilter, Blank()); Set(gLevelFilter, "All")
+    Children:
+      - lblNoRole:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =If(gAppReady, RGBA(163, 45, 45, 1), RGBA(136, 135, 128, 1))
+            Fill: =If(gAppReady, RGBA(252, 235, 235, 1), RGBA(255, 255, 255, 1))
+            Height: =Parent.Height - 60
+            Size: =12
+            Text: =If(gAppReady, "⚠ Your account was not found in the system. Please contact your administrator.", "Checking your account...")
+            Visible: =Not(gAppReady) || IsBlank(gCurrentEmployee.ID)
+            Width: =Parent.Width
+            Y: =60
+      - rectHeader:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(83, 74, 183, 1)
+            Height: =60
+            Width: =Parent.Width
+      - lblAppTitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            Size: =14
+            Text: ="Max Biocare Project List"
+            Width: =400
+            X: =20
+      - lblUserInfo:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =60
+            Size: =12
+            Text: |-
+              =If(
+                  IsBlank(gCurrentUser.Role.Value),
+                  gCurrentEmployee.Title,
+                  gCurrentEmployee.Title & " | " & gCurrentUser.Role.Value
+              )
+            Width: =280
+            X: =Parent.Width - 300
+      - rowToolbar:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =80
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =10
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
+            PaddingBottom: =20
+            PaddingLeft: =20
+            PaddingRight: =20
+            PaddingTop: =20
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Visible: =Not(IsBlank(gCurrentEmployee.ID))
+            Width: =Parent.Width
+            Y: =60
+          Children:
+            - lblSectionTitle:
+                Control: Label@2.5.1
+                Properties:
+                  FillPortions: =1
+                  FontWeight: =FontWeight.Bold
+                  Size: =14
+                  Text: ="All Projects"
+                  Width: =300
+            - txtSearch:
+                Control: TextInput@0.0.54
+                Properties:
+                  Height: =36
+                  Placeholder: ="Search by name or Project ID"
+                  Width: =260
+            - btnMyRequests:
+                Control: Button@0.0.45
+                Properties:
+                  Height: =36
+                  OnSelect: =Set(gApprovalsTab, "Mine"); Navigate(ApprovalsScreen)
+                  Text: ="My Requests"
+                  Width: =130
+            - btnApprovals:
+                Control: Button@0.0.45
+                Properties:
+                  BasePaletteColor: =RGBA(133, 79, 11, 1)
+                  Height: =36
+                  OnSelect: =Set(gApprovalsTab, "To Approve"); Navigate(ApprovalsScreen)
+                  Text: |-
+                    ="Approvals (" &
+                    CountRows(
+                        Filter(Project_ChangeRequests,
+                            Switch(gUserRole,
+                                "Manager", ApprovalStatus.Value = "Pending Manager",
+                                "Executive", ApprovalStatus.Value = "Pending Executive",
+                                ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive"
+                            )
+                        )
+                    ) & ")"
+                  Visible: =gIsApprover
+                  Width: =150
+            - btnNewProject:
+                Control: Button@0.0.45
+                Properties:
+                  Height: =36
+                  Icon: ="Add"
+                  OnSelect: =Navigate(CreateProjectScreen)
+                  Text: ="New Project"
+                  Width: =150
+      - rowFilterBar:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =48
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutOverflowX: =LayoutOverflow.Scroll
+            PaddingBottom: =12
+            PaddingLeft: =20
+            PaddingRight: =20
+            PaddingTop: =12
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Visible: =Not(IsBlank(gCurrentEmployee.ID))
+            Width: =Parent.Width
+            Y: =140
+          Children:
+            - lblFilterAll:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(IsBlank(gStatusFilter), RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(IsBlank(gStatusFilter), RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(IsBlank(gStatusFilter), FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gStatusFilter, Blank())
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="All"
+                  Width: =50
+            - divFilter1:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =16
+                  Width: =1
+            - lblFilterNotStarted:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gStatusFilter = "Not Started", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gStatusFilter = "Not Started", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gStatusFilter = "Not Started", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gStatusFilter, "Not Started")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="Not Started"
+                  Width: =100
+            - divFilter2:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =16
+                  Width: =1
+            - lblFilterInPlanning:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gStatusFilter = "In Planning", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gStatusFilter = "In Planning", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gStatusFilter = "In Planning", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gStatusFilter, "In Planning")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="In Planning"
+                  Width: =100
+            - divFilter3:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =16
+                  Width: =1
+            - lblFilterInProgress:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gStatusFilter = "In Progress", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gStatusFilter = "In Progress", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gStatusFilter = "In Progress", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gStatusFilter, "In Progress")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="In Progress"
+                  Width: =100
+            - divFilter4:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =16
+                  Width: =1
+            - lblFilterOnHold:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gStatusFilter = "On Hold", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gStatusFilter = "On Hold", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gStatusFilter = "On Hold", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gStatusFilter, "On Hold")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="On Hold"
+                  Width: =80
+            - divFilter5:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =16
+                  Width: =1
+            - lblFilterCompleted:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gStatusFilter = "Completed", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gStatusFilter = "Completed", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gStatusFilter = "Completed", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gStatusFilter, "Completed")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="Completed"
+                  Width: =100
+            - divFilter6:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =16
+                  Width: =1
+            - lblFilterCancelled:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gStatusFilter = "Cancelled", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gStatusFilter = "Cancelled", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gStatusFilter = "Cancelled", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gStatusFilter, "Cancelled")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="Cancelled"
+                  Width: =90
+            - divFilter7:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =16
+                  Width: =1
+            - lblFilterLevelAll:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gLevelFilter = "All", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gLevelFilter = "All", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gLevelFilter = "All", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gLevelFilter, "All")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="All Levels"
+                  Width: =80
+            - lblFilterLevelRoot:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gLevelFilter = "Root", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gLevelFilter = "Root", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gLevelFilter = "Root", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gLevelFilter, "Root")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="Root"
+                  Width: =60
+            - lblFilterLevelChild:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gLevelFilter = "Child", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gLevelFilter = "Child", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gLevelFilter = "Child", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gLevelFilter, "Child")
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: ="Child"
+                  Width: =60
+            - divFilter8:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =16
+                  Width: =1
+            - lblFilterShowDeleted:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gShowDeleted, RGBA(163, 45, 45, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gShowDeleted, RGBA(252, 235, 235, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gShowDeleted, FontWeight.Bold, FontWeight.Semibold)
+                  Height: =24
+                  HoverColor: =RGBA(163, 45, 45, 1)
+                  OnSelect: =Set(gShowDeleted, !gShowDeleted)
+                  PaddingLeft: =8
+                  PaddingRight: =8
+                  Size: =11
+                  Text: =If(gShowDeleted, "Hide Deleted", "Show Deleted")
+                  Visible: =gUserRole = "Admin" || gUserRole = "Executive"
+                  Width: =110
+      - rectFilterBarBorder:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(210, 209, 199, 1)
+            Height: =1
+            Visible: =Not(IsBlank(gCurrentEmployee.ID))
+            Width: =Parent.Width
+            Y: =188
+      - galProjects:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+          Properties:
+            BorderColor: =RGBA(210, 209, 199, 1)
+            Height: =Parent.Height - 188
+            Items: |-
+              =SortByColumns(
+                  Filter(Project_List,
+                      (gShowDeleted || ProjectStatus.Value <> "Deleted") &&
+                      (IsBlank(gStatusFilter) || ProjectStatus.Value = gStatusFilter) &&
+                      (gLevelFilter = "All" ||
+                          (gLevelFilter = "Root" && ProjectLevel = 0) ||
+                          (gLevelFilter = "Child" && ProjectLevel = 1)
+                      ) &&
+                      (IsBlank(txtSearch.Value) ||
+                          StartsWith(Title, txtSearch.Value) ||
+                          StartsWith(ProjectID, txtSearch.Value)
+                      )
+                  ),
+                  "ID", SortOrder.Descending
+              )
+            TemplateSize: =92
+            Visible: =Not(IsBlank(gCurrentEmployee.ID))
+            Width: =Parent.Width
+            Y: =188
+          Children:
+            - lblProjectTitle:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =28
+                  Text: =Coalesce(ThisItem.ProjectID, "PROJ-PENDING-" & ThisItem.ID) & " — " & ThisItem.Title
+                  Width: =Parent.Width - 620
+                  X: =16
+                  Y: =10
+            - lblLevelBadge:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(ThisItem.ProjectLevel = 1, RGBA(83, 74, 183, 1), RGBA(68, 68, 65, 1))
+                  Fill: =If(ThisItem.ProjectLevel = 1, RGBA(237, 235, 254, 1), RGBA(241, 239, 232, 1))
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =10
+                  Text: =If(ThisItem.ProjectLevel = 1, "↳ " & ThisItem.RootProjectID, "Root")
+                  Width: =150
+                  X: =Parent.Width - 600
+                  Y: =12
+            - lblPendingChangeBadge:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =RGBA(133, 79, 11, 1)
+                  Fill: =RGBA(250, 238, 218, 1)
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =10
+                  Text: ="Change pending"
+                  Visible: |-
+                    =!IsBlank(
+                        LookUp(Project_ChangeRequests,
+                            TargetItemID = ThisItem.ID &&
+                            (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                        )
+                    )
+                  Width: =120
+                  X: =Parent.Width - 440
+                  Y: =12
+            - lblProjectStatus:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: |-
+                    =Switch(ThisItem.ProjectStatus.Value,
+                        "Completed", RGBA(15, 110, 86, 1),
+                        "Deleted", RGBA(163, 45, 45, 1),
+                        "Cancelled", RGBA(163, 45, 45, 1),
+                        "On Hold", RGBA(133, 79, 11, 1),
+                        "In Progress", RGBA(83, 74, 183, 1),
+                        RGBA(68, 68, 65, 1)
+                    )
+                  Fill: |-
+                    =Switch(ThisItem.ProjectStatus.Value,
+                        "Completed", RGBA(225, 245, 238, 1),
+                        "Deleted", RGBA(252, 235, 235, 1),
+                        "Cancelled", RGBA(252, 235, 235, 1),
+                        "On Hold", RGBA(250, 238, 218, 1),
+                        "In Progress", RGBA(225, 220, 252, 1),
+                        RGBA(241, 239, 232, 1)
+                    )
+                  FontWeight: =FontWeight.Semibold
+                  Height: =28
+                  Size: =11
+                  Text: =ThisItem.ProjectStatus.Value
+                  Width: =120
+                  X: =Parent.Width - 300
+                  Y: =10
+            - lblProjectMeta:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(136, 135, 128, 1)
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="Owner: " & ThisItem.ProjectOwner.Value &
+                    " | Manager: " & ThisItem.ProjectManager.Value &
+                    If(IsBlank(ThisItem.StartDate), "", " | " & Text(ThisItem.StartDate, "dd/mm/yyyy") & " → " & Text(ThisItem.EndDate, "dd/mm/yyyy")) &
+                    If(IsBlank(ThisItem.BudgetAmount) || ThisItem.BudgetAmount = 0, "", " | Budget: " & Text(ThisItem.BudgetAmount, "[#,###]")) &
+                    If(IsBlank(ThisItem.ActualCost) || ThisItem.ActualCost = 0, "", " | Actual: " & Text(ThisItem.ActualCost, "[#,###]"))
+                  Width: =Parent.Width - 620
+                  X: =16
+                  Y: =46
+            - btnRowUpdate:
+                Control: Button@0.0.45
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =28
+                  OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
+                  Text: ="Update"
+                  Visible: =ThisItem.ProjectStatus.Value <> "Deleted"
+                  Width: =90
+                  X: =Parent.Width - 300
+                  Y: =48
+            - btnRowDelete:
+                Control: Button@0.0.45
+                Properties:
+                  BasePaletteColor: =RGBA(163, 45, 45, 1)
+                  FontWeight: =FontWeight.Semibold
+                  Height: =28
+                  OnSelect: =Set(gSelectedProject, ThisItem); Navigate(DeleteProjectScreen)
+                  Text: ="Delete"
+                  Visible: =ThisItem.ProjectStatus.Value <> "Deleted"
+                  Width: =90
+                  X: =Parent.Width - 200
+                  Y: =48
+            - rectSeparator:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =1
+                  Width: =Parent.Width
+                  Y: =91

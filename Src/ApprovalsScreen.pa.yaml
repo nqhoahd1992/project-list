@@ -1,0 +1,1453 @@
+Screens:
+  ApprovalsScreen:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: =Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
+    Children:
+      - rectHeader:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(83, 74, 183, 1)
+            Height: =60
+            Width: =Parent.Width
+      - lblScreenTitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            Size: =14
+            Text: ="Max Biocare Project List - Approvals"
+            Width: =719
+            X: =20
+      - lblUserInfo:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =60
+            Size: =12
+            Text: |-
+              =If(
+                  IsBlank(gCurrentUser.Role.Value),
+                  gCurrentEmployee.Title,
+                  gCurrentEmployee.Title & " | " & gCurrentUser.Role.Value
+              )
+            Width: =280
+            X: =Parent.Width - 300
+      - rowTabs:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =48
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =8
+            PaddingBottom: =10
+            PaddingLeft: =20
+            PaddingRight: =10
+            PaddingTop: =10
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =440
+            Y: =60
+          Children:
+            - lblTabToApprove:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gApprovalsTab = "To Approve", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gApprovalsTab = "To Approve", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gApprovalsTab = "To Approve", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =28
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gApprovalsTab, "To Approve"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Size: =11
+                  Text: ="To Approve"
+                  Visible: =gIsApprover
+                  Width: =110
+            - lblTabMine:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gApprovalsTab = "Mine", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gApprovalsTab = "Mine", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gApprovalsTab = "Mine", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =28
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gApprovalsTab, "Mine"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Size: =11
+                  Text: ="My Requests"
+                  Width: =110
+            - lblTabHistory:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =If(gApprovalsTab = "History", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                  Fill: =If(gApprovalsTab = "History", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  FontWeight: =If(gApprovalsTab = "History", FontWeight.Bold, FontWeight.Semibold)
+                  Height: =28
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Set(gApprovalsTab, "History"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Size: =11
+                  Text: ="History"
+                  Visible: =gUserRole = "Executive" || gUserRole = "Admin"
+                  Width: =90
+            - lblTabBack:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =RGBA(136, 135, 128, 1)
+                  Height: =28
+                  HoverColor: =RGBA(83, 74, 183, 1)
+                  OnSelect: =Navigate(AllProjectsScreen)
+                  PaddingLeft: =10
+                  PaddingRight: =10
+                  Size: =11
+                  Text: ="← Back"
+                  Width: =80
+      - galChangeRequests:
+          Control: Gallery@2.15.0
+          Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+          Properties:
+            BorderColor: =RGBA(210, 209, 199, 1)
+            Height: =Parent.Height - 108
+            Items: |-
+              =SortByColumns(
+                  Switch(gApprovalsTab,
+                      "Mine",
+                      Filter(Project_ChangeRequests, RequesterEmail = User().Email),
+                      "History",
+                      Filter(Project_ChangeRequests,
+                          ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected"
+                      ),
+                      Switch(gUserRole,
+                          "Manager",
+                          Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager"),
+                          "Executive",
+                          Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Executive"),
+                          "Admin",
+                          Filter(Project_ChangeRequests,
+                              ApprovalStatus.Value = "Pending Manager" ||
+                              ApprovalStatus.Value = "Pending Executive"
+                          ),
+                          Filter(Project_ChangeRequests, RequesterEmail = User().Email)
+                      )
+                  ),
+                  "ID", SortOrder.Descending
+              )
+            OnSelect: |-
+              =Set(gSelectedCR, ThisItem);
+              Set(gLiveTarget,
+                  If(
+                      ThisItem.RequestType.Value = "Create",
+                      Blank(),
+                      LookUp(Project_List, ID = ThisItem.TargetItemID)
+                  )
+              );
+              Set(gShowRejectPanel, false)
+            TemplateSize: =84
+            Width: =440
+            Y: =108
+          Children:
+            - rectRowHitArea:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =If(gSelectedCR.ID = ThisItem.ID, RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                  Height: =84
+                  HoverFill: =RGBA(245, 245, 250, 1)
+                  OnSelect: |-
+                    =Set(gSelectedCR, ThisItem);
+                    Set(gLiveTarget,
+                        If(
+                            ThisItem.RequestType.Value = "Create",
+                            Blank(),
+                            LookUp(Project_List, ID = ThisItem.TargetItemID)
+                        )
+                    );
+                    Set(gShowRejectPanel, false)
+                  Width: =Parent.Width
+            - lblCRType:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: |-
+                    =Switch(ThisItem.RequestType.Value,
+                        "Create", RGBA(15, 110, 86, 1),
+                        "Update", RGBA(133, 79, 11, 1),
+                        "Delete", RGBA(163, 45, 45, 1),
+                        RGBA(68, 68, 65, 1)
+                    )
+                  Fill: |-
+                    =Switch(ThisItem.RequestType.Value,
+                        "Create", RGBA(225, 245, 238, 1),
+                        "Update", RGBA(250, 238, 218, 1),
+                        "Delete", RGBA(252, 235, 235, 1),
+                        RGBA(241, 239, 232, 1)
+                    )
+                  FontWeight: =FontWeight.Semibold
+                  Height: =22
+                  OnSelect: |-
+                    =Set(gSelectedCR, ThisItem);
+                    Set(gLiveTarget,
+                        If(
+                            ThisItem.RequestType.Value = "Create",
+                            Blank(),
+                            LookUp(Project_List, ID = ThisItem.TargetItemID)
+                        )
+                    );
+                    Set(gShowRejectPanel, false)
+                  Size: =10
+                  Text: =ThisItem.RequestType.Value
+                  Width: =60
+                  X: =12
+                  Y: =10
+            - lblCRProjectName:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =22
+                  OnSelect: |-
+                    =Set(gSelectedCR, ThisItem);
+                    Set(gLiveTarget,
+                        If(
+                            ThisItem.RequestType.Value = "Create",
+                            Blank(),
+                            LookUp(Project_List, ID = ThisItem.TargetItemID)
+                        )
+                    );
+                    Set(gShowRejectPanel, false)
+                  Size: =11
+                  Text: =ThisItem.ProjectName
+                  Width: =Parent.Width - 200
+                  X: =80
+                  Y: =10
+            - lblCRStatus:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: |-
+                    =Switch(ThisItem.ApprovalStatus.Value,
+                        "Approved", RGBA(15, 110, 86, 1),
+                        "Rejected", RGBA(163, 45, 45, 1),
+                        RGBA(133, 79, 11, 1)
+                    )
+                  Fill: |-
+                    =Switch(ThisItem.ApprovalStatus.Value,
+                        "Approved", RGBA(225, 245, 238, 1),
+                        "Rejected", RGBA(252, 235, 235, 1),
+                        RGBA(250, 238, 218, 1)
+                    )
+                  FontWeight: =FontWeight.Semibold
+                  Height: =22
+                  OnSelect: |-
+                    =Set(gSelectedCR, ThisItem);
+                    Set(gLiveTarget,
+                        If(
+                            ThisItem.RequestType.Value = "Create",
+                            Blank(),
+                            LookUp(Project_List, ID = ThisItem.TargetItemID)
+                        )
+                    );
+                    Set(gShowRejectPanel, false)
+                  Size: =10
+                  Text: =ThisItem.ApprovalStatus.Value
+                  Width: =130
+                  X: =Parent.Width - 145
+                  Y: =38
+            - lblCRMeta:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(136, 135, 128, 1)
+                  Height: =22
+                  OnSelect: |-
+                    =Set(gSelectedCR, ThisItem);
+                    Set(gLiveTarget,
+                        If(
+                            ThisItem.RequestType.Value = "Create",
+                            Blank(),
+                            LookUp(Project_List, ID = ThisItem.TargetItemID)
+                        )
+                    );
+                    Set(gShowRejectPanel, false)
+                  Size: =10
+                  Text: |-
+                    ="#" & ThisItem.ID & " | " & ThisItem.RequesterID.Value & " | " & Text(ThisItem.Created, "dd/mm/yyyy")
+                  Width: =Parent.Width - 160
+                  X: =12
+                  Y: =40
+            - rectSeparator:
+                Control: Rectangle@2.3.0
+                Properties:
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =1
+                  Width: =Parent.Width
+                  Y: =83
+      - rectSplit:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(210, 209, 199, 1)
+            Height: =Parent.Height - 60
+            Width: =1
+            X: =440
+            Y: =60
+      - lblSelectHint:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Center
+            Color: =RGBA(136, 135, 128, 1)
+            Height: =60
+            Size: =12
+            Text: ="Select a change request on the left to review it."
+            Visible: =IsBlank(gSelectedCR.ID)
+            Width: =Parent.Width - 441
+            X: =441
+            Y: =200
+      - containerDetail:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height - 130
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Visible: =!IsBlank(gSelectedCR.ID)
+            Width: =Parent.Width - 441
+            X: =441
+            Y: =70
+          Children:
+            - rowCRTitle:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =56
+                  PaddingBottom: =4
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblDetailTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Bold
+                        Height: =32
+                        Size: =13
+                        Text: =gSelectedCR.Title
+                        Width: =Parent.Width - 40
+                  - lblDetailMeta:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =22
+                        Size: =10
+                        Text: |-
+                          ="Requested by: " & gSelectedCR.RequesterID.Value & " | Submitted: " & Text(gSelectedCR.Created, "dd/mm/yyyy hh:mm") & " | Status: " & gSelectedCR.ApprovalStatus.Value & If(IsBlank(gSelectedCR.TargetProjectID), "", " | Target: " & gSelectedCR.TargetProjectID)
+                        Width: =Parent.Width - 40
+            - rowRequestReason:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =If(gSelectedCR.RequestType.Value = "Delete", RGBA(252, 235, 235, 1), RGBA(241, 239, 232, 1))
+                  FillPortions: =0
+                  Height: =70
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =2
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =!IsBlank(gSelectedCR.RequestReason)
+                  Width: =Parent.Width
+                Children:
+                  - lblReasonLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =If(gSelectedCR.RequestType.Value = "Delete", RGBA(163, 45, 45, 1), RGBA(136, 135, 128, 1))
+                        FontWeight: =FontWeight.Semibold
+                        Height: =20
+                        Size: =9
+                        Text: =If(gSelectedCR.RequestType.Value = "Delete", "Reason for deletion", "Request notes")
+                        Width: =Parent.Width - 40
+                  - lblReasonValue:
+                      Control: Label@2.5.1
+                      Properties:
+                        Height: =34
+                        Overflow: =Overflow.Scroll
+                        Size: =11
+                        Text: =gSelectedCR.RequestReason
+                        Width: =Parent.Width - 40
+            - rowProposedCreate:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  LayoutMinHeight: =260
+                  LayoutWrap: =true
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =gSelectedCR.RequestType.Value = "Create"
+                  Width: =Parent.Width
+                Children:
+                  - colPName:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =300
+                      Children:
+                        - lblPNameLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Project Name"
+                              Width: =300
+                        - lblPNameValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedCR.ProjectName
+                              Width: =300
+                  - colPType:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =220
+                      Children:
+                        - lblPTypeLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Project Type"
+                              Width: =220
+                        - lblPTypeValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedCR.ProjectType.Value
+                              Width: =220
+                  - colPDept:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =260
+                      Children:
+                        - lblPDeptLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Department(s)"
+                              Width: =260
+                        - lblPDeptValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =Concat(gSelectedCR.Department, Value, ", ")
+                              Width: =260
+                  - colPOwner:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =220
+                      Children:
+                        - lblPOwnerLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Owner / Manager"
+                              Width: =220
+                        - lblPOwnerValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedCR.ProjectOwner.Value & " / " & gSelectedCR.ProjectManager.Value
+                              Width: =220
+                  - colPPriority:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =160
+                      Children:
+                        - lblPPriorityLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Priority / Status"
+                              Width: =160
+                        - lblPPriorityValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedCR.Priority.Value & " / " & gSelectedCR.ProjectStatus.Value
+                              Width: =160
+                  - colPDates:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =200
+                      Children:
+                        - lblPDatesLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Start → End"
+                              Width: =200
+                        - lblPDatesValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =Text(gSelectedCR.StartDate, "dd/mm/yyyy") & " → " & Text(gSelectedCR.EndDate, "dd/mm/yyyy")
+                              Width: =200
+                  - colPBudget:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =180
+                      Children:
+                        - lblPBudgetLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Budget / CapEx-OpEx"
+                              Width: =180
+                        - lblPBudgetValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =Text(gSelectedCR.BudgetAmount, "[#,###]") & " / " & gSelectedCR.CapexOpex.Value
+                              Width: =180
+                  - colPMarket:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =200
+                      Children:
+                        - lblPMarketLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Market / Channel"
+                              Width: =200
+                        - lblPMarketValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedCR.Market.Value & " / " & gSelectedCR.Channel.Value
+                              Width: =200
+                  - colPObjective:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =220
+                      Children:
+                        - lblPObjectiveLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Strategic Objective"
+                              Width: =220
+                        - lblPObjectiveValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedCR.StrategicObjective.Value
+                              Width: =220
+                  - colPCostCenter:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =220
+                      Children:
+                        - lblPCostCenterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Cost Center / Country"
+                              Width: =220
+                        - lblPCostCenterValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedCR.CostCenter.Value & " / " & gSelectedCR.Country.Value
+                              Width: =220
+                  - colPSKU:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =220
+                      Children:
+                        - lblPSKULabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Related Product SKU"
+                              Width: =220
+                        - lblPSKUValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =If(IsBlank(gSelectedCR.RelatedSKU.Value), "—", gSelectedCR.RelatedSKU.Value)
+                              Width: =220
+                  - colPLevel:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =220
+                      Children:
+                        - lblPLevelLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Level"
+                              Width: =220
+                        - lblPLevelValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =If(gSelectedCR.ProjectLevel = 1, "Child of " & gSelectedCR.RootProjectID, "Root")
+                              Width: =220
+                  - colPDocs:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =460
+                      Children:
+                        - lblPDocsLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Documents"
+                              Width: =460
+                        - lblPDocsValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =If(IsBlank(gSelectedCR.ProjectDocuments), "—", gSelectedCR.ProjectDocuments)
+                              Width: =460
+                  - colPDescription:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =700
+                      Children:
+                        - lblPDescriptionLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Description"
+                              Width: =700
+                        - lblPDescriptionValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              Height: =60
+                              Overflow: =Overflow.Scroll
+                              Size: =11
+                              Text: =gSelectedCR.ProjectDescription
+                              Width: =700
+            - rowDiffUpdate:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =240
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =gSelectedCR.RequestType.Value = "Update"
+                  Width: =Parent.Width
+                Children:
+                  - lblDiffTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Bold
+                        Height: =26
+                        Size: =12
+                        Text: ="Proposed changes (current → proposed)"
+                        Width: =500
+                  - lblDiffDescCurrentLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =18
+                        Size: =9
+                        Text: ="Description — current"
+                        Width: =Parent.Width - 40
+                  - lblDiffDescCurrent:
+                      Control: Label@2.5.1
+                      Properties:
+                        Fill: =RGBA(241, 239, 232, 1)
+                        Height: =54
+                        Overflow: =Overflow.Scroll
+                        PaddingLeft: =8
+                        Size: =11
+                        Text: =gLiveTarget.ProjectDescription
+                        Width: =Parent.Width - 40
+                  - lblDiffDescProposedLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =18
+                        Size: =9
+                        Text: ="Description — proposed"
+                        Width: =Parent.Width - 40
+                  - lblDiffDescProposed:
+                      Control: Label@2.5.1
+                      Properties:
+                        Fill: |-
+                          =If(
+                              gLiveTarget.ProjectDescription <> gSelectedCR.ProjectDescription,
+                              RGBA(250, 238, 218, 1),
+                              RGBA(255, 255, 255, 1)
+                          )
+                        FontWeight: =FontWeight.Semibold
+                        Height: =54
+                        Overflow: =Overflow.Scroll
+                        PaddingLeft: =8
+                        Size: =11
+                        Text: =gSelectedCR.ProjectDescription
+                        Width: =Parent.Width - 40
+                  - lblDiffEndDate:
+                      Control: Label@2.5.1
+                      Properties:
+                        Fill: |-
+                          =If(
+                              gLiveTarget.EndDate <> gSelectedCR.EndDate,
+                              RGBA(250, 238, 218, 1),
+                              RGBA(255, 255, 255, 1)
+                          )
+                        FontWeight: =FontWeight.Semibold
+                        Height: =28
+                        PaddingLeft: =8
+                        Size: =11
+                        Text: |-
+                          ="End Date: " & If(IsBlank(gLiveTarget.EndDate), "—", Text(gLiveTarget.EndDate, "dd/mm/yyyy")) & "  →  " & If(IsBlank(gSelectedCR.EndDate), "—", Text(gSelectedCR.EndDate, "dd/mm/yyyy"))
+                        Width: =Parent.Width - 40
+                  - lblTargetMissing:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(163, 45, 45, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        Size: =11
+                        Text: ="⚠ The target project no longer exists — this request cannot be applied."
+                        Visible: =IsBlank(gLiveTarget.ID)
+                        Width: =Parent.Width - 40
+            - rowDeleteInfo:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(252, 235, 235, 1)
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =120
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =gSelectedCR.RequestType.Value = "Delete"
+                  Width: =Parent.Width
+                Children:
+                  - lblDeleteInfoTitle:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(163, 45, 45, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =24
+                        Size: =12
+                        Text: ="This request will mark the project below as Deleted (soft delete)"
+                        Width: =Parent.Width - 40
+                  - lblDeleteInfoProject:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        Size: =11
+                        Text: |-
+                          =If(
+                              IsBlank(gLiveTarget.ID),
+                              "⚠ The target project no longer exists — this request cannot be applied.",
+                              Coalesce(gLiveTarget.ProjectID, "PROJ-PENDING-" & gLiveTarget.ID) & " — " & gLiveTarget.Title & " | Status: " & gLiveTarget.ProjectStatus.Value
+                          )
+                        Width: =Parent.Width - 40
+                  - lblDeleteInfoMeta:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(68, 68, 65, 1)
+                        Height: =24
+                        Size: =10
+                        Text: |-
+                          =If(
+                              IsBlank(gLiveTarget.ID),
+                              "",
+                              "Owner: " & gLiveTarget.ProjectOwner.Value & " | Manager: " & gLiveTarget.ProjectManager.Value & " | " & Text(gLiveTarget.StartDate, "dd/mm/yyyy") & " → " & Text(gLiveTarget.EndDate, "dd/mm/yyyy")
+                          )
+                        Width: =Parent.Width - 40
+            - rowManagerTrail:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(237, 235, 254, 1)
+                  FillPortions: =0
+                  Height: =52
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =gSelectedCR.ApprovalStatus.Value <> "Pending Manager"
+                  Width: =Parent.Width
+                Children:
+                  - lblManagerTrail:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(83, 74, 183, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =36
+                        Size: =11
+                        Text: |-
+                          =With(
+                              {wTrail: LookUp(Project_ApprovalLog, ChangeRequestIDText = Text(gSelectedCR.ID) && StepNumber = 1)},
+                              If(
+                                  IsBlank(wTrail.ID),
+                                  "Manager step: no log entry found",
+                                  "Manager step: " & wTrail.Action.Value & " by " & wTrail.ApproverID.Value & " on " & Text(wTrail.ActionAt, "dd/mm/yyyy hh:mm") & If(IsBlank(wTrail.Remark), "", " — " & wTrail.Remark)
+                              )
+                          )
+                        Width: =Parent.Width - 40
+            - rowRejectPanel:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(252, 235, 235, 1)
+                  FillPortions: =0
+                  Height: =150
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =gShowRejectPanel
+                  Width: =Parent.Width
+                Children:
+                  - lblRejectRemarkLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(163, 45, 45, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =24
+                        Size: =12
+                        Text: ="Rejection remark * (required)"
+                        Width: =300
+                  - txtRejectRemark:
+                      Control: TextInput@0.0.54
+                      Properties:
+                        Height: =60
+                        Mode: ='TextInputCanvas.Mode'.Multiline
+                        Placeholder: ="Explain why this request is rejected"
+                        Width: =Parent.Width - 40
+                  - rowRejectActions:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =40
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =10
+                        LayoutJustifyContent: =LayoutJustifyContent.End
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width - 40
+                      Children:
+                        - btnCancelReject:
+                            Control: Button@0.0.45
+                            Properties:
+                              Height: =32
+                              OnSelect: =Set(gShowRejectPanel, false)
+                              Text: ="Cancel"
+                              Width: =100
+                        - btnConfirmReject:
+                            Control: Button@0.0.45
+                            Properties:
+                              BasePaletteColor: =RGBA(163, 45, 45, 1)
+                              Height: =32
+                              OnSelect: |-
+                                =If(
+                                    IsBlank(txtRejectRemark.Value),
+                                    Notify("A remark is required to reject", NotificationType.Error),
+                                    With(
+                                        {wLog: Patch(
+                                            Project_ApprovalLog,
+                                            Defaults(Project_ApprovalLog),
+                                            {
+                                                Title: "Step " & If(gSelectedCR.ApprovalStatus.Value = "Pending Manager", "1", "2") & " - Rejected - " & gSelectedCR.Title,
+                                                ChangeRequestID: {Id: gSelectedCR.ID, Value: gSelectedCR.Title},
+                                                ChangeRequestIDText: Text(gSelectedCR.ID),
+                                                StepNumber: If(gSelectedCR.ApprovalStatus.Value = "Pending Manager", 1, 2),
+                                                ApproverID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
+                                                Action: {Value: "Rejected"},
+                                                Remark: txtRejectRemark.Value,
+                                                ActionAt: Now()
+                                            }
+                                        )},
+                                        If(
+                                            IsBlank(wLog.ID),
+                                            Notify("Failed to save the approval log. Please try again.", NotificationType.Error),
+                                            With(
+                                                {wCR: Patch(Project_ChangeRequests, gSelectedCR, {ApprovalStatus: {Value: "Rejected"}})},
+                                                If(
+                                                    IsBlank(wCR.ID),
+                                                    Notify("Failed to update the request status. Please try again.", NotificationType.Error),
+                                                    Project_Notify.Run(
+                                                        "FinalRejected",
+                                                        gSelectedCR.RequesterEmail,
+                                                        gSelectedCR.Title,
+                                                        gSelectedCR.ID,
+                                                        gSelectedCR.RequestType.Value,
+                                                        gSelectedCR.ProjectName,
+                                                        gSelectedCR.RequesterID.Value,
+                                                        gCurrentEmployee.Title,
+                                                        txtRejectRemark.Value
+                                                    );
+                                                    Notify("Request rejected", NotificationType.Success);
+                                                    Set(gShowRejectPanel, false);
+                                                    Set(gSelectedCR, Blank());
+                                                    Set(gLiveTarget, Blank())
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                              Text: ="Confirm Reject"
+                              Width: =140
+      - conActionBar:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =60
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =12
+            LayoutJustifyContent: =LayoutJustifyContent.End
+            PaddingBottom: =8
+            PaddingLeft: =20
+            PaddingRight: =20
+            PaddingTop: =8
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Visible: |-
+              =!IsBlank(gSelectedCR.ID) &&
+              (
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager" && (gUserRole = "Manager" || gUserRole = "Admin")) ||
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Executive" && (gUserRole = "Executive" || gUserRole = "Admin"))
+              )
+            Width: =Parent.Width - 441
+            X: =441
+            Y: =Parent.Height - 60
+          Children:
+            - btnReject:
+                Control: Button@0.0.45
+                Properties:
+                  BasePaletteColor: =RGBA(163, 45, 45, 1)
+                  Height: =36
+                  OnSelect: =Set(gShowRejectPanel, true)
+                  Text: ="Reject"
+                  Width: =120
+            - btnApproveManager:
+                Control: Button@0.0.45
+                Properties:
+                  Height: =36
+                  OnSelect: |-
+                    =With(
+                        {wLog: Patch(
+                            Project_ApprovalLog,
+                            Defaults(Project_ApprovalLog),
+                            {
+                                Title: "Step 1 - Approved - " & gSelectedCR.Title,
+                                ChangeRequestID: {Id: gSelectedCR.ID, Value: gSelectedCR.Title},
+                                ChangeRequestIDText: Text(gSelectedCR.ID),
+                                StepNumber: 1,
+                                ApproverID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
+                                Action: {Value: "Approved"},
+                                ActionAt: Now()
+                            }
+                        )},
+                        If(
+                            IsBlank(wLog.ID),
+                            Notify("Failed to save the approval log. Please try again.", NotificationType.Error),
+                            With(
+                                {wCR: Patch(Project_ChangeRequests, gSelectedCR, {ApprovalStatus: {Value: "Pending Executive"}})},
+                                If(
+                                    IsBlank(wCR.ID),
+                                    Notify("Failed to update the request status. Please try again.", NotificationType.Error),
+                                    Project_Notify.Run(
+                                        "ManagerApprovedToExecutive",
+                                        Concat(
+                                            Filter(Project_User, Role.Value = "Executive" && IsActive),
+                                            LookUp('Employee List', ID = EmployeeID.Id).Email,
+                                            ";"
+                                        ),
+                                        gSelectedCR.Title,
+                                        gSelectedCR.ID,
+                                        gSelectedCR.RequestType.Value,
+                                        gSelectedCR.ProjectName,
+                                        gSelectedCR.RequesterID.Value,
+                                        gCurrentEmployee.Title,
+                                        ""
+                                    );
+                                    Notify("Approved — sent to Executive for final approval", NotificationType.Success);
+                                    Set(gSelectedCR, Blank());
+                                    Set(gLiveTarget, Blank())
+                                )
+                            )
+                        )
+                    )
+                  Text: ="Approve →"
+                  Visible: =gSelectedCR.ApprovalStatus.Value = "Pending Manager"
+                  Width: =160
+            - btnApproveExecutive:
+                Control: Button@0.0.45
+                Properties:
+                  Height: =36
+                  OnSelect: |-
+                    =Switch(
+                        gSelectedCR.RequestType.Value,
+                        "Create",
+                        With(
+                            {wNew: Patch(
+                                Project_List,
+                                Defaults(Project_List),
+                                {
+                                    Title: gSelectedCR.ProjectName,
+                                    ProjectDescription: gSelectedCR.ProjectDescription,
+                                    ProjectType: gSelectedCR.ProjectType,
+                                    Department: gSelectedCR.Department,
+                                    ProjectOwner: If(IsBlank(gSelectedCR.ProjectOwner.Id), Blank(), {Id: gSelectedCR.ProjectOwner.Id, Value: gSelectedCR.ProjectOwner.Value}),
+                                    ProjectManager: If(IsBlank(gSelectedCR.ProjectManager.Id), Blank(), {Id: gSelectedCR.ProjectManager.Id, Value: gSelectedCR.ProjectManager.Value}),
+                                    Priority: gSelectedCR.Priority,
+                                    StartDate: gSelectedCR.StartDate,
+                                    EndDate: gSelectedCR.EndDate,
+                                    ProjectStatus: gSelectedCR.ProjectStatus,
+                                    BudgetAmount: gSelectedCR.BudgetAmount,
+                                    CapexOpex: gSelectedCR.CapexOpex,
+                                    RelatedSKU: If(IsBlank(gSelectedCR.RelatedSKU.Id), Blank(), {Id: gSelectedCR.RelatedSKU.Id, Value: gSelectedCR.RelatedSKU.Value}),
+                                    Market: gSelectedCR.Market,
+                                    Channel: gSelectedCR.Channel,
+                                    StrategicObjective: gSelectedCR.StrategicObjective,
+                                    CostCenter: gSelectedCR.CostCenter,
+                                    Country: gSelectedCR.Country,
+                                    ProjectDocuments: gSelectedCR.ProjectDocuments,
+                                    ProjectLevel: gSelectedCR.ProjectLevel,
+                                    RootProjectID: gSelectedCR.RootProjectID,
+                                    ApprovalStatus: {Value: "Approved"},
+                                    ApprovedBy: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title}
+                                }
+                            )},
+                            If(
+                                IsBlank(wNew.ID),
+                                Notify("Failed to create the project. The request remains pending — you can retry.", NotificationType.Error),
+                                With(
+                                    {wPID: Patch(
+                                        Project_List,
+                                        wNew,
+                                        {
+                                            ProjectID: "PROJ-" &
+                                                Switch(First(gSelectedCR.Department).Value,
+                                                    "Quality Assurance", "QA",
+                                                    "Regulatory Affairs", "RA",
+                                                    "Marketing", "MK",
+                                                    "Sales", "SL",
+                                                    "Supply Chain", "SC",
+                                                    "Finance", "FN",
+                                                    "IT", "IT",
+                                                    "R&D", "RD",
+                                                    "HR", "HR",
+                                                    "Operations", "OP",
+                                                    "GN"
+                                                ) & "-" & Text(Year(Today())) & "-" & Text(wNew.ID, "000")
+                                        }
+                                    )},
+                                    With(
+                                        {wLog: Patch(
+                                            Project_ApprovalLog,
+                                            Defaults(Project_ApprovalLog),
+                                            {
+                                                Title: "Step 2 - Approved - " & gSelectedCR.Title,
+                                                ChangeRequestID: {Id: gSelectedCR.ID, Value: gSelectedCR.Title},
+                                                ChangeRequestIDText: Text(gSelectedCR.ID),
+                                                StepNumber: 2,
+                                                ApproverID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
+                                                Action: {Value: "Approved"},
+                                                ActionAt: Now()
+                                            }
+                                        )},
+                                        If(
+                                            IsBlank(wLog.ID),
+                                            Notify("Project was created but the approval log failed. Contact your administrator before retrying.", NotificationType.Error),
+                                            With(
+                                                {wCR: Patch(Project_ChangeRequests, gSelectedCR, {ApprovalStatus: {Value: "Approved"}})},
+                                                If(
+                                                    IsBlank(wCR.ID),
+                                                    Notify("Project was created but the request status update failed. Contact your administrator.", NotificationType.Error),
+                                                    Project_Notify.Run(
+                                                        "FinalApproved",
+                                                        gSelectedCR.RequesterEmail,
+                                                        gSelectedCR.Title,
+                                                        gSelectedCR.ID,
+                                                        "Create",
+                                                        gSelectedCR.ProjectName,
+                                                        gSelectedCR.RequesterID.Value,
+                                                        gCurrentEmployee.Title,
+                                                        ""
+                                                    );
+                                                    Notify("Approved — project created as " & wPID.ProjectID, NotificationType.Success);
+                                                    Set(gSelectedCR, Blank());
+                                                    Set(gLiveTarget, Blank())
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        "Update",
+                        With(
+                            {wTarget: LookUp(Project_List, ID = gSelectedCR.TargetItemID)},
+                            If(
+                                IsBlank(wTarget.ID),
+                                Notify("The target project no longer exists. This request cannot be applied.", NotificationType.Error),
+                                With(
+                                    {wUpd: Patch(
+                                        Project_List,
+                                        wTarget,
+                                        {
+                                            ProjectDescription: gSelectedCR.ProjectDescription,
+                                            EndDate: gSelectedCR.EndDate
+                                        }
+                                    )},
+                                    If(
+                                        IsBlank(wUpd.ID),
+                                        Notify("Failed to apply the update. The request remains pending — you can retry.", NotificationType.Error),
+                                        With(
+                                            {wLog: Patch(
+                                                Project_ApprovalLog,
+                                                Defaults(Project_ApprovalLog),
+                                                {
+                                                    Title: "Step 2 - Approved - " & gSelectedCR.Title,
+                                                    ChangeRequestID: {Id: gSelectedCR.ID, Value: gSelectedCR.Title},
+                                                    ChangeRequestIDText: Text(gSelectedCR.ID),
+                                                    StepNumber: 2,
+                                                    ApproverID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
+                                                    Action: {Value: "Approved"},
+                                                    ActionAt: Now()
+                                                }
+                                            )},
+                                            If(
+                                                IsBlank(wLog.ID),
+                                                Notify("Update was applied but the approval log failed. Contact your administrator before retrying.", NotificationType.Error),
+                                                With(
+                                                    {wCR: Patch(Project_ChangeRequests, gSelectedCR, {ApprovalStatus: {Value: "Approved"}})},
+                                                    If(
+                                                        IsBlank(wCR.ID),
+                                                        Notify("Update was applied but the request status update failed. Contact your administrator.", NotificationType.Error),
+                                                        Project_Notify.Run(
+                                                            "FinalApproved",
+                                                            gSelectedCR.RequesterEmail,
+                                                            gSelectedCR.Title,
+                                                            gSelectedCR.ID,
+                                                            "Update",
+                                                            gSelectedCR.ProjectName,
+                                                            gSelectedCR.RequesterID.Value,
+                                                            gCurrentEmployee.Title,
+                                                            ""
+                                                        );
+                                                        Notify("Approved — update applied to the project", NotificationType.Success);
+                                                        Set(gSelectedCR, Blank());
+                                                        Set(gLiveTarget, Blank())
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        "Delete",
+                        With(
+                            {wTarget: LookUp(Project_List, ID = gSelectedCR.TargetItemID)},
+                            If(
+                                IsBlank(wTarget.ID),
+                                Notify("The target project no longer exists. This request cannot be applied.", NotificationType.Error),
+                                With(
+                                    {wDel: Patch(
+                                        Project_List,
+                                        wTarget,
+                                        {ProjectStatus: {Value: "Deleted"}}
+                                    )},
+                                    If(
+                                        IsBlank(wDel.ID),
+                                        Notify("Failed to apply the deletion. The request remains pending — you can retry.", NotificationType.Error),
+                                        With(
+                                            {wLog: Patch(
+                                                Project_ApprovalLog,
+                                                Defaults(Project_ApprovalLog),
+                                                {
+                                                    Title: "Step 2 - Approved - " & gSelectedCR.Title,
+                                                    ChangeRequestID: {Id: gSelectedCR.ID, Value: gSelectedCR.Title},
+                                                    ChangeRequestIDText: Text(gSelectedCR.ID),
+                                                    StepNumber: 2,
+                                                    ApproverID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
+                                                    Action: {Value: "Approved"},
+                                                    ActionAt: Now()
+                                                }
+                                            )},
+                                            If(
+                                                IsBlank(wLog.ID),
+                                                Notify("Deletion was applied but the approval log failed. Contact your administrator before retrying.", NotificationType.Error),
+                                                With(
+                                                    {wCR: Patch(Project_ChangeRequests, gSelectedCR, {ApprovalStatus: {Value: "Approved"}})},
+                                                    If(
+                                                        IsBlank(wCR.ID),
+                                                        Notify("Deletion was applied but the request status update failed. Contact your administrator.", NotificationType.Error),
+                                                        Project_Notify.Run(
+                                                            "FinalApproved",
+                                                            gSelectedCR.RequesterEmail,
+                                                            gSelectedCR.Title,
+                                                            gSelectedCR.ID,
+                                                            "Delete",
+                                                            gSelectedCR.ProjectName,
+                                                            gSelectedCR.RequesterID.Value,
+                                                            gCurrentEmployee.Title,
+                                                            ""
+                                                        );
+                                                        Notify("Approved — project marked as Deleted", NotificationType.Success);
+                                                        Set(gSelectedCR, Blank());
+                                                        Set(gLiveTarget, Blank())
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                  Text: ="Approve & Apply ✓"
+                  Visible: =gSelectedCR.ApprovalStatus.Value = "Pending Executive"
+                  Width: =180

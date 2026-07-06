@@ -1,0 +1,37 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+#
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+#
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+App:
+  Properties:
+    OnStart: |-
+      =Set(gAppReady, false);
+      Set(gCurrentEmployee, LookUp('Employee List', Email = User().Email));
+      Set(gCurrentUser,
+          If(
+              IsBlank(LookUp(Project_User, EmployeeID.Id = gCurrentEmployee.ID && IsActive)),
+              {Role: {Value: "Requester"}},
+              LookUp(Project_User, EmployeeID.Id = gCurrentEmployee.ID && IsActive)
+          )
+      );
+      Set(gUserRole, gCurrentUser.Role.Value);
+      Set(gIsApprover,
+          gUserRole = "Manager" ||
+          gUserRole = "Executive" ||
+          gUserRole = "Admin"
+      );
+      Set(gSelectedProject, Blank());
+      Set(gSelectedCR, Blank());
+      Set(gLiveTarget, Blank());
+      Set(gShowRejectPanel, false);
+      Set(gShowDeleted, false);
+      Set(gStatusFilter, Blank());
+      Set(gLevelFilter, "All");
+      Set(gApprovalsTab, "To Approve");
+      Set(gHasPendingCR, false);
+      Set(gAppReady, true)
+    Theme: =PowerAppsTheme

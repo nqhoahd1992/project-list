@@ -1,0 +1,594 @@
+Screens:
+  UpdateProjectScreen:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |-
+        =Set(gHasPendingCR,
+            !IsBlank(
+                LookUp(Project_ChangeRequests,
+                    TargetItemID = gSelectedProject.ID &&
+                    (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                )
+            )
+        )
+    Children:
+      - rectHeader:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(83, 74, 183, 1)
+            Height: =60
+            Width: =Parent.Width
+      - lblScreenTitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            Size: =14
+            Text: ="Max Biocare Project List - Update Project"
+            Width: =719
+            X: =20
+      - lblUserInfo:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =60
+            Size: =12
+            Text: |-
+              =If(
+                  IsBlank(gCurrentUser.Role.Value),
+                  gCurrentEmployee.Title,
+                  gCurrentEmployee.Title & " | " & gCurrentUser.Role.Value
+              )
+            Width: =280
+            X: =Parent.Width - 300
+      - containerScroll:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height - 120
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+            Y: =60
+          Children:
+            - rowPendingWarning:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(250, 238, 218, 1)
+                  FillPortions: =0
+                  Height: =48
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =gHasPendingCR
+                  Width: =Parent.Width
+                Children:
+                  - lblPendingWarning:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(133, 79, 11, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =32
+                        Size: =11
+                        Text: ="⚠ A change request for this project is already pending approval. You cannot submit another one until it is resolved."
+                        Width: =Parent.Width - 40
+            - rowProjectTitle:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMinHeight: =60
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblProjectTitleValue:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Bold
+                        Height: =36
+                        Size: =14
+                        Text: =Coalesce(gSelectedProject.ProjectID, "PROJ-PENDING-" & gSelectedProject.ID) & " — " & gSelectedProject.Title
+                        Width: =Parent.Width - 160
+            - rowProjectInfo:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(241, 239, 232, 1)
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutMinHeight: =80
+                  LayoutWrap: =true
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colType:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblTypeLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =20
+                              Size: =9
+                              Text: ="Project Type"
+                              Width: =240
+                        - lblTypeValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedProject.ProjectType.Value
+                              Width: =240
+                  - colOwner:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblOwnerLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =20
+                              Size: =9
+                              Text: ="Project Owner"
+                              Width: =240
+                        - lblOwnerValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedProject.ProjectOwner.Value
+                              Width: =240
+                  - colManager:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblManagerLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =20
+                              Size: =9
+                              Text: ="Project Manager"
+                              Width: =240
+                        - lblManagerValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedProject.ProjectManager.Value
+                              Width: =240
+                  - colStatus:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =200
+                      Children:
+                        - lblStatusLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =20
+                              Size: =9
+                              Text: ="Project Status"
+                              Width: =200
+                        - lblStatusValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedProject.ProjectStatus.Value
+                              Width: =200
+                  - colDates:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblDatesLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =20
+                              Size: =9
+                              Text: ="Start → End"
+                              Width: =240
+                        - lblDatesValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =Text(gSelectedProject.StartDate, "dd/mm/yyyy") & " → " & Text(gSelectedProject.EndDate, "dd/mm/yyyy")
+                              Width: =240
+                  - colBudget:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =200
+                      Children:
+                        - lblBudgetLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =20
+                              Size: =9
+                              Text: ="Budget / Actual Cost"
+                              Width: =200
+                        - lblBudgetValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =Text(gSelectedProject.BudgetAmount, "[#,###]") & " / " & If(IsBlank(gSelectedProject.ActualCost), "—", Text(gSelectedProject.ActualCost, "[#,###]"))
+                              Width: =200
+            - rowCurrentDescription:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =110
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblCurrentDescLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =20
+                        Size: =9
+                        Text: ="Current Description"
+                        Width: =Parent.Width
+                  - lblCurrentDescValue:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =70
+                        Overflow: =Overflow.Scroll
+                        Size: =11
+                        Text: =gSelectedProject.ProjectDescription
+                        Width: =Parent.Width - 40
+            - rowEditableNote:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(237, 235, 254, 1)
+                  FillPortions: =0
+                  Height: =44
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblEditableNote:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(83, 74, 183, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =28
+                        Size: =11
+                        Text: ="Only Project Description and End Date can be updated. Changes take effect after Manager and Executive approval."
+                        Width: =Parent.Width - 40
+            - rowNewDescription:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =130
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblNewDescLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Bold
+                        Height: =24
+                        Size: =12
+                        Text: ="New Project Description"
+                        Width: =300
+                  - txtNewDescription:
+                      Control: TextInput@0.0.54
+                      Properties:
+                        Height: =80
+                        Mode: ='TextInputCanvas.Mode'.Multiline
+                        Value: =gSelectedProject.ProjectDescription
+                        Width: =Parent.Width - 40
+            - rowNewEndDate:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =100
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  PaddingBottom: =20
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colNewEndDate:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblNewEndDateLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Bold
+                              Height: =24
+                              Size: =12
+                              Text: ="New End Date"
+                              Width: =240
+                        - dpNewEndDate:
+                            Control: DatePicker@0.0.46
+                            Properties:
+                              Height: =40
+                              Placeholder: ="Keep current date"
+                              Width: =240
+                  - colCurrentEndDate:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblCurrentEndDateLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =24
+                              Size: =9
+                              Text: ="Current End Date"
+                              Width: =240
+                        - lblCurrentEndDateValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =40
+                              Size: =11
+                              Text: =If(IsBlank(gSelectedProject.EndDate), "—", Text(gSelectedProject.EndDate, "dd/mm/yyyy"))
+                              Width: =240
+                  - colUpdateReason:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =1
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                      Children:
+                        - lblUpdateReasonLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Bold
+                              Height: =24
+                              Size: =12
+                              Text: ="Reason (optional)"
+                              Width: =300
+                        - txtUpdateReason:
+                            Control: TextInput@0.0.54
+                            Properties:
+                              Height: =40
+                              Placeholder: ="Why is this update needed?"
+                              Width: =Parent.Width
+      - conActionBar:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =60
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =12
+            LayoutJustifyContent: =LayoutJustifyContent.End
+            PaddingBottom: =8
+            PaddingLeft: =20
+            PaddingRight: =20
+            PaddingTop: =8
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+            Y: =Parent.Height - 60
+          Children:
+            - btnCancelUpdate:
+                Control: Button@0.0.45
+                Properties:
+                  Height: =36
+                  OnSelect: =Navigate(AllProjectsScreen)
+                  Text: ="Cancel"
+                  Width: =120
+            - btnSubmitUpdate:
+                Control: Button@0.0.45
+                Properties:
+                  DisplayMode: =If(gHasPendingCR, DisplayMode.Disabled, DisplayMode.Edit)
+                  Height: =36
+                  OnSelect: |-
+                    =With(
+                        {wNewEndDate: Coalesce(dpNewEndDate.SelectedDate, gSelectedProject.EndDate)},
+                        If(
+                            txtNewDescription.Value = gSelectedProject.ProjectDescription && wNewEndDate = gSelectedProject.EndDate,
+                            Notify("No changes to submit", NotificationType.Warning),
+                            With(
+                                {wCR: Patch(
+                                    Project_ChangeRequests,
+                                    Defaults(Project_ChangeRequests),
+                                    {
+                                        Title: "Update - " & gSelectedProject.Title & " - " & gCurrentEmployee.Title & " - " & Text(Today(), "dd/mm/yyyy"),
+                                        RequestType: {Value: "Update"},
+                                        ApprovalStatus: {Value: "Pending Manager"},
+                                        RequesterEmail: User().Email,
+                                        RequesterID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
+                                        RequestReason: txtUpdateReason.Value,
+                                        TargetItemID: gSelectedProject.ID,
+                                        TargetProjectID: gSelectedProject.ProjectID,
+                                        ProjectName: gSelectedProject.Title,
+                                        ProjectDescription: txtNewDescription.Value,
+                                        EndDate: wNewEndDate
+                                    }
+                                )},
+                                If(
+                                    IsBlank(wCR.ID),
+                                    Notify("Failed to submit the request. Please try again.", NotificationType.Error),
+                                    Project_Notify.Run(
+                                        "SubmittedToManager",
+                                        Concat(
+                                            Filter(Project_User, Role.Value = "Manager" && IsActive),
+                                            LookUp('Employee List', ID = EmployeeID.Id).Email,
+                                            ";"
+                                        ),
+                                        wCR.Title,
+                                        wCR.ID,
+                                        "Update",
+                                        gSelectedProject.Title,
+                                        gCurrentEmployee.Title,
+                                        gCurrentEmployee.Title,
+                                        ""
+                                    );
+                                    Notify("Update request submitted for Manager approval", NotificationType.Success);
+                                    Navigate(AllProjectsScreen)
+                                )
+                            )
+                        )
+                    )
+                  Text: ="Submit Update Request →"
+                  Width: =220

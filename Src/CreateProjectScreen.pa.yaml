@@ -1,0 +1,1000 @@
+Screens:
+  CreateProjectScreen:
+    Properties:
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+    Children:
+      - rectHeader:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(83, 74, 183, 1)
+            Height: =60
+            Width: =Parent.Width
+      - lblScreenTitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =60
+            Size: =14
+            Text: ="Max Biocare Project List - New Project Request"
+            Width: =719
+            X: =20
+      - lblUserInfo:
+          Control: Label@2.5.1
+          Properties:
+            Align: =Align.Right
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =60
+            Size: =12
+            Text: |-
+              =If(
+                  IsBlank(gCurrentUser.Role.Value),
+                  gCurrentEmployee.Title,
+                  gCurrentEmployee.Title & " | " & gCurrentUser.Role.Value
+              )
+            Width: =280
+            X: =Parent.Width - 300
+      - containerScroll:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Height: =Parent.Height - 120
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+            Y: =60
+          Children:
+            - rowApprovalNote:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(237, 235, 254, 1)
+                  FillPortions: =0
+                  Height: =48
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblApprovalNote:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(83, 74, 183, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =32
+                        Size: =11
+                        Text: ="This request will be applied only after Manager and Executive approval."
+                        Width: =Parent.Width - 40
+            - rowNameType:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colProjectName:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =480
+                      Children:
+                        - lblProjectNameLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Project Name *"
+                              Width: =480
+                        - txtProjectName:
+                            Control: TextInput@0.0.54
+                            Properties:
+                              Height: =40
+                              Placeholder: ="Enter project name"
+                              Width: =480
+                  - colProjectType:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =320
+                      Children:
+                        - lblProjectTypeLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Project Type *"
+                              Width: =320
+                        - cmbProjectType:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.ProjectType)
+                              Width: =320
+                  - colPriority:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblPriorityLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Priority *"
+                              Width: =240
+                        - cmbPriority:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.Priority)
+                              Width: =240
+            - rowDescription:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =130
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblDescriptionLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        Size: =11
+                        Text: ="Project Description"
+                        Width: =300
+                  - txtDescription:
+                      Control: TextInput@0.0.54
+                      Properties:
+                        Height: =80
+                        Mode: ='TextInputCanvas.Mode'.Multiline
+                        Placeholder: ="Describe the project scope"
+                        Width: =Parent.Width - 40
+            - rowPeople:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colDepartment:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =320
+                      Children:
+                        - lblDepartmentLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Department(s) *"
+                              Width: =320
+                        - cmbDepartment:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose one or more"
+                              Items: =Choices(Project_ChangeRequests.Department)
+                              SelectMultiple: =true
+                              Width: =320
+                  - colOwner:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =320
+                      Children:
+                        - lblOwnerLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Project Owner *"
+                              Width: =320
+                        - cmbOwner:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an employee"
+                              Items: =Sort('Employee List', Title, SortOrder.Ascending)
+                              Width: =320
+                  - colManager:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =320
+                      Children:
+                        - lblManagerLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Project Manager *"
+                              Width: =320
+                        - cmbManager:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an employee"
+                              Items: =Sort('Employee List', Title, SortOrder.Ascending)
+                              Width: =320
+            - rowSchedule:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colStartDate:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblStartDateLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Start Date"
+                              Width: =240
+                        - dpStartDate:
+                            Control: DatePicker@0.0.46
+                            Properties:
+                              Height: =40
+                              Placeholder: ="Choose a date"
+                              Width: =240
+                  - colEndDate:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblEndDateLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="End Date"
+                              Width: =240
+                        - dpEndDate:
+                            Control: DatePicker@0.0.46
+                            Properties:
+                              Height: =40
+                              Placeholder: ="Choose a date"
+                              Width: =240
+                  - colInitialStatus:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblInitialStatusLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Initial Status"
+                              Width: =240
+                        - cmbInitialStatus:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              DefaultSelectedItems: =Filter(Choices(Project_ChangeRequests.ProjectStatus), Value = "Not Started")
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.ProjectStatus)
+                              Width: =240
+            - rowBudget:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colBudgetAmount:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblBudgetAmountLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Budget Amount"
+                              Width: =240
+                        - txtBudgetAmount:
+                            Control: TextInput@0.0.54
+                            Properties:
+                              Height: =40
+                              Placeholder: ="0"
+                              Width: =240
+                  - colActualCost:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =320
+                      Children:
+                        - lblActualCostLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Actual Cost"
+                              Width: =320
+                        - lblActualCostValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Fill: =RGBA(241, 239, 232, 1)
+                              Height: =40
+                              PaddingLeft: =12
+                              Size: =11
+                              Text: ="Auto-calculated from procurement — coming soon"
+                              Width: =320
+                  - colCapexOpex:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblCapexOpexLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="CapEx / OpEx"
+                              Width: =240
+                        - cmbCapexOpex:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.CapexOpex)
+                              Width: =240
+            - rowBusiness:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colMarket:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =200
+                      Children:
+                        - lblMarketLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Market"
+                              Width: =200
+                        - cmbMarket:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.Market)
+                              Width: =200
+                  - colChannel:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblChannelLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Channel"
+                              Width: =240
+                        - cmbChannel:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.Channel)
+                              Width: =240
+                  - colObjective:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =260
+                      Children:
+                        - lblObjectiveLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Strategic Objective"
+                              Width: =260
+                        - cmbObjective:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.StrategicObjective)
+                              Width: =260
+                  - colSKU:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =280
+                      Children:
+                        - lblSKULabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Related Product SKU"
+                              Width: =280
+                        - cmbSKU:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose a product"
+                              Items: =Sort(Product_Database_SKU_Master, Title, SortOrder.Ascending)
+                              Width: =280
+            - rowLocation:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colCostCenter:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblCostCenterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Cost Center *"
+                              Width: =240
+                        - cmbCostCenter:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.CostCenter)
+                              Width: =240
+                  - colCountry:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblCountryLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Country"
+                              Width: =240
+                        - cmbCountry:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              Items: =Choices(Project_ChangeRequests.Country)
+                              Width: =240
+                  - colDocsUrl:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =480
+                      Children:
+                        - lblDocsUrlLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Project Documents (URL)"
+                              Width: =480
+                        - txtDocsUrl:
+                            Control: TextInput@0.0.54
+                            Properties:
+                              Height: =40
+                              Placeholder: |-
+                                ="https://maxbiocare.sharepoint.com/..."
+                              Width: =480
+            - rowHierarchy:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(241, 239, 232, 1)
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =110
+                  LayoutWrap: =true
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colLevel:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =420
+                      Children:
+                        - lblLevelLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Project Level *"
+                              Width: =420
+                        - rdoLevel:
+                            Control: Radio@0.0.25
+                            Properties:
+                              Items: =["Root Project (Level 0)", "Child Project (Level 1)"]
+                              Layout: ='RadioGroupCanvas.Layout'.Horizontal
+                              Width: =420
+                  - colRootProject:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =StartsWith(rdoLevel.Selected.Value, "Child")
+                        Width: =420
+                      Children:
+                        - lblRootProjectLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Root Project *"
+                              Width: =420
+                        - cmbRootProject:
+                            Control: ComboBox@0.0.51
+                            Properties:
+                              Height: =40
+                              InputTextPlaceholder: ="Choose the parent project"
+                              Items: =Filter(Project_List, ProjectLevel = 0 && ProjectStatus.Value <> "Deleted")
+                              Width: =420
+            - rowReason:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =120
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  PaddingBottom: =20
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblReasonLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        Size: =11
+                        Text: ="Request Notes (optional)"
+                        Width: =300
+                  - txtReason:
+                      Control: TextInput@0.0.54
+                      Properties:
+                        Height: =60
+                        Mode: ='TextInputCanvas.Mode'.Multiline
+                        Placeholder: ="Context for the approvers"
+                        Width: =Parent.Width - 40
+      - conActionBar:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =60
+            LayoutAlignItems: =LayoutAlignItems.Center
+            LayoutDirection: =LayoutDirection.Horizontal
+            LayoutGap: =12
+            LayoutJustifyContent: =LayoutJustifyContent.End
+            PaddingBottom: =8
+            PaddingLeft: =20
+            PaddingRight: =20
+            PaddingTop: =8
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: =Parent.Width
+            Y: =Parent.Height - 60
+          Children:
+            - btnCancelCreate:
+                Control: Button@0.0.45
+                Properties:
+                  Height: =36
+                  OnSelect: =Navigate(AllProjectsScreen)
+                  Text: ="Cancel"
+                  Width: =120
+            - btnSubmitCreate:
+                Control: Button@0.0.45
+                Properties:
+                  Height: =36
+                  OnSelect: |-
+                    =If(
+                        IsBlank(txtProjectName.Value),
+                        Notify("Project Name is required", NotificationType.Error),
+                        If(
+                            IsBlank(cmbProjectType.Selected.Value),
+                            Notify("Project Type is required", NotificationType.Error),
+                            If(
+                                CountRows(cmbDepartment.SelectedItems) = 0,
+                                Notify("At least one Department is required", NotificationType.Error),
+                                If(
+                                    IsBlank(cmbOwner.Selected.ID) || IsBlank(cmbManager.Selected.ID),
+                                    Notify("Project Owner and Project Manager are required", NotificationType.Error),
+                                    If(
+                                        IsBlank(cmbPriority.Selected.Value),
+                                        Notify("Priority is required", NotificationType.Error),
+                                        If(
+                                            IsBlank(cmbCostCenter.Selected.Value),
+                                            Notify("Cost Center is required", NotificationType.Error),
+                                            If(
+                                                StartsWith(rdoLevel.Selected.Value, "Child") && IsBlank(cmbRootProject.Selected.ProjectID),
+                                                Notify("Please select the root project", NotificationType.Error),
+                                                If(
+                                                    !IsBlank(dpStartDate.SelectedDate) && !IsBlank(dpEndDate.SelectedDate) && dpEndDate.SelectedDate < dpStartDate.SelectedDate,
+                                                    Notify("End Date must be on or after Start Date", NotificationType.Error),
+                                                    With(
+                                                        {wCR: Patch(
+                                                            Project_ChangeRequests,
+                                                            Defaults(Project_ChangeRequests),
+                                                            {
+                                                                Title: "Create - " & txtProjectName.Value & " - " & gCurrentEmployee.Title & " - " & Text(Today(), "dd/mm/yyyy"),
+                                                                RequestType: {Value: "Create"},
+                                                                ApprovalStatus: {Value: "Pending Manager"},
+                                                                RequesterEmail: User().Email,
+                                                                RequesterID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
+                                                                RequestReason: txtReason.Value,
+                                                                ProjectName: txtProjectName.Value,
+                                                                ProjectDescription: txtDescription.Value,
+                                                                ProjectType: {Value: cmbProjectType.Selected.Value},
+                                                                Department: ForAll(cmbDepartment.SelectedItems, {Value: ThisRecord.Value}),
+                                                                ProjectOwner: {Id: cmbOwner.Selected.ID, Value: cmbOwner.Selected.Title},
+                                                                ProjectManager: {Id: cmbManager.Selected.ID, Value: cmbManager.Selected.Title},
+                                                                Priority: {Value: cmbPriority.Selected.Value},
+                                                                StartDate: dpStartDate.SelectedDate,
+                                                                EndDate: dpEndDate.SelectedDate,
+                                                                ProjectStatus: If(
+                                                                    IsBlank(cmbInitialStatus.Selected.Value),
+                                                                    {Value: "Not Started"},
+                                                                    {Value: cmbInitialStatus.Selected.Value}
+                                                                ),
+                                                                BudgetAmount: Value(txtBudgetAmount.Value),
+                                                                CapexOpex: If(IsBlank(cmbCapexOpex.Selected.Value), Blank(), {Value: cmbCapexOpex.Selected.Value}),
+                                                                RelatedSKU: If(IsBlank(cmbSKU.Selected.ID), Blank(), {Id: cmbSKU.Selected.ID, Value: cmbSKU.Selected.Title}),
+                                                                Market: If(IsBlank(cmbMarket.Selected.Value), Blank(), {Value: cmbMarket.Selected.Value}),
+                                                                Channel: If(IsBlank(cmbChannel.Selected.Value), Blank(), {Value: cmbChannel.Selected.Value}),
+                                                                StrategicObjective: If(IsBlank(cmbObjective.Selected.Value), Blank(), {Value: cmbObjective.Selected.Value}),
+                                                                CostCenter: {Value: cmbCostCenter.Selected.Value},
+                                                                Country: If(IsBlank(cmbCountry.Selected.Value), Blank(), {Value: cmbCountry.Selected.Value}),
+                                                                ProjectDocuments: txtDocsUrl.Value,
+                                                                ProjectLevel: If(StartsWith(rdoLevel.Selected.Value, "Root"), 0, 1),
+                                                                RootProjectID: If(StartsWith(rdoLevel.Selected.Value, "Child"), cmbRootProject.Selected.ProjectID, Blank())
+                                                            }
+                                                        )},
+                                                        If(
+                                                            IsBlank(wCR.ID),
+                                                            Notify("Failed to submit the request. Please try again.", NotificationType.Error),
+                                                            Project_Notify.Run(
+                                                                "SubmittedToManager",
+                                                                Concat(
+                                                                    Filter(Project_User, Role.Value = "Manager" && IsActive),
+                                                                    LookUp('Employee List', ID = EmployeeID.Id).Email,
+                                                                    ";"
+                                                                ),
+                                                                wCR.Title,
+                                                                wCR.ID,
+                                                                "Create",
+                                                                txtProjectName.Value,
+                                                                gCurrentEmployee.Title,
+                                                                gCurrentEmployee.Title,
+                                                                ""
+                                                            );
+                                                            Notify("Request submitted for Manager approval", NotificationType.Success);
+                                                            Navigate(AllProjectsScreen)
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                  Text: ="Submit Request →"
+                  Width: =180
