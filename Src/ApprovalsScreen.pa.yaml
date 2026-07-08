@@ -450,6 +450,7 @@ Screens:
                   - lblReasonValue:
                       Control: Label@2.5.1
                       Properties:
+                        FontWeight: =FontWeight.Semibold
                         Height: =60
                         Overflow: =Overflow.Scroll
                         Size: =11
@@ -882,6 +883,589 @@ Screens:
                               Size: =11
                               Text: =gSelectedCR.ProjectDescription
                               Width: =700
+            - rowLiveTargetInfo:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(241, 239, 232, 1)
+                  Height: =380
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  LayoutMinHeight: =380
+                  PaddingBottom: =16
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =16
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =(gSelectedCR.RequestType.Value = "Update" || gSelectedCR.RequestType.Value = "Delete") && !IsBlank(gLiveTarget.ID)
+                  Width: =Parent.Width
+                Children:
+                  - lblLTHeading:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Bold
+                        Height: =26
+                        Size: =12
+                        Text: ="Current project details"
+                        Width: =Parent.Width - 40
+                  - lblLTProjectHeader:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        Size: =11
+                        Text: =Coalesce(gLiveTarget.ProjectID, "PROJ-PENDING-" & gLiveTarget.ID) & " — " & gLiveTarget.Title & If(gLiveTarget.ProjectLevel = 1, "  (↳ Child of " & gLiveTarget.RootProjectID & ")", "  (Root)")
+                        Width: =Parent.Width - 40
+                  - gridLTInfo:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =16
+                        LayoutMinHeight: =320
+                        LayoutWrap: =true
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width - 40
+                      Children:
+                        - colLTType:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTTypeLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Project Type"
+                                    Width: =220
+                              - lblLTTypeValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.ProjectType.Value
+                                    Width: =220
+                        - colLTDept:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTDeptLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Department"
+                                    Width: =220
+                              - lblLTDeptValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.Department
+                                    Width: =220
+                        - colLTPriority:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTPriorityLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Priority"
+                                    Width: =220
+                              - lblLTPriorityValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.Priority.Value
+                                    Width: =220
+                        - colLTOwner:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTOwnerLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Project Owner"
+                                    Width: =220
+                              - lblLTOwnerValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.ProjectOwner.Value
+                                    Width: =220
+                        - colLTManager:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTManagerLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Project Manager"
+                                    Width: =220
+                              - lblLTManagerValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.ProjectManager.Value
+                                    Width: =220
+                        - colLTRequestedBy:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTRequestedByLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Requested By"
+                                    Width: =220
+                              - lblLTRequestedByValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =If(IsBlank(gLiveTarget.RequestedBy.Value), "—", gLiveTarget.RequestedBy.Value)
+                                    Width: =220
+                        - colLTApprovedBy:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTApprovedByLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Approved By"
+                                    Width: =220
+                              - lblLTApprovedByValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =If(IsBlank(gLiveTarget.ApprovedBy.Value), "—", gLiveTarget.ApprovedBy.Value)
+                                    Width: =220
+                        - colLTStatus:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTStatusLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Project Status"
+                                    Width: =220
+                              - lblLTStatusValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.ProjectStatus.Value
+                                    Width: =220
+                        - colLTDates:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTDatesLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Start → End"
+                                    Width: =220
+                              - lblLTDatesValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =Text(gLiveTarget.StartDate, "dd/mm/yyyy") & " → " & Text(gLiveTarget.EndDate, "dd/mm/yyyy")
+                                    Width: =220
+                        - colLTBudget:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTBudgetLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Budget Amount"
+                                    Width: =220
+                              - lblLTBudgetValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =Text(gLiveTarget.BudgetAmount, "[#,###]")
+                                    Width: =220
+                        - colLTActualCost:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTActualCostLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Actual Cost"
+                                    Width: =220
+                              - lblLTActualCostValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =If(IsBlank(gLiveTarget.ActualCost), "—", Text(gLiveTarget.ActualCost, "[#,###]"))
+                                    Width: =220
+                        - colLTCapexOpex:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTCapexOpexLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="CapEx / OpEx"
+                                    Width: =220
+                              - lblLTCapexOpexValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.CapexOpex.Value
+                                    Width: =220
+                        - colLTMarket:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTMarketLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Market / Channel"
+                                    Width: =220
+                              - lblLTMarketValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.Market.Value & " / " & gLiveTarget.Channel.Value
+                                    Width: =220
+                        - colLTObjective:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTObjectiveLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Strategic Objective"
+                                    Width: =220
+                              - lblLTObjectiveValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =11
+                                    Text: =gLiveTarget.StrategicObjective.Value
+                                    Width: =220
+                        - colLTCostCenter:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTCostCenterLabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Cost Center"
+                                    Width: =220
+                              - lblLTCostCenterValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =44
+                                    Size: =11
+                                    Text: =gLiveTarget.CostCenter.Value
+                                    Width: =220
+                        - colLTSKU:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
+                              Height: =46
+                              LayoutDirection: =LayoutDirection.Vertical
+                              LayoutGap: =2
+                              LayoutMinHeight: =60
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =220
+                            Children:
+                              - lblLTSKULabel:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(136, 135, 128, 1)
+                                    Height: =20
+                                    Size: =9
+                                    Text: ="Related Product SKU"
+                                    Width: =220
+                              - lblLTSKUValue:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =44
+                                    Overflow: =Overflow.Scroll
+                                    Size: =11
+                                    Text: =If(CountRows(gLiveTarget.RelatedSKU) = 0, "—", Concat(gLiveTarget.RelatedSKU, Value, ", "))
+                                    Width: =220
+                  - lblLTDocsLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =20
+                        Size: =9
+                        Text: ="Project Documents"
+                        Width: =Parent.Width - 40
+                  - lblLTDocsValue:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(83, 74, 183, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =28
+                        Size: =11
+                        Text: =If(IsBlank(gLiveTarget.ProjectDocuments), "—", gLiveTarget.ProjectDocuments)
+                        Width: =Parent.Width - 40
             - rowDiffUpdate:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -921,6 +1505,7 @@ Screens:
                       Control: Label@2.5.1
                       Properties:
                         Fill: =RGBA(241, 239, 232, 1)
+                        FontWeight: =FontWeight.Semibold
                         Height: =100
                         Overflow: =Overflow.Scroll
                         PaddingLeft: =8
