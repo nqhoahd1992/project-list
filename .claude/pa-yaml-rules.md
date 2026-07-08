@@ -190,6 +190,30 @@ Layout: ='RadioGroupCanvas.Layout'.Horizontal
 
 ---
 
+## 6b. ComboBox on a full-record data source: author it as `ModernCombobox@1.1.1` with `ItemDisplayText`
+
+When `Items` is a raw table of records (e.g. `Sort('Employee List', Title, ...)`, `Filter(Project_List, ...)`) rather than `Choices(...)`, a plain `ComboBox@0.0.51` does **not** reliably infer which column to display — observed in Studio rendering the numeric `ID` instead of the name/title in every dropdown option. Studio also silently auto-upgrades any `ComboBox@0.0.51` you paste in to `ModernCombobox@1.1.1` on its own, which doesn't even have a `DisplayFields` property — so author it as `ModernCombobox@1.1.1` directly instead of round-tripping through the legacy control.
+
+**Correct:**
+```yaml
+- cmbOwner:
+    Control: ModernCombobox@1.1.1
+    Properties:
+      AllowExternalSelectedItems: =false
+      FontWeight: =""
+      Height: =40
+      InputTextPlaceholder: ="Choose an employee"
+      ItemDisplayText: =ThisItem.Title   # ← the field that actually exists on the source table
+      Items: =Sort('Employee List', Title, SortOrder.Ascending)
+      SelectMultiple: =false
+      Size: =0
+      Width: =Parent.Width
+```
+
+**Rule:** for `ModernCombobox@1.1.1` on a full-record source, set `ItemDisplayText` to the record's display field (`ThisItem.Title`, `ThisItem.Value` for `Choices(...)`-derived tables, etc.). `.Selected`/`.SelectedItems` still expose every field on the underlying record (e.g. `.Selected.ID`, `.Selected.ProjectID`) regardless of what `ItemDisplayText` renders — it only controls what's shown in the box, not what's queryable.
+
+---
+
 ## 4. Global var initialisation
 
 Declare all attachment globals in `App.OnStart`:

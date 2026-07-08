@@ -86,10 +86,11 @@ Anyone with an email in the tenant can create change requests, including Manager
 
 - **UI text and all source: English only.**
 - Guarded writes: `With({wX: Patch(...)}, If(IsBlank(wX.ID), Notify(error), <next step>))` — chain nested `With` for multi-step (log → status → notify).
-- Choice: write `{Value: "..."}`; multi-choice: table of `{Value}` records; Lookup/Person: `{Id, Value}`; multi-lookup (`RelatedSKU`): table of `{Id, Value}` records; Currency/Number: plain numbers. Exception: `Department` is plain Text (options sourced from `Distinct('Employee List', department.Value)`), not a Choice column.
+- Choice: write `{Value: "..."}`; multi-choice: table of `{Value}` records; Lookup/Person: `{Id, Value}`; multi-lookup (`RelatedSKU`): table of `{Id, Value}` records; Currency/Number: plain numbers. Exception: `Department` is plain Text (options sourced from `Distinct(Filter('Employee List', !IsBlank(department.Value)), department.Value)` — blanks filtered out before Distinct), not a Choice column.
 - Status strings (`Pending Manager`, `Pending Executive`, `Approved`, `Rejected`, `Deleted`, …) are **literals in every screen** — no shared constant; renaming one means touching every filter, color map, and Patch.
 - Join key for logs: `ChangeRequestIDText = Text(cr.ID)` (delegable), never lookup-column comparison.
 - `Project_User.Title` is never populated — always resolve a user's display name/email through its `EmployeeID` lookup into `Employee List`, never read `Project_User.Title` directly.
+- `Project_Notify.Run(...)` recipient args are always `Coalesce(Concat(Filter(Project_User, Role.Value = "..." && IsActive), ..., ";"), "app.admin@maxbiocare.com")` — an empty active-approver Filter makes `Concat` return `""`, which fails the flow's "Send an email" action on an empty `To`.
 - Inline `RGBA(...)` colors; brand purple `RGBA(83, 74, 183, 1)`; status pill palette mirrors procurement (green `RGBA(15,110,86,1)` / red `RGBA(163,45,45,1)` / amber `RGBA(133,79,11,1)`).
 - Control versions and YAML pitfalls: **`.claude/pa-yaml-rules.md` is binding** (`Label@2.5.1`, `Button@0.0.45`, `TextInput@0.0.54`, `Radio@0.0.25` no Default, `ComboBox@0.0.51` DefaultSelectedItems=Filter, `CheckBox@0.0.30`, `Gallery@2.15.0`, `GroupContainer@1.5.0`, `Rectangle@2.3.0`; `|-` block literal for any formula containing `: `; `FillPortions: =0` for AutoLayout children with explicit Height).
 - `ActualCost` is display-only everywhere — reserved for the future procurement cost-sync flow (`docs/approval-workflow-plan.md` §Future).

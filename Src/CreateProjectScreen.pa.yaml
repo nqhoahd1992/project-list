@@ -84,7 +84,6 @@ Screens:
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
-                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =20
                   LayoutMinHeight: =90
@@ -121,10 +120,14 @@ Screens:
                               Text: ="Project Name *"
                               Width: =Parent.Width
                         - txtProjectName:
-                            Control: TextInput@0.0.54
+                            Control: ModernTextInput@1.1.1
                             Properties:
+                              FontWeight: =""
                               Height: =40
+                              MaxLength: =-1
                               Placeholder: ="Enter project name"
+                              Size: =0
+                              TriggerOutput: =TriggerOutput.FocusOut
                               Width: =Parent.Width
                   - colProjectType:
                       Control: GroupContainer@1.5.0
@@ -181,52 +184,22 @@ Screens:
                               Text: ="Priority *"
                               Width: =Parent.Width
                         - cmbPriority:
-                            Control: ComboBox@0.0.51
+                            Control: ModernCombobox@1.1.1
                             Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
                               Height: =40
                               InputTextPlaceholder: ="Choose an option"
+                              ItemDisplayText: =ThisItem.Value
                               Items: =Choices(Project_ChangeRequests.Priority)
+                              SelectMultiple: =false
+                              Size: =0
                               Width: =Parent.Width
-            - rowDescription:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  FillPortions: =0
-                  Height: =130
-                  LayoutDirection: =LayoutDirection.Vertical
-                  LayoutGap: =4
-                  PaddingBottom: =8
-                  PaddingLeft: =20
-                  PaddingRight: =20
-                  PaddingTop: =8
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                  Width: =Parent.Width
-                Children:
-                  - lblDescriptionLabel:
-                      Control: Label@2.5.1
-                      Properties:
-                        FontWeight: =FontWeight.Semibold
-                        Height: =24
-                        Size: =11
-                        Text: ="Project Description"
-                        Width: =300
-                  - txtDescription:
-                      Control: TextInput@0.0.54
-                      Properties:
-                        Height: =80
-                        Mode: ='TextInputCanvas.Mode'.Multiline
-                        Placeholder: ="Describe the project scope"
-                        Width: =Parent.Width - 40
             - rowPeople:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
-                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =20
                   LayoutMinHeight: =90
@@ -270,7 +243,7 @@ Screens:
                               Height: =40
                               InputTextPlaceholder: ="Choose an option"
                               ItemDisplayText: =ThisItem.Value
-                              Items: =Distinct('Employee List', department.Value)
+                              Items: =Distinct(Filter('Employee List', !IsBlank(department.Value)), department.Value)
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
@@ -296,11 +269,16 @@ Screens:
                               Text: ="Project Owner *"
                               Width: =Parent.Width
                         - cmbOwner:
-                            Control: ComboBox@0.0.51
+                            Control: ModernCombobox@1.1.1
                             Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
                               Height: =40
                               InputTextPlaceholder: ="Choose an employee"
-                              Items: =Sort('Employee List', Title, SortOrder.Ascending)
+                              ItemDisplayText: =ThisItem.Title
+                              Items: =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Executive"), LookUp('Employee List', ID = EmployeeID.Id)), Title, SortOrder.Ascending)
+                              SelectMultiple: =false
+                              Size: =0
                               Width: =Parent.Width
                   - colManager:
                       Control: GroupContainer@1.5.0
@@ -324,17 +302,22 @@ Screens:
                               Text: ="Project Manager *"
                               Width: =Parent.Width
                         - cmbManager:
-                            Control: ComboBox@0.0.51
+                            Control: ModernCombobox@1.1.1
                             Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
                               Height: =40
                               InputTextPlaceholder: ="Choose an employee"
-                              Items: =Sort('Employee List', Title, SortOrder.Ascending)
+                              ItemDisplayText: =ThisItem.Title
+                              Items: =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Manager"), LookUp('Employee List', ID = EmployeeID.Id)), Title, SortOrder.Ascending)
+                              SelectMultiple: =false
+                              Size: =0
+                              Width: =Parent.Width
             - rowSchedule:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
-                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =20
                   LayoutMinHeight: =90
@@ -368,13 +351,17 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: ="Start Date"
+                              Text: ="Start Date *"
                               Width: =Parent.Width
                         - dpStartDate:
-                            Control: DatePicker@0.0.46
+                            Control: ModernDatePicker@1.0.1
                             Properties:
+                              BorderStyle: =""
+                              Font: =""
+                              FontWeight: =""
                               Height: =40
                               Placeholder: ="Choose a date"
+                              Size: =0
                               Width: =Parent.Width
                   - colEndDate:
                       Control: GroupContainer@1.5.0
@@ -395,49 +382,23 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: ="End Date"
+                              Text: ="End Date *"
                               Width: =Parent.Width
                         - dpEndDate:
-                            Control: DatePicker@0.0.46
+                            Control: ModernDatePicker@1.0.1
                             Properties:
+                              BorderStyle: =""
+                              Font: =""
+                              FontWeight: =""
                               Height: =40
                               Placeholder: ="Choose a date"
-                              Width: =Parent.Width
-                  - colInitialStatus:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =240
-                      Children:
-                        - lblInitialStatusLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Initial Status"
-                              Width: =Parent.Width
-                        - cmbInitialStatus:
-                            Control: ComboBox@0.0.51
-                            Properties:
-                              DefaultSelectedItems: =Filter(Choices(Project_ChangeRequests.ProjectStatus), Value = "Not Started")
-                              Height: =40
-                              InputTextPlaceholder: ="Choose an option"
-                              Items: =Choices(Project_ChangeRequests.ProjectStatus)
+                              Size: =0
                               Width: =Parent.Width
             - rowBudget:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
-                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =20
                   LayoutMinHeight: =90
@@ -471,43 +432,13 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: ="Budget Amount"
+                              Text: ="Budget Amount *"
                               Width: =Parent.Width
                         - txtBudgetAmount:
                             Control: TextInput@0.0.54
                             Properties:
                               Height: =40
                               Placeholder: ="0"
-                              Width: =Parent.Width
-                  - colActualCost:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =320
-                      Children:
-                        - lblActualCostLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Actual Cost"
-                              Width: =Parent.Width
-                        - lblActualCostValue:
-                            Control: Label@2.5.1
-                            Properties:
-                              Color: =RGBA(136, 135, 128, 1)
-                              Fill: =RGBA(241, 239, 232, 1)
-                              PaddingLeft: =12
-                              Size: =11
-                              Text: ="Auto-calculated from procurement — coming soon"
                               Width: =Parent.Width
                   - colCapexOpex:
                       Control: GroupContainer@1.5.0
@@ -528,7 +459,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: ="CapEx / OpEx"
+                              Text: ="CapEx / OpEx *"
                               Width: =Parent.Width
                         - cmbCapexOpex:
                             Control: ComboBox@0.0.51
@@ -537,12 +468,46 @@ Screens:
                               InputTextPlaceholder: ="Choose an option"
                               Items: =Choices(Project_ChangeRequests.CapexOpex)
                               Width: =Parent.Width
+                  - colObjective:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =260
+                        X: =40
+                        Y: =40
+                      Children:
+                        - lblObjectiveLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Strategic Objective *"
+                              Width: =Parent.Width
+                        - cmbObjective:
+                            Control: ModernCombobox@1.1.1
+                            Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              ItemDisplayText: =ThisItem.Value
+                              Items: =Choices(Project_ChangeRequests.StrategicObjective)
+                              SelectMultiple: =false
+                              Size: =0
+                              Width: =Parent.Width
             - rowBusiness:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
-                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =20
                   LayoutMinHeight: =90
@@ -576,14 +541,54 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: ="Market"
+                              Text: ="Market *"
                               Width: =Parent.Width
                         - cmbMarket:
-                            Control: ComboBox@0.0.51
+                            Control: ModernCombobox@1.1.1
                             Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
                               Height: =40
                               InputTextPlaceholder: ="Choose an option"
+                              ItemDisplayText: =ThisItem.Value
                               Items: =Choices(Project_ChangeRequests.Market)
+                              SelectMultiple: =false
+                              Size: =0
+                              Width: =Parent.Width
+                  - colCostCenter:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                        X: =40
+                        Y: =40
+                      Children:
+                        - lblCostCenterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Cost Center *"
+                              Width: =Parent.Width
+                        - cmbCostCenter:
+                            Control: ModernCombobox@1.1.1
+                            Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              ItemDisplayText: =ThisItem.Value
+                              Items: =Choices(Project_ChangeRequests.CostCenter)
+                              SelectMultiple: =false
+                              Size: =0
                               Width: =Parent.Width
                   - colChannel:
                       Control: GroupContainer@1.5.0
@@ -604,43 +609,39 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: ="Channel"
+                              Text: ="Channel *"
                               Width: =Parent.Width
                         - cmbChannel:
-                            Control: ComboBox@0.0.51
+                            Control: ModernCombobox@1.1.1
                             Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
                               Height: =40
                               InputTextPlaceholder: ="Choose an option"
+                              ItemDisplayText: =ThisItem.Value
                               Items: =Choices(Project_ChangeRequests.Channel)
+                              SelectMultiple: =false
+                              Size: =0
                               Width: =Parent.Width
-                  - colObjective:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =260
-                      Children:
-                        - lblObjectiveLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Strategic Objective"
-                              Width: =Parent.Width
-                        - cmbObjective:
-                            Control: ComboBox@0.0.51
-                            Properties:
-                              Height: =40
-                              InputTextPlaceholder: ="Choose an option"
-                              Items: =Choices(Project_ChangeRequests.StrategicObjective)
-                              Width: =Parent.Width
+            - rowLocation:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
                   - colSKU:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -653,6 +654,8 @@ Screens:
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
                         Width: =280
+                        X: =40
+                        Y: =40
                       Children:
                         - lblSKULabel:
                             Control: Label@2.5.1
@@ -673,54 +676,6 @@ Screens:
                               Items: =Sort(Product_Database_SKU_Master, Title, SortOrder.Ascending)
                               Size: =0
                               Width: =Parent.Width
-            - rowLocation:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  FillPortions: =0
-                  LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =20
-                  LayoutMinHeight: =90
-                  LayoutWrap: =true
-                  PaddingBottom: =8
-                  PaddingLeft: =20
-                  PaddingRight: =20
-                  PaddingTop: =8
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                  Width: =Parent.Width
-                Children:
-                  - colCostCenter:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =240
-                      Children:
-                        - lblCostCenterLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Cost Center *"
-                              Width: =Parent.Width
-                        - cmbCostCenter:
-                            Control: ComboBox@0.0.51
-                            Properties:
-                              Height: =40
-                              InputTextPlaceholder: ="Choose an option"
-                              Items: =Choices(Project_ChangeRequests.CostCenter)
-                              Width: =Parent.Width
                   - colDocsUrl:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -740,13 +695,17 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: ="Project Documents (URL)"
+                              Text: ="Project Documents (URL) *"
                               Width: =Parent.Width
                         - txtDocsUrl:
-                            Control: TextInput@0.0.54
+                            Control: ModernTextInput@1.1.1
                             Properties:
+                              FontWeight: =""
                               Height: =40
+                              MaxLength: =-1
                               Placeholder: ="https://maxbiocare.sharepoint.com/..."
+                              Size: =0
+                              TriggerOutput: =TriggerOutput.FocusOut
                               Width: =Parent.Width
             - rowHierarchy:
                 Control: GroupContainer@1.5.0
@@ -754,7 +713,6 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(241, 239, 232, 1)
-                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =20
                   LayoutMinHeight: =110
@@ -819,22 +777,27 @@ Screens:
                               Text: ="Root Project *"
                               Width: =Parent.Width
                         - cmbRootProject:
-                            Control: ComboBox@0.0.51
+                            Control: ModernCombobox@1.1.1
                             Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
                               Height: =40
                               InputTextPlaceholder: ="Choose the parent project"
+                              ItemDisplayText: =ThisItem.Title
                               Items: =Filter(Project_List, ProjectLevel = 0 && ProjectStatus.Value <> "Deleted")
+                              SelectMultiple: =false
+                              Size: =0
                               Width: =Parent.Width
-            - rowReason:
+            - rowDescription:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =120
+                  Height: =130
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
-                  PaddingBottom: =20
+                  PaddingBottom: =8
                   PaddingLeft: =20
                   PaddingRight: =20
                   PaddingTop: =8
@@ -844,20 +807,24 @@ Screens:
                   RadiusTopRight: =0
                   Width: =Parent.Width
                 Children:
-                  - lblReasonLabel_1:
+                  - lblDescriptionLabel:
                       Control: Label@2.5.1
                       Properties:
                         FontWeight: =FontWeight.Semibold
                         Height: =24
                         Size: =11
-                        Text: ="Request Notes (optional)"
+                        Text: ="Project Description *"
                         Width: =300
-                  - txtReason:
-                      Control: TextInput@0.0.54
+                  - txtDescription:
+                      Control: ModernTextInput@1.1.1
                       Properties:
-                        Height: =60
-                        Mode: ='TextInputCanvas.Mode'.Multiline
-                        Placeholder: ="Context for the approvers"
+                        FontWeight: =""
+                        Height: =80
+                        MaxLength: =-1
+                        Placeholder: ="Describe the project scope"
+                        Size: =0
+                        TriggerOutput: =TriggerOutput.FocusOut
+                        Type: =TextInputType.Multiline
                         Width: =Parent.Width - 40
       - conActionBar_1:
           Control: GroupContainer@1.5.0
@@ -882,19 +849,32 @@ Screens:
             Y: =Parent.Height - 60
           Children:
             - btnCancelCreate:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
+                  FontWeight: =""
                   Height: =36
                   OnSelect: =Navigate(AllProjectsScreen)
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
                   Text: ="Cancel"
+                  VerticalAlign: =VerticalAlign.Middle
                   Width: =120
             - btnSubmitCreate:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
+                  FontWeight: =""
                   Height: =36
                   OnSelect: |-
                     =If(
-                        IsBlank(txtProjectName.Value),
+                        IsBlank(txtProjectName.Text),
                         Notify("Project Name is required", NotificationType.Error),
                         If(
                             IsBlank(cmbProjectType.Selected.Value),
@@ -912,24 +892,26 @@ Screens:
                                             IsBlank(cmbCostCenter.Selected.Value),
                                             Notify("Cost Center is required", NotificationType.Error),
                                             If(
-                                                StartsWith(rdoLevel.Selected.Value, "Child") && IsBlank(cmbRootProject.Selected.ProjectID),
+                                                IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Value) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text),
+                                                Notify("Please fill in all required fields (Start/End Date, Budget Amount, CapEx/OpEx, Strategic Objective, Market, Channel, Project Documents URL, Project Description)", NotificationType.Error),
+                                                If(
+                                                    StartsWith(rdoLevel.Selected.Value, "Child") && IsBlank(cmbRootProject.Selected.ProjectID),
                                                 Notify("Please select the root project", NotificationType.Error),
                                                 If(
-                                                    !IsBlank(dpStartDate.SelectedDate) && !IsBlank(dpEndDate.SelectedDate) && dpEndDate.SelectedDate < dpStartDate.SelectedDate,
+                                                    dpEndDate.SelectedDate < dpStartDate.SelectedDate,
                                                     Notify("End Date must be on or after Start Date", NotificationType.Error),
                                                     With(
                                                         {wCR: Patch(
                                                             Project_ChangeRequests,
                                                             Defaults(Project_ChangeRequests),
                                                             {
-                                                                Title: "Create - " & txtProjectName.Value & " - " & gCurrentEmployee.Title & " - " & Text(Today(), "dd/mm/yyyy"),
+                                                                Title: "Create - " & txtProjectName.Text & " - " & gCurrentEmployee.Title & " - " & Text(Today(), "dd/mm/yyyy"),
                                                                 RequestType: {Value: "Create"},
                                                                 ApprovalStatus: {Value: "Pending Manager"},
                                                                 RequesterEmail: User().Email,
                                                                 RequesterID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
-                                                                RequestReason: txtReason.Value,
-                                                                ProjectName: txtProjectName.Value,
-                                                                ProjectDescription: txtDescription.Value,
+                                                                ProjectName: txtProjectName.Text,
+                                                                ProjectDescription: txtDescription.Text,
                                                                 ProjectType: {Value: cmbProjectType.Selected.Value},
                                                                 Department: cmbDepartment.Selected.Value,
                                                                 ProjectOwner: {Id: cmbOwner.Selected.ID, Value: cmbOwner.Selected.Title},
@@ -937,19 +919,15 @@ Screens:
                                                                 Priority: {Value: cmbPriority.Selected.Value},
                                                                 StartDate: dpStartDate.SelectedDate,
                                                                 EndDate: dpEndDate.SelectedDate,
-                                                                ProjectStatus: If(
-                                                                    IsBlank(cmbInitialStatus.Selected.Value),
-                                                                    {Value: "Not Started"},
-                                                                    {Value: cmbInitialStatus.Selected.Value}
-                                                                ),
+                                                                ProjectStatus: {Value: "Not Started"},
                                                                 BudgetAmount: Value(txtBudgetAmount.Value),
-                                                                CapexOpex: If(IsBlank(cmbCapexOpex.Selected.Value), Blank(), {Value: cmbCapexOpex.Selected.Value}),
+                                                                CapexOpex: {Value: cmbCapexOpex.Selected.Value},
                                                                 RelatedSKU: ForAll(cmbSKU.SelectedItems, {Id: ID, Value: Title}),
-                                                                Market: If(IsBlank(cmbMarket.Selected.Value), Blank(), {Value: cmbMarket.Selected.Value}),
-                                                                Channel: If(IsBlank(cmbChannel.Selected.Value), Blank(), {Value: cmbChannel.Selected.Value}),
-                                                                StrategicObjective: If(IsBlank(cmbObjective.Selected.Value), Blank(), {Value: cmbObjective.Selected.Value}),
+                                                                Market: {Value: cmbMarket.Selected.Value},
+                                                                Channel: {Value: cmbChannel.Selected.Value},
+                                                                StrategicObjective: {Value: cmbObjective.Selected.Value},
                                                                 CostCenter: {Value: cmbCostCenter.Selected.Value},
-                                                                ProjectDocuments: txtDocsUrl.Value,
+                                                                ProjectDocuments: txtDocsUrl.Text,
                                                                 ProjectLevel: If(StartsWith(rdoLevel.Selected.Value, "Root"), 0, 1),
                                                                 RootProjectID: If(StartsWith(rdoLevel.Selected.Value, "Child"), cmbRootProject.Selected.ProjectID, Blank())
                                                             }
@@ -959,15 +937,18 @@ Screens:
                                                             Notify("Failed to submit the request. Please try again.", NotificationType.Error),
                                                             Project_Notify.Run(
                                                                 "SubmittedToManager",
-                                                                Concat(
-                                                                    Filter(Project_User, Role.Value = "Manager" && IsActive),
-                                                                    LookUp('Employee List', ID = EmployeeID.Id).Email,
-                                                                    ";"
+                                                                Coalesce(
+                                                                    Concat(
+                                                                        Filter(Project_User, Role.Value = "Manager" && IsActive),
+                                                                        LookUp('Employee List', ID = EmployeeID.Id).Email,
+                                                                        ";"
+                                                                    ),
+                                                                    "app.admin@maxbiocare.com"
                                                                 ),
                                                                 wCR.Title,
                                                                 wCR.ID,
                                                                 "Create",
-                                                                txtProjectName.Value,
+                                                                txtProjectName.Text,
                                                                 gCurrentEmployee.Title,
                                                                 gCurrentEmployee.Title,
                                                                 ""
@@ -984,5 +965,15 @@ Screens:
                             )
                         )
                     )
+                    )
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
                   Text: ="Submit Request →"
+                  VerticalAlign: =VerticalAlign.Middle
                   Width: =180

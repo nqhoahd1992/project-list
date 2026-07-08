@@ -52,12 +52,12 @@ Anyone with a tenant email can submit (`Requester` above is not a `Project_User`
 
 ## 3. `Project_Notify` flow — build spec (manual, Power Automate portal)
 
-- **Trigger**: Power Apps (V2). Add 9 inputs in this exact order, declaring types explicitly (do NOT let a Blank in the first test run infer the type):
-  `text` (Text), `text_1` (Text), `text_2` (Text), `number` (Number), `text_3` (Text), `text_4` (Text), `text_5` (Text), `text_6` (Text), `text_7` (Text) — meanings in `sharepoint-schema.md` §Flows.
+- **Trigger**: Power Apps (V2). Add 9 inputs in this exact order, declaring types explicitly (do NOT let a Blank in the first test run infer the type), and rename each from its Power Automate default:
+  `notificationType` (Text, default `text`), `recipientEmails` (Text, default `text_1`), `requestTitle` (Text, default `text_2`), `requestId` (Number, default `number`), `requestType` (Text, default `text_3`), `projectName` (Text, default `text_4`), `requesterName` (Text, default `text_5`), `actionByName` (Text, default `text_6`), `remark` (Text, default `text_7`) — meanings in `sharepoint-schema.md` §Flows.
 - **Actions**:
   1. `Initialize variable` — `varSubject` (String), `varBody` (String).
-  2. `Switch` on `text` (notificationType) with 4 cases setting `varSubject` / `varBody` (templates below). **Default branch → Terminate (Failed, "Unknown notificationType")** so a typo in the app surfaces as a flow failure instead of silent no-mail.
-  3. `Send an email (V2)` — To: `text_1` (semicolon-separated works natively), Subject: `varSubject`, Body: `varBody` (HTML on).
+  2. `Switch` on `notificationType` with 4 cases setting `varSubject` / `varBody` (templates below). **Default branch → Terminate (Failed, "Unknown notificationType")** so a typo in the app surfaces as a flow failure instead of silent no-mail.
+  3. `Send an email (V2)` — To: `recipientEmails` (semicolon-separated works natively), Subject: `varSubject`, Body: `varBody` (HTML on).
 - **Connection**: `app.admin@maxbiocare.com` shared mailbox connection; pin it under *Run only users* so every app user sends through the same connection.
 - App deep link used in bodies (fill after the app is published):
   `https://apps.powerapps.com/play/e/<ENV_ID>/a/<APP_ID>?tenantId=<TENANT_ID>`
@@ -66,15 +66,15 @@ Anyone with a tenant email can submit (`Requester` above is not a `Project_User`
 
 **Case `SubmittedToManager`** — To: all active Managers
 
-- Subject: `[Project List] Approval needed: @{triggerBody()['text_2']}`
+- Subject: `[Project List] Approval needed: @{triggerBody()['requestTitle']}`
 - Body:
   ```
   A new project change request is waiting for your review.
 
-  Request:      @{triggerBody()['text_2']} (#@{triggerBody()['number']})
-  Type:         @{triggerBody()['text_3']}
-  Project:      @{triggerBody()['text_4']}
-  Requested by: @{triggerBody()['text_5']}
+  Request:      @{triggerBody()['requestTitle']} (#@{triggerBody()['requestId']})
+  Type:         @{triggerBody()['requestType']}
+  Project:      @{triggerBody()['projectName']}
+  Requested by: @{triggerBody()['requesterName']}
 
   Please open the Project List app → Approvals to review it.
   <app deep link>
@@ -82,34 +82,34 @@ Anyone with a tenant email can submit (`Requester` above is not a `Project_User`
 
 **Case `ManagerApprovedToExecutive`** — To: all active Executives
 
-- Subject: `[Project List] Executive approval needed: @{triggerBody()['text_2']}`
-- Body: same layout, plus `Manager approved by: @{triggerBody()['text_6']}`.
+- Subject: `[Project List] Executive approval needed: @{triggerBody()['requestTitle']}`
+- Body: same layout, plus `Manager approved by: @{triggerBody()['actionByName']}`.
 
 **Case `FinalApproved`** — To: requester
 
-- Subject: `[Project List] Approved: @{triggerBody()['text_2']}`
+- Subject: `[Project List] Approved: @{triggerBody()['requestTitle']}`
 - Body:
   ```
   Your request has been fully approved and applied.
 
-  Request:     @{triggerBody()['text_2']} (#@{triggerBody()['number']})
-  Type:        @{triggerBody()['text_3']}
-  Project:     @{triggerBody()['text_4']}
-  Approved by: @{triggerBody()['text_6']}
+  Request:     @{triggerBody()['requestTitle']} (#@{triggerBody()['requestId']})
+  Type:        @{triggerBody()['requestType']}
+  Project:     @{triggerBody()['projectName']}
+  Approved by: @{triggerBody()['actionByName']}
   ```
 
 **Case `FinalRejected`** — To: requester
 
-- Subject: `[Project List] Rejected: @{triggerBody()['text_2']}`
+- Subject: `[Project List] Rejected: @{triggerBody()['requestTitle']}`
 - Body:
   ```
   Your request has been rejected.
 
-  Request:     @{triggerBody()['text_2']} (#@{triggerBody()['number']})
-  Type:        @{triggerBody()['text_3']}
-  Project:     @{triggerBody()['text_4']}
-  Rejected by: @{triggerBody()['text_6']}
-  Remark:      @{triggerBody()['text_7']}
+  Request:     @{triggerBody()['requestTitle']} (#@{triggerBody()['requestId']})
+  Type:        @{triggerBody()['requestType']}
+  Project:     @{triggerBody()['projectName']}
+  Rejected by: @{triggerBody()['actionByName']}
+  Remark:      @{triggerBody()['remark']}
 
   You may submit a new request after addressing the remark.
   ```
