@@ -157,9 +157,23 @@ Screens:
                       ),
                       Switch(gUserRole,
                           "Manager",
-                          Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager"),
+                          Filter(Project_ChangeRequests,
+                              ApprovalStatus.Value = "Pending Manager" &&
+                              If(
+                                  RequestType.Value = "Create",
+                                  ProjectManager.Id = gCurrentEmployee.ID,
+                                  LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
+                              )
+                          ),
                           "Executive",
-                          Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Executive"),
+                          Filter(Project_ChangeRequests,
+                              ApprovalStatus.Value = "Pending Executive" &&
+                              If(
+                                  RequestType.Value = "Create",
+                                  ProjectOwner.Id = gCurrentEmployee.ID,
+                                  LookUp(Project_List, ID = TargetItemID).ProjectOwner.Id = gCurrentEmployee.ID
+                              )
+                          ),
                           Filter(Project_ChangeRequests, RequesterEmail = User().Email)
                       )
                   ),
@@ -337,7 +351,7 @@ Screens:
           Variant: AutoLayout
           Properties:
             DropShadow: =DropShadow.None
-            Height: =Parent.Height - 130
+            Height: =Parent.Height - 120
             LayoutDirection: =LayoutDirection.Vertical
             LayoutOverflowY: =LayoutOverflow.Scroll
             RadiusBottomLeft: =0
@@ -347,7 +361,7 @@ Screens:
             Visible: =!IsBlank(gSelectedCR.ID)
             Width: =Parent.Width - 441
             X: =441
-            Y: =70
+            Y: =60
           Children:
             - rowCRTitle:
                 Control: GroupContainer@1.5.0
@@ -889,7 +903,7 @@ Screens:
                       Control: Label@2.5.1
                       Properties:
                         Fill: =RGBA(241, 239, 232, 1)
-                        Height: =54
+                        Height: =100
                         Overflow: =Overflow.Scroll
                         PaddingLeft: =8
                         Size: =11
@@ -913,7 +927,7 @@ Screens:
                               RGBA(255, 255, 255, 1)
                           )
                         FontWeight: =FontWeight.Semibold
-                        Height: =54
+                        Height: =100
                         Overflow: =Overflow.Scroll
                         PaddingLeft: =8
                         Size: =11
@@ -929,7 +943,6 @@ Screens:
                               RGBA(255, 255, 255, 1)
                           )
                         FontWeight: =FontWeight.Semibold
-                        Height: =28
                         PaddingLeft: =8
                         Size: =11
                         Text: |-
@@ -1184,8 +1197,10 @@ Screens:
             Visible: |-
               =!IsBlank(gSelectedCR.ID) &&
               (
-                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager" && gUserRole = "Manager") ||
-                  (gSelectedCR.ApprovalStatus.Value = "Pending Executive" && gUserRole = "Executive")
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager" && gUserRole = "Manager" &&
+                      If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectManager.Id, gLiveTarget.ProjectManager.Id) = gCurrentEmployee.ID) ||
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Executive" && gUserRole = "Executive" &&
+                      If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectOwner.Id, gLiveTarget.ProjectOwner.Id) = gCurrentEmployee.ID)
               )
             Width: =Parent.Width - 441
             X: =441
@@ -1228,10 +1243,11 @@ Screens:
                                     Notify("Failed to update the request status. Please try again.", NotificationType.Error),
                                     Project_Notify.Run(
                                         "ManagerApprovedToExecutive",
-                                        Concat(
-                                            Filter(Project_User, Role.Value = "Executive" && IsActive),
-                                            LookUp('Employee List', ID = EmployeeID.Id).Email,
-                                            ";"
+                                        Coalesce(
+                                            LookUp('Employee List',
+                                                ID = If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectOwner.Id, gLiveTarget.ProjectOwner.Id)
+                                            ).Email,
+                                            "app.admin@maxbiocare.com"
                                         ),
                                         gSelectedCR.Title,
                                         gSelectedCR.ID,

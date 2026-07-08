@@ -541,10 +541,9 @@ Screens:
                                     Notify("Failed to submit the request. Please try again.", NotificationType.Error),
                                     Project_Notify.Run(
                                         "SubmittedToManager",
-                                        Concat(
-                                            Filter(Project_User, Role.Value = "Manager" && IsActive),
-                                            LookUp('Employee List', ID = EmployeeID.Id).Email,
-                                            ";"
+                                        Coalesce(
+                                            LookUp('Employee List', ID = gSelectedProject.ProjectManager.Id).Email,
+                                            "app.admin@maxbiocare.com"
                                         ),
                                         wCR.Title,
                                         wCR.ID,

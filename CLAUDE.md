@@ -81,8 +81,16 @@ Anyone with an email in the tenant can create change requests, including Manager
 | Role | Sees |
 |---|---|
 | Requester (default, no `Project_User` row) | All Projects; own change requests (Mine tab) |
-| Manager | + Approvals queue filtered `Pending Manager` (acts as Step 1) |
-| Executive | + Approvals queue filtered `Pending Executive` (acts as Step 2 + applies); History tab; Show-deleted toggle |
+| Manager | + Approvals queue filtered `Pending Manager` **AND** assigned as that CR's `ProjectManager` (acts as Step 1) |
+| Executive | + Approvals queue filtered `Pending Executive` **AND** assigned as that CR's `ProjectOwner` (acts as Step 2 + applies); History tab; Show-deleted toggle |
+
+**Approval authorization is per-project, not just per-role.** A Manager only sees/can act on a CR if they are that project's `ProjectManager`; an Executive only if they are that project's `ProjectOwner`. It is not a shared "any Manager can approve any pending-Manager CR" queue. The responsible person is resolved as:
+- **Create CR**: `ProjectManager`/`ProjectOwner` proposed directly on the CR (`gSelectedCR.ProjectManager`/`.ProjectOwner`) — the project doesn't exist yet, so there's nothing else to check against.
+- **Update/Delete CR**: the *live* target project's `ProjectManager`/`ProjectOwner` (`gLiveTarget.ProjectManager`/`.ProjectOwner`, looked up via `TargetItemID`) — the CR itself doesn't carry these fields.
+
+This authorization check is duplicated in 3 places per role and must stay in sync if the rule ever changes: the `galChangeRequests` gallery `Items` filter (which CRs appear in "To Approve"), `conActionBar`'s `Visible` (whether Approve/Reject buttons show for the selected CR), and `gApprovalsPendingCount` (the badge count, in both `App.OnStart` and `AllProjectsScreen.OnVisible`). `cmbOwner`/`cmbManager` on `CreateProjectScreen` already only offer Executives/Managers as choices (see `docs/sharepoint-schema.md`), so `ProjectOwner`/`ProjectManager` are guaranteed to hold someone with the matching role — this authorization model depends on that constraint holding.
+
+Email notifications follow the same per-project targeting, not a role broadcast: `SubmittedToManager` goes to the CR's/project's specific `ProjectManager` (`Coalesce(LookUp('Employee List', ID = <ProjectManager.Id>).Email, "app.admin@maxbiocare.com")`), and `ManagerApprovedToExecutive` goes to the specific `ProjectOwner` the same way.
 
 ## Conventions
 

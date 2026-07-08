@@ -186,7 +186,7 @@ Picker: `ComboBox@0.0.51`, `SelectMultiple: =true`, `Items: =Sort(Product_Databa
 
 Called from Power Fx after every successful state transition. **Always pass all 9 args** — use `""` for unused remark. Declare each trigger input's type explicitly when building the flow (Blank-type inference bug — see invoice-batch-app `docs/finalize-invoice-flow-plan.md`).
 
-**Recipient resolution always falls back to `app.admin@maxbiocare.com`** (the flow's own connection owner) when no active Manager/Executive is configured: `Coalesce(Concat(Filter(Project_User, Role.Value = "..." && IsActive), LookUp('Employee List', ID = EmployeeID.Id).Email, ";"), "app.admin@maxbiocare.com")`. Without this, `Concat` over an empty filtered table returns `""`, and the flow's "Send an email (V2)" action fails on an empty `To`.
+**Recipients are the CR's/project's specific `ProjectManager`/`ProjectOwner`, not a role broadcast** (see `CLAUDE.md` §Role-based visibility for the full authorization model) — always wrapped in `Coalesce(LookUp('Employee List', ID = <ProjectManager.Id or ProjectOwner.Id>).Email, "app.admin@maxbiocare.com")` so a blank/unassigned person never leaves the flow's "Send an email (V2)" action with an empty `To`.
 
 | # | Trigger param (rename from Power Automate default) | Type | Meaning |
 |---|---|---|---|

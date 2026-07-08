@@ -948,11 +948,7 @@ Screens:
                                                             Project_Notify.Run(
                                                                 "SubmittedToManager",
                                                                 Coalesce(
-                                                                    Concat(
-                                                                        Filter(Project_User, Role.Value = "Manager" && IsActive),
-                                                                        LookUp('Employee List', ID = EmployeeID.Id).Email,
-                                                                        ";"
-                                                                    ),
+                                                                    LookUp('Employee List', ID = cmbManager.Selected.ID).Email,
                                                                     "app.admin@maxbiocare.com"
                                                                 ),
                                                                 wCR.Title,

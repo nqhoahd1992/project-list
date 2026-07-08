@@ -14,15 +14,15 @@ How the 2-level approval (Manager → Executive) works, and the spec for the `Pr
 ```
 Requester submits (Create / Update / Delete form)
         │  Patch Project_ChangeRequests → ApprovalStatus = "Pending Manager"
-        │  Project_Notify.Run("SubmittedToManager", <active Manager emails>)
+        │  Project_Notify.Run("SubmittedToManager", <that project's ProjectManager email>)
         ▼
-Pending Manager ── ApprovalsScreen, role Manager, StepNumber 1 ──
+Pending Manager ── ApprovalsScreen, StepNumber 1, actor = the CR's/project's ProjectManager only ──
         │  Approve → log(1, Approved) → CR = "Pending Executive"
-        │            → Notify("ManagerApprovedToExecutive", <active Executive emails>)
+        │            → Notify("ManagerApprovedToExecutive", <that project's ProjectOwner email>)
         │  Reject  → Remark ⚠ → log(1, Rejected, Remark) → CR = "Rejected"
         │            → Notify("FinalRejected", requester)
         ▼
-Pending Executive ── ApprovalsScreen, role Executive, StepNumber 2 ──
+Pending Executive ── ApprovalsScreen, StepNumber 2, actor = the CR's/project's ProjectOwner only ──
         │  Reject  → Remark ⚠ → log(2, Rejected, Remark) → CR = "Rejected"
         │            → Notify("FinalRejected", requester)
         │  Approve → APPLY to Project_List (Switch on RequestType, guarded Patch)
@@ -33,7 +33,9 @@ Pending Executive ── ApprovalsScreen, role Executive, StepNumber 2 ──
 Approved / Rejected (terminal)
 ```
 
-Anyone with a tenant email can submit (`Requester` above is not a `Project_User` role — Managers and Executives can submit requests too). There is no substitute-approver role: each step can only be acted on by its own role.
+Anyone with a tenant email can submit (`Requester` above is not a `Project_User` role — Managers and Executives can submit requests too).
+
+**Authorization is per-project, not per-role.** Having `Role = "Manager"` in `Project_User` is necessary but not sufficient to act on a given CR — the user must also be that specific CR's/project's `ProjectManager` (Step 1) or `ProjectOwner` (Step 2). For a Create CR, "that project" means the values proposed on the CR itself (`ProjectManager`/`ProjectOwner`, since the project doesn't exist yet); for Update/Delete, it means the live target row in `Project_List` (via `TargetItemID`). There is no substitute-approver role — a Manager who isn't the assigned `ProjectManager` for a project never sees that project's CR in their queue at all. See `CLAUDE.md` §Role-based visibility for the exact formula and the 3 places it's duplicated.
 
 ### Apply logic per RequestType (Executive approve)
 
@@ -116,15 +118,22 @@ Anyone with a tenant email can submit (`Requester` above is not a `Project_User`
 
 ### Recipient resolution (app side, Power Fx)
 
+Per-project, not a role broadcast — see `CLAUDE.md` §Role-based visibility for the full authorization model.
+
 ```
-// Managers (submit): all active Manager role emails, ";"-joined
-Concat(
-    Filter(Project_User, Role.Value = "Manager" && IsActive),
-    LookUp('Employee List', ID = EmployeeID.Id).email, ";"
+// SubmittedToManager: the CR's/project's specific ProjectManager
+Coalesce(
+    LookUp('Employee List', ID = <ProjectManager.Id>).Email,
+    "app.admin@maxbiocare.com"
 )
-// Executives (manager approved): same with Role.Value = "Executive"
-// Requester (final result): gSelectedCR.RequesterEmail
+// ManagerApprovedToExecutive: the CR's/project's specific ProjectOwner, same Coalesce fallback
+// FinalApproved / FinalRejected (requester): gSelectedCR.RequesterEmail
 ```
+
+`<ProjectManager.Id>` / `<ProjectOwner.Id>` resolve differently depending on where the call happens:
+- Submitting a Create request (`CreateProjectScreen`): the form's own `cmbManager.Selected.ID` (the CR doesn't exist yet).
+- Submitting an Update/Delete request (`Update`/`DeleteProjectScreen`): the target project's `gSelectedProject.ProjectManager.Id`.
+- Manager approving (`ApprovalsScreen`, Step 1 → notifies the Executive): `If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectOwner.Id, gLiveTarget.ProjectOwner.Id)`.
 
 ## 4. FUTURE — `Project_SyncActualCost` (placeholder, do not build yet)
 
