@@ -1674,7 +1674,45 @@ Screens:
                               If(
                                   IsBlank(wTrail.ID),
                                   "Manager step: no log entry found",
-                                  "Manager step: " & wTrail.Action.Value & " by " & wTrail.ApproverID.Value & " on " & Text(wTrail.ActionAt, "dd/mm/yyyy hh:mm") & If(IsBlank(wTrail.Remark), "", " — " & wTrail.Remark)
+                                  If(wTrail.Action.Value = "Approved", "✅ ", "❌ ") & "Manager step: " & wTrail.Action.Value & " by " & wTrail.ApproverID.Value & " on " & Text(wTrail.ActionAt, "dd/mm/yyyy hh:mm") & If(IsBlank(wTrail.Remark), "", " — " & wTrail.Remark)
+                              )
+                          )
+                        Width: =Parent.Width - 40
+            - rowExecutiveTrail:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(225, 245, 238, 1)
+                  FillPortions: =0
+                  Height: =52
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =!IsBlank(LookUp(Project_ApprovalLog, ChangeRequestIDText = Text(gSelectedCR.ID) && StepNumber = 2))
+                  Width: =Parent.Width
+                Children:
+                  - lblExecutiveTrail:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(15, 110, 86, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =36
+                        Size: =11
+                        Text: |-
+                          =With(
+                              {wTrail: LookUp(Project_ApprovalLog, ChangeRequestIDText = Text(gSelectedCR.ID) && StepNumber = 2)},
+                              If(
+                                  IsBlank(wTrail.ID),
+                                  "Executive step: no log entry found",
+                                  If(wTrail.Action.Value = "Approved", "✅ ", "❌ ") & "Executive step: " & wTrail.Action.Value & " by " & wTrail.ApproverID.Value & " on " & Text(wTrail.ActionAt, "dd/mm/yyyy hh:mm") & If(IsBlank(wTrail.Remark), "", " — " & wTrail.Remark)
                               )
                           )
                         Width: =Parent.Width - 40
