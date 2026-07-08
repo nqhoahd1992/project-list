@@ -10,7 +10,8 @@ Screens:
                     (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
                 )
             )
-        )
+        );
+        Set(gCanEditProject, gSelectedProject.RequestedBy.Id = gCurrentEmployee.ID)
     Children:
       - rectHeader_4:
           Control: Rectangle@2.3.0
@@ -25,7 +26,7 @@ Screens:
             FontWeight: =FontWeight.Bold
             Height: =60
             Size: =14
-            Text: ="Max Biocare Project List - Update Project"
+            Text: =If(gCanEditProject, "Max Biocare Project List - Update Project", "Max Biocare Project List - Project Details")
             Width: =719
             X: =20
       - lblUserInfo_4:
@@ -383,6 +384,7 @@ Screens:
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
+                  Visible: =gCanEditProject
                   Width: =Parent.Width
                 Children:
                   - lblEditableNote:
@@ -411,6 +413,7 @@ Screens:
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
+                  Visible: =gCanEditProject
                   Width: =Parent.Width
                 Children:
                   - lblNewDescLabel:
@@ -445,6 +448,7 @@ Screens:
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
+                  Visible: =gCanEditProject
                   Width: =Parent.Width
                 Children:
                   - colCurrentEndDate:
@@ -563,13 +567,14 @@ Screens:
                 Properties:
                   Height: =36
                   OnSelect: =Navigate(AllProjectsScreen)
-                  Text: ="Cancel"
+                  Text: =If(gCanEditProject, "Cancel", "Close")
                   Width: =120
             - btnSubmitUpdate:
                 Control: Button@0.0.45
                 Properties:
                   DisplayMode: =If(gHasPendingCR, DisplayMode.Disabled, DisplayMode.Edit)
                   Height: =36
+                  Visible: =gCanEditProject
                   OnSelect: |-
                     =With(
                         {wNewEndDate: Coalesce(dpNewEndDate.SelectedDate, gSelectedProject.EndDate)},

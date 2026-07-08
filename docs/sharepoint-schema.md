@@ -65,6 +65,7 @@ Required ⚠: `ProjectStatus`, `ApprovalStatus`, `ProjectLevel`.
 | `Channel` | Choice | `Retail Pharmacy`, `Hospital`, `Distributor`, `E-commerce`, `Direct-to-Consumer`, `Cross-border`, `Multiple` |
 | `ApprovalStatus` ⚠ | Choice | `Approved` — always `Approved` on master rows (rows only exist after full approval); kept per spec for reporting |
 | `ApprovedBy` | Lookup→Employee List | Executive who applied the create |
+| `RequestedBy` ⚠ | Lookup→Employee List | Original requester who submitted the Create request (`{Id, Value}`, copied from `gSelectedCR.RequesterID` at apply time) — **gates who can submit Update/Delete for this project** (`AllProjectsScreen`'s Update/Delete row buttons only show when `RequestedBy.Id = gCurrentEmployee.ID`). Rows created before this column existed have it blank, which locks everyone out of Update/Delete for that row until fixed manually |
 | `ProjectDocuments` | Text (URL) | Document link — plain text column, NOT the Hyperlink column type (awkward to Patch) |
 | `StrategicObjective` | Choice | `Revenue Growth`, `Market Expansion`, `Brand Building`, `Product Innovation`, `Operational Excellence`, `Regulatory Compliance`, `Cost Optimization` |
 | `CostCenter` | Choice | `Office Melbourne (Head Quarter)`, `Port Melbourne Warehouse`, `Max Biocare Research Park - Natural Inspirations@Yinnar`, `Max Biocare Research Park - Mar-Nuka Bay`, `Malay Warehouse`, `Singapore Warehouse` |

@@ -563,7 +563,16 @@ Screens:
                   FontWeight: =FontWeight.Semibold
                   Height: =28
                   Size: =10
-                  Text: ="Change pending"
+                  Text: |-
+                    =Switch(
+                        LookUp(Project_ChangeRequests,
+                            TargetItemID = ThisItem.ID &&
+                            (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                        ).RequestType.Value,
+                        "Update", "Update pending",
+                        "Delete", "Delete pending",
+                        "Change pending"
+                    )
                   Visible: |-
                     =!IsBlank(
                         LookUp(Project_ChangeRequests,
@@ -618,6 +627,37 @@ Screens:
                   Width: =Parent.Width - 620
                   X: =16
                   Y: =46
+            - btnRowView:
+                Control: ModernButton@1.0.0
+                Properties:
+                  Align: =Align.Center
+                  FontWeight: =FontWeight.Semibold
+                  Height: =28
+                  OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: ="View"
+                  VerticalAlign: =VerticalAlign.Middle
+                  Visible: |-
+                    =!(
+                        ThisItem.ProjectStatus.Value <> "Deleted" &&
+                        ThisItem.RequestedBy.Id = gCurrentEmployee.ID &&
+                        IsBlank(
+                            LookUp(Project_ChangeRequests,
+                                TargetItemID = ThisItem.ID &&
+                                (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                            )
+                        )
+                    )
+                  Width: =195
+                  X: =1151
+                  Y: =53
             - btnRowUpdate:
                 Control: ModernButton@1.0.0
                 Properties:
@@ -635,7 +675,15 @@ Screens:
                   RadiusTopRight: =4
                   Text: ="Update"
                   VerticalAlign: =VerticalAlign.Middle
-                  Visible: =ThisItem.ProjectStatus.Value <> "Deleted"
+                  Visible: |-
+                    =ThisItem.ProjectStatus.Value <> "Deleted" &&
+                    ThisItem.RequestedBy.Id = gCurrentEmployee.ID &&
+                    IsBlank(
+                        LookUp(Project_ChangeRequests,
+                            TargetItemID = ThisItem.ID &&
+                            (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                        )
+                    )
                   Width: =90
                   X: =1151
                   Y: =53
@@ -657,7 +705,15 @@ Screens:
                   RadiusTopRight: =4
                   Text: ="Delete"
                   VerticalAlign: =VerticalAlign.Middle
-                  Visible: =ThisItem.ProjectStatus.Value <> "Deleted"
+                  Visible: |-
+                    =ThisItem.ProjectStatus.Value <> "Deleted" &&
+                    ThisItem.RequestedBy.Id = gCurrentEmployee.ID &&
+                    IsBlank(
+                        LookUp(Project_ChangeRequests,
+                            TargetItemID = ThisItem.ID &&
+                            (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                        )
+                    )
                   Width: =90
                   X: =1256
                   Y: =53

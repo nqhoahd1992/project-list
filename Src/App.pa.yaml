@@ -52,5 +52,6 @@ App:
       Set(gLevelFilter, "All");
       Set(gApprovalsTab, "To Approve");
       Set(gHasPendingCR, false);
+      Set(gCanEditProject, false);
       Set(gAppReady, true)
     Theme: =PowerAppsTheme

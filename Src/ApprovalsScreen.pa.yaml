@@ -871,7 +871,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =8
-                  LayoutMinHeight: =240
+                  LayoutMinHeight: =380
                   PaddingBottom: =12
                   PaddingLeft: =20
                   PaddingRight: =20
@@ -1059,7 +1059,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(252, 235, 235, 1)
                   FillPortions: =0
-                  Height: =150
+                  Height: =180
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   PaddingBottom: =12
@@ -1095,10 +1095,11 @@ Screens:
                       Properties:
                         DropShadow: =DropShadow.None
                         FillPortions: =0
-                        Height: =40
+                        Height: =60
                         LayoutDirection: =LayoutDirection.Horizontal
                         LayoutGap: =10
                         LayoutJustifyContent: =LayoutJustifyContent.End
+                        PaddingTop: =20
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -1286,6 +1287,7 @@ Screens:
                                     ProjectDescription: gSelectedCR.ProjectDescription,
                                     ProjectType: gSelectedCR.ProjectType,
                                     Department: gSelectedCR.Department,
+                                    RequestedBy: {Id: gSelectedCR.RequesterID.Id, Value: gSelectedCR.RequesterID.Value},
                                     ProjectOwner: If(IsBlank(gSelectedCR.ProjectOwner.Id), Blank(), {Id: gSelectedCR.ProjectOwner.Id, Value: gSelectedCR.ProjectOwner.Value}),
                                     ProjectManager: If(IsBlank(gSelectedCR.ProjectManager.Id), Blank(), {Id: gSelectedCR.ProjectManager.Id, Value: gSelectedCR.ProjectManager.Value}),
                                     Priority: gSelectedCR.Priority,
