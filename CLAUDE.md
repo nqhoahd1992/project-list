@@ -81,8 +81,10 @@ Anyone with an email in the tenant can create change requests, including Manager
 | Role | Sees |
 |---|---|
 | Requester (default, no `Project_User` row) | All Projects; own change requests (Mine tab) |
-| Manager | + Approvals queue filtered `Pending Manager` **AND** assigned as that CR's `ProjectManager` (acts as Step 1) |
-| Executive | + Approvals queue filtered `Pending Executive` **AND** assigned as that CR's `ProjectOwner` (acts as Step 2 + applies); History tab; Show-deleted toggle |
+| Manager | + Approvals queue filtered `Pending Manager` **AND** assigned as that CR's `ProjectManager` (acts as Step 1); History tab, scoped to projects where they're `ProjectManager` |
+| Executive | + Approvals queue filtered `Pending Executive` **AND** assigned as that CR's `ProjectOwner` (acts as Step 2 + applies); History tab, scoped to projects where they're `ProjectOwner`; Show-deleted toggle |
+
+**History tab is per-project too, same as the "To Approve" queue** — not a global audit log. A Manager only sees `Approved`/`Rejected` CRs for projects where they're the `ProjectManager`; an Executive only for projects where they're the `ProjectOwner`. This includes CRs rejected at the *other* step (e.g. a Manager sees their project's CR even if it was later rejected by the Executive at Step 2) — the scoping is by project assignment, not by who personally acted on that particular CR.
 
 **Approval authorization is per-project, not just per-role.** A Manager only sees/can act on a CR if they are that project's `ProjectManager`; an Executive only if they are that project's `ProjectOwner`. It is not a shared "any Manager can approve any pending-Manager CR" queue. The responsible person is resolved as:
 - **Create CR**: `ProjectManager`/`ProjectOwner` proposed directly on the CR (`gSelectedCR.ProjectManager`/`.ProjectOwner`) — the project doesn't exist yet, so there's nothing else to check against.

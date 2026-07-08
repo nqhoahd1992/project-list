@@ -528,6 +528,7 @@ Screens:
                   ),
                   "ID", SortOrder.Descending
               )
+            OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
             TemplateSize: =92
             Visible: =Not(IsBlank(gCurrentEmployee.ID))
             Width: =Parent.Width
@@ -552,7 +553,8 @@ Screens:
                   Height: =28
                   Size: =10
                   Text: =If(ThisItem.ProjectLevel = 1, "↳ " & ThisItem.RootProjectID, "Root")
-                  X: =1061
+                  Width: =120
+                  X: =1091
                   Y: =10
             - lblPendingChangeBadge:
                 Control: Label@2.5.1
@@ -583,6 +585,109 @@ Screens:
                   Width: =120
                   X: =923
                   Y: =10
+            - galProjectsBtn:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Height: =30
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =10
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =110
+                  X: =Parent.Width - 130
+                  Y: =50
+                Children:
+                  - btnRowView:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        Align: =Align.Center
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        Icon: ="Eye"
+                        Layout: =ButtonLayout.IconOnly
+                        OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
+                        PaddingBottom: =5
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =5
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Text: ="View"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Width: =30
+                        X: =40
+                        Y: =40
+                  - btnRowUpdate:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        Align: =Align.Center
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        Icon: ="Edit"
+                        Layout: =ButtonLayout.IconOnly
+                        OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
+                        PaddingBottom: =5
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =5
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Text: ="Update"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Visible: |-
+                          =ThisItem.ProjectStatus.Value <> "Deleted" &&
+                          ThisItem.RequestedBy.Id = gCurrentEmployee.ID &&
+                          IsBlank(
+                              LookUp(Project_ChangeRequests,
+                                  TargetItemID = ThisItem.ID &&
+                                  (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                              )
+                          )
+                        Width: =30
+                        X: =40
+                        Y: =40
+                  - btnRowDelete:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        Align: =Align.Center
+                        BasePaletteColor: =RGBA(163, 45, 45, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        Icon: ="Delete"
+                        Layout: =ButtonLayout.IconOnly
+                        OnSelect: =Set(gSelectedProject, ThisItem); Navigate(DeleteProjectScreen)
+                        PaddingBottom: =5
+                        PaddingLeft: =12
+                        PaddingRight: =12
+                        PaddingTop: =5
+                        RadiusBottomLeft: =4
+                        RadiusBottomRight: =4
+                        RadiusTopLeft: =4
+                        RadiusTopRight: =4
+                        Text: ="Delete"
+                        VerticalAlign: =VerticalAlign.Middle
+                        Visible: |-
+                          =ThisItem.ProjectStatus.Value <> "Deleted" &&
+                          ThisItem.RequestedBy.Id = gCurrentEmployee.ID &&
+                          IsBlank(
+                              LookUp(Project_ChangeRequests,
+                                  TargetItemID = ThisItem.ID &&
+                                  (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                              )
+                          )
+                        Width: =30
+                        X: =40
+                        Y: =40
             - lblProjectStatus:
                 Control: Label@2.5.1
                 Properties:
@@ -627,96 +732,6 @@ Screens:
                   Width: =Parent.Width - 620
                   X: =16
                   Y: =46
-            - btnRowView:
-                Control: ModernButton@1.0.0
-                Properties:
-                  Align: =Align.Center
-                  FontWeight: =FontWeight.Semibold
-                  Height: =28
-                  OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
-                  PaddingBottom: =5
-                  PaddingLeft: =12
-                  PaddingRight: =12
-                  PaddingTop: =5
-                  RadiusBottomLeft: =4
-                  RadiusBottomRight: =4
-                  RadiusTopLeft: =4
-                  RadiusTopRight: =4
-                  Text: ="View"
-                  VerticalAlign: =VerticalAlign.Middle
-                  Visible: |-
-                    =!(
-                        ThisItem.ProjectStatus.Value <> "Deleted" &&
-                        ThisItem.RequestedBy.Id = gCurrentEmployee.ID &&
-                        IsBlank(
-                            LookUp(Project_ChangeRequests,
-                                TargetItemID = ThisItem.ID &&
-                                (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
-                            )
-                        )
-                    )
-                  Width: =195
-                  X: =1151
-                  Y: =53
-            - btnRowUpdate:
-                Control: ModernButton@1.0.0
-                Properties:
-                  Align: =Align.Center
-                  FontWeight: =FontWeight.Semibold
-                  Height: =28
-                  OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
-                  PaddingBottom: =5
-                  PaddingLeft: =12
-                  PaddingRight: =12
-                  PaddingTop: =5
-                  RadiusBottomLeft: =4
-                  RadiusBottomRight: =4
-                  RadiusTopLeft: =4
-                  RadiusTopRight: =4
-                  Text: ="Update"
-                  VerticalAlign: =VerticalAlign.Middle
-                  Visible: |-
-                    =ThisItem.ProjectStatus.Value <> "Deleted" &&
-                    ThisItem.RequestedBy.Id = gCurrentEmployee.ID &&
-                    IsBlank(
-                        LookUp(Project_ChangeRequests,
-                            TargetItemID = ThisItem.ID &&
-                            (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
-                        )
-                    )
-                  Width: =90
-                  X: =1151
-                  Y: =53
-            - btnRowDelete:
-                Control: ModernButton@1.0.0
-                Properties:
-                  Align: =Align.Center
-                  BasePaletteColor: =RGBA(163, 45, 45, 1)
-                  FontWeight: =FontWeight.Semibold
-                  Height: =28
-                  OnSelect: =Set(gSelectedProject, ThisItem); Navigate(DeleteProjectScreen)
-                  PaddingBottom: =5
-                  PaddingLeft: =12
-                  PaddingRight: =12
-                  PaddingTop: =5
-                  RadiusBottomLeft: =4
-                  RadiusBottomRight: =4
-                  RadiusTopLeft: =4
-                  RadiusTopRight: =4
-                  Text: ="Delete"
-                  VerticalAlign: =VerticalAlign.Middle
-                  Visible: |-
-                    =ThisItem.ProjectStatus.Value <> "Deleted" &&
-                    ThisItem.RequestedBy.Id = gCurrentEmployee.ID &&
-                    IsBlank(
-                        LookUp(Project_ChangeRequests,
-                            TargetItemID = ThisItem.ID &&
-                            (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
-                        )
-                    )
-                  Width: =90
-                  X: =1256
-                  Y: =53
             - rectSeparator:
                 Control: Rectangle@2.3.0
                 Properties:

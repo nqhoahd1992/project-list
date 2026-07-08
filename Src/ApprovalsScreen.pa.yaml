@@ -123,7 +123,7 @@ Screens:
                         PaddingRight: =10
                         Size: =11
                         Text: ="History"
-                        Visible: =gUserRole = "Executive"
+                        Visible: =gUserRole = "Manager" || gUserRole = "Executive"
                         Width: =90
                         X: =40
                         Y: =40
@@ -152,8 +152,26 @@ Screens:
                       "Mine",
                       Filter(Project_ChangeRequests, RequesterEmail = User().Email),
                       "History",
-                      Filter(Project_ChangeRequests,
-                          ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected"
+                      Switch(gUserRole,
+                          "Manager",
+                          Filter(Project_ChangeRequests,
+                              (ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected") &&
+                              If(
+                                  RequestType.Value = "Create",
+                                  ProjectManager.Id = gCurrentEmployee.ID,
+                                  LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
+                              )
+                          ),
+                          "Executive",
+                          Filter(Project_ChangeRequests,
+                              (ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected") &&
+                              If(
+                                  RequestType.Value = "Create",
+                                  ProjectOwner.Id = gCurrentEmployee.ID,
+                                  LookUp(Project_List, ID = TargetItemID).ProjectOwner.Id = gCurrentEmployee.ID
+                              )
+                          ),
+                          Filter(Project_ChangeRequests, false)
                       ),
                       Switch(gUserRole,
                           "Manager",
