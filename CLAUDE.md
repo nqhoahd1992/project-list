@@ -30,7 +30,8 @@ project-list/
     ├── App.pa.yaml                 ← App.OnStart global state
     ├── AllProjectsScreen.pa.yaml   ← home: approved projects gallery
     ├── CreateProjectScreen.pa.yaml ← full form → Create change request
-    ├── UpdateProjectScreen.pa.yaml ← Description + End Date only → Update change request
+    ├── ViewProjectScreen.pa.yaml   ← read-only project details (gallery row tap + View button)
+    ├── UpdateProjectScreen.pa.yaml ← Description + End Date only → Update change request (owner-only)
     ├── DeleteProjectScreen.pa.yaml ← confirmation + reason → Delete change request
     └── ApprovalsScreen.pa.yaml     ← shared approval queue (role-filtered) + apply logic
 ```
@@ -64,13 +65,14 @@ Pending Manager ──approve──▶ Pending Executive ──approve──▶ 
 ## ProjectID generation (race-free)
 
 Generated at apply time from the new row's SharePoint ID (two-step Patch):
-`"PROJ-" & <DeptCode> & "-" & Text(Year(Today())) & "-" & Text(wNew.ID, "000")`
+`"PROJ-" & <MarketCode> & "-" & <DeptCode> & "-" & Text(Year(Today())) & "-" & Text(wNew.ID, "000")` → e.g. `PROJ-AU-GN-2026-002`.
+MarketCode = `gSelectedCR.Market.Value` used verbatim — the `Market` Choice values are already the 2-letter codes `AU`/`MY`/`SG`/`VN` (see `docs/sharepoint-schema.md`), so no mapping is needed. `Market` is required on Create, so it is always present.
 DeptCode = `Switch(Department, "Quality Assurance","QA", "Regulatory Affairs","RA", "Marketing","MK", "Sales","SL", "Supply Chain","SC", "Finance","FN", "IT","IT", "R&D","RD", "HR","HR", "Operations","OP", "GN")`. `Department` is a single Text value (see `docs/sharepoint-schema.md`), not a Choice column.
 The numeric part is a global sequence (not per-department/year) — accepted trade-off; count-based schemes race and hit delegation limits. If the app dies between the two Patches the row has a blank ProjectID — the gallery shows `PROJ-PENDING-<ID>` via `Coalesce`; fix by patching ProjectID manually.
 
 ## Global state (App.OnStart)
 
-`gCurrentEmployee` (Employee List row by `User().Email`) · `gCurrentUser`/`gUserRole` (Project_User, fallback Requester) · `gIsApprover` · `gApprovalsPendingCount` (see below) · `gSelectedProject` (gallery → Update/Delete screens) · `gSelectedCR` + `gLiveTarget` (Approvals master-detail; `gLiveTarget` = live master row for diff) · `gShowRejectPanel` · `gShowDeleted` · `gStatusFilter` · `gLevelFilter` · `gApprovalsTab` · `gHasPendingCR` · `gCanEditProject` (`UpdateProjectScreen`, set `OnVisible` — see below) · `gAppReady`.
+`gCurrentEmployee` (Employee List row by `User().Email`) · `gCurrentUser`/`gUserRole` (Project_User, fallback Requester) · `gIsApprover` · `gApprovalsPendingCount` (see below) · `gSelectedProject` (gallery → View/Update/Delete screens) · `gSelectedCR` + `gLiveTarget` (Approvals master-detail; `gLiveTarget` = live master row for diff) · `gShowRejectPanel` · `gShowDeleted` · `gStatusFilter` · `gLevelFilter` · `gApprovalsTab` · `gHasPendingCR` · `gAppReady`.
 
 - **`CountRows` against SharePoint is never delegable, full stop** — Studio flags the delegation warning on the formula itself regardless of which property hosts it (`Text`, `OnStart`, `OnVisible`, `OnSelect` all show it identically; moving the call between them does not suppress it). `gApprovalsPendingCount` is computed with `CountRows(Filter(Project_ChangeRequests, ...))` in `App.OnStart` and refreshed in `AllProjectsScreen.OnVisible` purely to avoid re-querying on every render (perf/freshness), **not** to dodge the warning — the warning is expected and accepted, same as the other delegation caveats below. Accurate only within the app's non-delegable query row limit (default 500, raisable to 2000 in Advanced Settings).
 
@@ -92,7 +94,7 @@ Anyone with an email in the tenant can create change requests, including Manager
 
 **Viewing `Project_List` is public to every user; submitting Update/Delete is not.** `AllProjectsScreen` shows every non-deleted project to everyone regardless of role. The row's `Update`/`Delete` buttons only appear when `ThisItem.RequestedBy.Id = gCurrentEmployee.ID` **and** no CR is already pending for that project — only the original requester who submitted that project's Create request can start an Update or Delete CR on it. This is unrelated to the `ProjectManager`/`ProjectOwner` approval-authorization rule above — a project's assigned Manager/Executive cannot Update/Delete it themselves unless they also happen to be `RequestedBy`.
 
-Whenever `Update`/`Delete` are hidden (not the owner, project deleted, or a CR already pending), a **`View`** button takes their place and navigates to the same `UpdateProjectScreen` — that screen is read-only-aware, not a separate view: `OnVisible` sets `gCanEditProject = (gSelectedProject.RequestedBy.Id = gCurrentEmployee.ID)`, and the editable rows (`rowEditableNote`, `rowNewDescription`, `rowNewEndDate`, `btnSubmitUpdate`) are all gated `Visible: =gCanEditProject` — everyone gets the same read-only project info (`rowProjectInfo_1`, `rowCurrentDescription`), only the owner additionally gets the edit form. `btnCancelUpdate`'s label flips between "Cancel"/"Close" based on the same flag.
+A **`View`** button is always present on every row (read-only, available to everyone) and navigates to `ViewProjectScreen`, a dedicated read-only details screen (project info grid + description + pending-change banner + a `Close` button — no edit form). Tapping the gallery row itself (`galProjects.OnSelect`) also navigates to `ViewProjectScreen`. `Update`/`Delete` are the extra owner-only actions layered on top (shown only when `ThisItem.RequestedBy.Id = gCurrentEmployee.ID`, project not deleted, and no CR pending). `UpdateProjectScreen` is now **edit-only** — only the owner ever reaches it (via `btnRowUpdate`), so it no longer carries the old `gCanEditProject` read-only-aware branching; all its edit rows are unconditionally visible.
 
 This authorization check is duplicated in 3 places per role and must stay in sync if the rule ever changes: the `galChangeRequests` gallery `Items` filter (which CRs appear in "To Approve"), `conActionBar`'s `Visible` (whether Approve/Reject buttons show for the selected CR), and `gApprovalsPendingCount` (the badge count, in both `App.OnStart` and `AllProjectsScreen.OnVisible`). `cmbOwner`/`cmbManager` on `CreateProjectScreen` already only offer Executives/Managers as choices (see `docs/sharepoint-schema.md`), so `ProjectOwner`/`ProjectManager` are guaranteed to hold someone with the matching role — this authorization model depends on that constraint holding.
 
@@ -115,7 +117,7 @@ Email notifications follow the same per-project targeting, not a role broadcast:
 
 ### Done — repo authoring phase complete
 - All docs written: `docs/sharepoint-schema.md` (4 lists + `Project_Notify` 9-arg table), `docs/approval-workflow-plan.md` (state machine, flow build spec, 4 English email templates, future cost-sync placeholder), this CLAUDE.md, `.claude/pa-yaml-rules.md` (copied from procurement-procedure).
-- All 7 `Src/*.pa.yaml` files written and YAML-validated: `_EditorState`, `App` (OnStart role resolution), `AllProjectsScreen` (filters, search, pending-change badge, approvals counter), `CreateProjectScreen` (full form, Actual Cost read-only, Root/Child hierarchy picker), `UpdateProjectScreen` (Description + End Date only, pending-CR guard), `DeleteProjectScreen` (reason + confirm required, active-children guard), `ApprovalsScreen` (master-detail, update diff view, manager/executive approve chains with apply-before-flip, reject with required remark).
+- All 8 `Src/*.pa.yaml` files written and YAML-validated: `_EditorState`, `App` (OnStart role resolution), `AllProjectsScreen` (filters, search, pending-change badge, approvals counter), `CreateProjectScreen` (full form, Actual Cost read-only, Root/Child hierarchy picker), `ViewProjectScreen` (read-only project details, gallery row tap + View button target), `UpdateProjectScreen` (Description + End Date only, pending-CR guard, owner-only edit), `DeleteProjectScreen` (reason + confirm required, active-children guard), `ApprovalsScreen` (master-detail, update diff view, manager/executive approve chains with apply-before-flip, reject with required remark).
 - Cross-checked: column names in formulas match the schema doc; status strings consistent; 8 `Project_Notify.Run` call sites all pass 9 args.
 - Decisions locked with the user: staging list `Project_ChangeRequests`; single shared Approvals screen; Update limited to Description + End Date; soft delete; **Budget Approved column dropped** (Budget Amount only); SKU lookup target = `Product_Database_SKU_Master`; emails on submit / manager-approve / final result.
 

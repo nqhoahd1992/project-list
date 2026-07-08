@@ -109,6 +109,7 @@ Screens:
                 Control: ModernButton@1.0.0
                 Properties:
                   Align: =Align.Center
+                  BasePaletteColor: =RGBA(168, 110, 235, 1)
                   FontWeight: =""
                   Height: =36
                   OnSelect: =Set(gApprovalsTab, "Mine"); Navigate(ApprovalsScreen)
@@ -528,7 +529,7 @@ Screens:
                   ),
                   "ID", SortOrder.Descending
               )
-            OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
+            OnSelect: =Set(gSelectedProject, ThisItem); Navigate(ViewProjectScreen)
             TemplateSize: =92
             Visible: =Not(IsBlank(gCurrentEmployee.ID))
             Width: =Parent.Width
@@ -611,7 +612,7 @@ Screens:
                         Height: =30
                         Icon: ="Eye"
                         Layout: =ButtonLayout.IconOnly
-                        OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
+                        OnSelect: =Set(gSelectedProject, ThisItem); Navigate(ViewProjectScreen)
                         PaddingBottom: =5
                         PaddingLeft: =12
                         PaddingRight: =12

@@ -41,7 +41,7 @@ Anyone with a tenant email can submit (`Requester` above is not a `Project_User`
 
 | RequestType | Apply |
 |---|---|
-| `Create` | Patch new `Project_List` row from CR values (`ApprovalStatus: Approved`, `ApprovedBy` = executive) → 2nd Patch sets `ProjectID = "PROJ-" & <DeptCode> & "-" & <Year> & "-" & Text(newRow.ID, "000")` |
+| `Create` | Patch new `Project_List` row from CR values (`ApprovalStatus: Approved`, `ApprovedBy` = executive) → 2nd Patch sets `ProjectID = "PROJ-" & <MarketCode> & "-" & <DeptCode> & "-" & <Year> & "-" & Text(newRow.ID, "000")` (e.g. `PROJ-AU-GN-2026-002`; MarketCode = `Market.Value`, already `AU`/`MY`/`SG`/`VN`) |
 | `Update` | `LookUp` target by `TargetItemID` (guard: still exists) → Patch only `ProjectDescription` + `EndDate` |
 | `Delete` | Patch target `ProjectStatus = {Value: "Deleted"}` (soft delete — row is hidden from All Projects by default) |
 

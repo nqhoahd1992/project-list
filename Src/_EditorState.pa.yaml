@@ -10,6 +10,7 @@ EditorState:
   ScreensOrder:
     - AllProjectsScreen
     - CreateProjectScreen
+    - ViewProjectScreen
     - UpdateProjectScreen
     - DeleteProjectScreen
     - ApprovalsScreen

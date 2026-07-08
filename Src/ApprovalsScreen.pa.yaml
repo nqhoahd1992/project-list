@@ -1335,6 +1335,7 @@ Screens:
                                         wNew,
                                         {
                                             ProjectID: "PROJ-" &
+                                                gSelectedCR.Market.Value & "-" &
                                                 Switch(gSelectedCR.Department,
                                                     "Quality Assurance", "QA",
                                                     "Regulatory Affairs", "RA",
