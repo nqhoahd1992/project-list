@@ -70,7 +70,9 @@ The numeric part is a global sequence (not per-department/year) — accepted tra
 
 ## Global state (App.OnStart)
 
-`gCurrentEmployee` (Employee List row by `User().Email`) · `gCurrentUser`/`gUserRole` (Project_User, fallback Requester) · `gIsApprover` · `gSelectedProject` (gallery → Update/Delete screens) · `gSelectedCR` + `gLiveTarget` (Approvals master-detail; `gLiveTarget` = live master row for diff) · `gShowRejectPanel` · `gShowDeleted` · `gStatusFilter` · `gLevelFilter` · `gApprovalsTab` · `gHasPendingCR` · `gAppReady`.
+`gCurrentEmployee` (Employee List row by `User().Email`) · `gCurrentUser`/`gUserRole` (Project_User, fallback Requester) · `gIsApprover` · `gApprovalsPendingCount` (see below) · `gSelectedProject` (gallery → Update/Delete screens) · `gSelectedCR` + `gLiveTarget` (Approvals master-detail; `gLiveTarget` = live master row for diff) · `gShowRejectPanel` · `gShowDeleted` · `gStatusFilter` · `gLevelFilter` · `gApprovalsTab` · `gHasPendingCR` · `gAppReady`.
+
+- **`CountRows` against SharePoint is never delegable, full stop** — Studio flags the delegation warning on the formula itself regardless of which property hosts it (`Text`, `OnStart`, `OnVisible`, `OnSelect` all show it identically; moving the call between them does not suppress it). `gApprovalsPendingCount` is computed with `CountRows(Filter(Project_ChangeRequests, ...))` in `App.OnStart` and refreshed in `AllProjectsScreen.OnVisible` purely to avoid re-querying on every render (perf/freshness), **not** to dodge the warning — the warning is expected and accepted, same as the other delegation caveats below. Accurate only within the app's non-delegable query row limit (default 500, raisable to 2000 in Advanced Settings).
 
 ## Role-based visibility
 
@@ -86,7 +88,7 @@ Anyone with an email in the tenant can create change requests, including Manager
 
 - **UI text and all source: English only.**
 - Guarded writes: `With({wX: Patch(...)}, If(IsBlank(wX.ID), Notify(error), <next step>))` — chain nested `With` for multi-step (log → status → notify).
-- Choice: write `{Value: "..."}`; multi-choice: table of `{Value}` records; Lookup/Person: `{Id, Value}`; multi-lookup (`RelatedSKU`): table of `{Id, Value}` records; Currency/Number: plain numbers. Exception: `Department` is plain Text (options sourced from `Distinct(Filter('Employee List', !IsBlank(department.Value)), department.Value)` — blanks filtered out before Distinct), not a Choice column.
+- Choice: write `{Value: "..."}`; multi-choice: table of `{Value}` records; Lookup/Person: `{Id, Value}`; multi-lookup (`RelatedSKU`): table of `{Id, Value}` records; Currency/Number: plain numbers. Exception: `Department` is plain Text (options sourced from `Choices('Employee List'.department)` — the Choice column's defined value set, not the distinct values actually in use), not a Choice column itself.
 - Status strings (`Pending Manager`, `Pending Executive`, `Approved`, `Rejected`, `Deleted`, …) are **literals in every screen** — no shared constant; renaming one means touching every filter, color map, and Patch.
 - Join key for logs: `ChangeRequestIDText = Text(cr.ID)` (delegable), never lookup-column comparison.
 - `Project_User.Title` is never populated — always resolve a user's display name/email through its `EmployeeID` lookup into `Employee List`, never read `Project_User.Title` directly.
@@ -114,8 +116,9 @@ Anyone with an email in the tenant can create change requests, including Manager
 
 ## Known caveats
 
-- `ProjectStatus.Value <> "Deleted"` raises a delegation warning on SharePoint choice columns — acceptable while the list stays well under 2000 rows.
+- This SharePoint connector delegates neither `<>` nor `Not(...)` — never write `Col.Value <> "X"` or `Not(Col.Value = "X")` against a data source. Instead OR together `=` comparisons against every value you DO want (e.g. exclude `Deleted` by writing `Col.Value = "Not Started" || Col.Value = "In Planning" || ...` for every non-Deleted status). Verbose, but `=`/`&&`/`||` are the only combination confirmed delegable here.
 - Per-row `LookUp` badges (pending-change on All Projects, manager trail on Approvals) are N+1 queries — fine at portfolio scale; revisit past ~500 rows.
+- Recipient email resolution (`Project_Notify` calls) uses `LookUp('Employee List', ID = EmployeeID.Id).Email` per active Manager/Executive — another accepted N+1 pattern, and this is final: `Project_User.EmployeeID` only ever exposes `.Id`/`.Value` (→Title) in this app's connection. SharePoint's Lookup column "additional columns" setting was configured for `EmployeeID` (Email checked) and the `Project_User` data source was refreshed in Studio — `EmployeeID.Email` still doesn't resolve (`PA2108`, "Name isn't valid. 'Email' isn't recognized"). Do not retry this; always use the `LookUp` form for any field beyond `.Id`/`.Value` on this column.
 - Choice value sets are duplicated between `Project_List` and `Project_ChangeRequests` and must stay identical, or the apply Patch fails. (`Department` is the exception — plain Text on both, no Choice value set to sync.)
 - `Product_Database_SKU_Master` schema and Employee List internal names must be verified in SharePoint before first Studio wiring.
 - DatePicker/Toggle modern-control versions are not yet in `pa-yaml-rules.md` — verify in Studio on first paste and add them.

@@ -23,6 +23,14 @@ App:
           gUserRole = "Manager" ||
           gUserRole = "Executive"
       );
+      Set(gApprovalsPendingCount,
+          CountRows(
+              Filter(Project_ChangeRequests,
+                  (gUserRole = "Manager" && ApprovalStatus.Value = "Pending Manager") ||
+                  (gUserRole = "Executive" && ApprovalStatus.Value = "Pending Executive")
+              )
+          )
+      );
       Set(gSelectedProject, Blank());
       Set(gSelectedCR, Blank());
       Set(gLiveTarget, Blank());

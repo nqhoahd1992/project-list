@@ -16,7 +16,12 @@ Screens:
             !IsBlank(
                 LookUp(Project_List,
                     RootProjectID = gSelectedProject.ProjectID &&
-                    ProjectStatus.Value <> "Deleted"
+                    (ProjectStatus.Value = "Not Started" ||
+                        ProjectStatus.Value = "In Planning" ||
+                        ProjectStatus.Value = "In Progress" ||
+                        ProjectStatus.Value = "On Hold" ||
+                        ProjectStatus.Value = "Completed" ||
+                        ProjectStatus.Value = "Cancelled")
                 )
             )
         )

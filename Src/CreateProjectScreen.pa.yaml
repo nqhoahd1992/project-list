@@ -243,7 +243,7 @@ Screens:
                               Height: =40
                               InputTextPlaceholder: ="Choose an option"
                               ItemDisplayText: =ThisItem.Value
-                              Items: =Distinct(Filter('Employee List', !IsBlank(department.Value)), department.Value)
+                              Items: =Choices('Employee List'.department)
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
@@ -276,7 +276,8 @@ Screens:
                               Height: =40
                               InputTextPlaceholder: ="Choose an employee"
                               ItemDisplayText: =ThisItem.Title
-                              Items: =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Executive"), LookUp('Employee List', ID = EmployeeID.Id)), Title, SortOrder.Ascending)
+                              Items: |-
+                                =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Executive"), {ID: EmployeeID.Id, Title: EmployeeID.Value}), Title, SortOrder.Ascending)
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
@@ -309,89 +310,9 @@ Screens:
                               Height: =40
                               InputTextPlaceholder: ="Choose an employee"
                               ItemDisplayText: =ThisItem.Title
-                              Items: =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Manager"), LookUp('Employee List', ID = EmployeeID.Id)), Title, SortOrder.Ascending)
+                              Items: |-
+                                =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Manager"), {ID: EmployeeID.Id, Title: EmployeeID.Value}), Title, SortOrder.Ascending)
                               SelectMultiple: =false
-                              Size: =0
-                              Width: =Parent.Width
-            - rowSchedule:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =20
-                  LayoutMinHeight: =90
-                  LayoutWrap: =true
-                  PaddingBottom: =8
-                  PaddingLeft: =20
-                  PaddingRight: =20
-                  PaddingTop: =8
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                  Width: =Parent.Width
-                Children:
-                  - colStartDate:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =240
-                      Children:
-                        - lblStartDateLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Start Date *"
-                              Width: =Parent.Width
-                        - dpStartDate:
-                            Control: ModernDatePicker@1.0.1
-                            Properties:
-                              BorderStyle: =""
-                              Font: =""
-                              FontWeight: =""
-                              Height: =40
-                              Placeholder: ="Choose a date"
-                              Size: =0
-                              Width: =Parent.Width
-                  - colEndDate:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =240
-                      Children:
-                        - lblEndDateLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="End Date *"
-                              Width: =Parent.Width
-                        - dpEndDate:
-                            Control: ModernDatePicker@1.0.1
-                            Properties:
-                              BorderStyle: =""
-                              Font: =""
-                              FontWeight: =""
-                              Height: =40
-                              Placeholder: ="Choose a date"
                               Size: =0
                               Width: =Parent.Width
             - rowBudget:
@@ -623,6 +544,87 @@ Screens:
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
+            - rowSchedule:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colStartDate:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblStartDateLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Start Date *"
+                              Width: =Parent.Width
+                        - dpStartDate:
+                            Control: ModernDatePicker@1.0.1
+                            Properties:
+                              BorderStyle: =""
+                              Font: =""
+                              FontWeight: =""
+                              Height: =40
+                              Placeholder: ="Choose a date"
+                              Size: =0
+                              Width: =Parent.Width
+                  - colEndDate:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                      Children:
+                        - lblEndDateLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="End Date *"
+                              Width: =Parent.Width
+                        - dpEndDate:
+                            Control: ModernDatePicker@1.0.1
+                            Properties:
+                              BorderStyle: =""
+                              Font: =""
+                              FontWeight: =""
+                              Height: =40
+                              Placeholder: ="Choose a date"
+                              Size: =0
+                              Width: =Parent.Width
             - rowLocation:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -642,6 +644,37 @@ Screens:
                   RadiusTopRight: =0
                   Width: =Parent.Width
                 Children:
+                  - colDocsUrl:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =480
+                      Children:
+                        - lblDocsUrlLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Project Documents (URL) *"
+                              Width: =Parent.Width
+                        - txtDocsUrl:
+                            Control: ModernTextInput@1.1.1
+                            Properties:
+                              FontWeight: =""
+                              Height: =40
+                              MaxLength: =-1
+                              Placeholder: ="https://maxbiocare.sharepoint.com/..."
+                              Size: =0
+                              TriggerOutput: =TriggerOutput.FocusOut
+                              Width: =Parent.Width
                   - colSKU:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -675,37 +708,6 @@ Screens:
                               ItemDisplayText: =ThisItem.Title
                               Items: =Sort(Product_Database_SKU_Master, Title, SortOrder.Ascending)
                               Size: =0
-                              Width: =Parent.Width
-                  - colDocsUrl:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =480
-                      Children:
-                        - lblDocsUrlLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Project Documents (URL) *"
-                              Width: =Parent.Width
-                        - txtDocsUrl:
-                            Control: ModernTextInput@1.1.1
-                            Properties:
-                              FontWeight: =""
-                              Height: =40
-                              MaxLength: =-1
-                              Placeholder: ="https://maxbiocare.sharepoint.com/..."
-                              Size: =0
-                              TriggerOutput: =TriggerOutput.FocusOut
                               Width: =Parent.Width
             - rowHierarchy:
                 Control: GroupContainer@1.5.0
@@ -784,7 +786,15 @@ Screens:
                               Height: =40
                               InputTextPlaceholder: ="Choose the parent project"
                               ItemDisplayText: =ThisItem.Title
-                              Items: =Filter(Project_List, ProjectLevel = 0 && ProjectStatus.Value <> "Deleted")
+                              Items: |-
+                                =Filter(Project_List, ProjectLevel = 0 &&
+                                    (ProjectStatus.Value = "Not Started" ||
+                                        ProjectStatus.Value = "In Planning" ||
+                                        ProjectStatus.Value = "In Progress" ||
+                                        ProjectStatus.Value = "On Hold" ||
+                                        ProjectStatus.Value = "Completed" ||
+                                        ProjectStatus.Value = "Cancelled")
+                                )
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width

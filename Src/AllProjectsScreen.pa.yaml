@@ -2,7 +2,17 @@ Screens:
   AllProjectsScreen:
     Properties:
       LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
-      OnVisible: =Set(gStatusFilter, Blank()); Set(gLevelFilter, "All")
+      OnVisible: |-
+        =Set(gStatusFilter, Blank());
+        Set(gLevelFilter, "All");
+        Set(gApprovalsPendingCount,
+            CountRows(
+                Filter(Project_ChangeRequests,
+                    (gUserRole = "Manager" && ApprovalStatus.Value = "Pending Manager") ||
+                    (gUserRole = "Executive" && ApprovalStatus.Value = "Pending Executive")
+                )
+            )
+        )
     Children:
       - lblNoRole:
           Control: Label@2.5.1
@@ -84,38 +94,61 @@ Screens:
                   Placeholder: ="Search by name or Project ID"
                   Width: =260
             - btnMyRequests:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
+                  FontWeight: =""
                   Height: =36
                   OnSelect: =Set(gApprovalsTab, "Mine"); Navigate(ApprovalsScreen)
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
                   Text: ="My Requests"
+                  VerticalAlign: =VerticalAlign.Middle
                   Width: =130
             - btnApprovals:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
                   BasePaletteColor: =RGBA(133, 79, 11, 1)
+                  FontWeight: =""
                   Height: =36
                   OnSelect: =Set(gApprovalsTab, "To Approve"); Navigate(ApprovalsScreen)
-                  Text: |-
-                    ="Approvals (" &
-                    CountRows(
-                        Filter(Project_ChangeRequests,
-                            Switch(gUserRole,
-                                "Manager", ApprovalStatus.Value = "Pending Manager",
-                                "Executive", ApprovalStatus.Value = "Pending Executive",
-                                false
-                            )
-                        )
-                    ) & ")"
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
+                  Text: ="Approvals (" & gApprovalsPendingCount & ")"
+                  VerticalAlign: =VerticalAlign.Middle
                   Visible: =gIsApprover
                   Width: =150
             - btnNewProject:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
+                  FontWeight: =""
                   Height: =36
                   Icon: ="Add"
                   OnSelect: =Navigate(CreateProjectScreen)
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
                   Text: ="New Project"
+                  VerticalAlign: =VerticalAlign.Middle
                   Width: =150
       - rowFilterBar:
           Control: GroupContainer@1.5.0
@@ -463,7 +496,14 @@ Screens:
             Items: |-
               =SortByColumns(
                   Filter(Project_List,
-                      (gShowDeleted || ProjectStatus.Value <> "Deleted") &&
+                      (gShowDeleted ||
+                          ProjectStatus.Value = "Not Started" ||
+                          ProjectStatus.Value = "In Planning" ||
+                          ProjectStatus.Value = "In Progress" ||
+                          ProjectStatus.Value = "On Hold" ||
+                          ProjectStatus.Value = "Completed" ||
+                          ProjectStatus.Value = "Cancelled"
+                      ) &&
                       (IsBlank(gStatusFilter) || ProjectStatus.Value = gStatusFilter) &&
                       (gLevelFilter = "All" ||
                           (gLevelFilter = "Root" && ProjectLevel = 0) ||
@@ -567,24 +607,44 @@ Screens:
                   X: =16
                   Y: =46
             - btnRowUpdate:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
                   FontWeight: =FontWeight.Semibold
                   Height: =28
                   OnSelect: =Set(gSelectedProject, ThisItem); Navigate(UpdateProjectScreen)
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
                   Text: ="Update"
+                  VerticalAlign: =VerticalAlign.Middle
                   Visible: =ThisItem.ProjectStatus.Value <> "Deleted"
                   Width: =90
                   X: =1151
                   Y: =53
             - btnRowDelete:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
                   BasePaletteColor: =RGBA(163, 45, 45, 1)
                   FontWeight: =FontWeight.Semibold
                   Height: =28
                   OnSelect: =Set(gSelectedProject, ThisItem); Navigate(DeleteProjectScreen)
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
                   Text: ="Delete"
+                  VerticalAlign: =VerticalAlign.Middle
                   Visible: =ThisItem.ProjectStatus.Value <> "Deleted"
                   Width: =90
                   X: =1256
