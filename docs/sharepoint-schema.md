@@ -94,7 +94,7 @@ Required ⚠: `RequestType`, `ApprovalStatus`, `RequesterEmail`.
 | `TargetProjectID` | Text | Business `ProjectID` snapshot for display (Update/Delete only) |
 | `RequesterEmail` ⚠ | Text | `User().Email`; "my requests" filter key |
 | `RequesterID` | Lookup→Employee List | `{Id, Value}` |
-| `RequestReason` | Text (multiline) | **Required for Delete** (enforced in app); Update collects it too; Create no longer has a Request Notes field, so it's always blank on Create CRs |
+| `RequestReason` | Text (multiline) | **Required for Delete and Update** (enforced in app); Create no longer has a Request Notes field, so it's always blank on Create CRs |
 
 ### Proposed values (Create: all set · Update: only `ProjectDescription` + `EndDate` + `ProjectName` for display · Delete: all blank)
 

@@ -45,6 +45,7 @@ Screens:
             LayoutAlignItems: =LayoutAlignItems.Center
             LayoutDirection: =LayoutDirection.Horizontal
             LayoutGap: =8
+            LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
             PaddingBottom: =10
             PaddingLeft: =20
             PaddingRight: =10
@@ -56,53 +57,76 @@ Screens:
             Width: =440
             Y: =60
           Children:
-            - lblTabToApprove:
-                Control: Label@2.5.1
+            - rowTabsBtn:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
                 Properties:
-                  Align: =Align.Center
-                  Color: =If(gApprovalsTab = "To Approve", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
-                  Fill: =If(gApprovalsTab = "To Approve", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
-                  FontWeight: =If(gApprovalsTab = "To Approve", FontWeight.Bold, FontWeight.Semibold)
-                  Height: =28
-                  HoverColor: =RGBA(83, 74, 183, 1)
-                  OnSelect: =Set(gApprovalsTab, "To Approve"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
-                  PaddingLeft: =10
-                  PaddingRight: =10
-                  Size: =11
-                  Text: ="To Approve"
-                  Visible: =gIsApprover
-                  Width: =110
-            - lblTabMine:
-                Control: Label@2.5.1
-                Properties:
-                  Align: =Align.Center
-                  Color: =If(gApprovalsTab = "Mine", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
-                  Fill: =If(gApprovalsTab = "Mine", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
-                  FontWeight: =If(gApprovalsTab = "Mine", FontWeight.Bold, FontWeight.Semibold)
-                  Height: =28
-                  HoverColor: =RGBA(83, 74, 183, 1)
-                  OnSelect: =Set(gApprovalsTab, "Mine"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
-                  PaddingLeft: =10
-                  PaddingRight: =10
-                  Size: =11
-                  Text: ="My Requests"
-                  Width: =110
-            - lblTabHistory:
-                Control: Label@2.5.1
-                Properties:
-                  Align: =Align.Center
-                  Color: =If(gApprovalsTab = "History", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
-                  Fill: =If(gApprovalsTab = "History", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
-                  FontWeight: =If(gApprovalsTab = "History", FontWeight.Bold, FontWeight.Semibold)
-                  Height: =28
-                  HoverColor: =RGBA(83, 74, 183, 1)
-                  OnSelect: =Set(gApprovalsTab, "History"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
-                  PaddingLeft: =10
-                  PaddingRight: =10
-                  Size: =11
-                  Text: ="History"
-                  Visible: =gUserRole = "Executive"
-                  Width: =90
+                  DropShadow: =DropShadow.None
+                  Height: =48
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =8
+                  LayoutMinHeight: =28
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =440
+                  Y: =60
+                Children:
+                  - lblTabToApprove:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        Color: =If(gApprovalsTab = "To Approve", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                        Fill: =If(gApprovalsTab = "To Approve", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                        FontWeight: =If(gApprovalsTab = "To Approve", FontWeight.Bold, FontWeight.Semibold)
+                        Height: =28
+                        HoverColor: =RGBA(83, 74, 183, 1)
+                        OnSelect: =Set(gApprovalsTab, "To Approve"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        Size: =11
+                        Text: ="To Approve"
+                        Visible: =gIsApprover
+                        Width: =110
+                        X: =40
+                        Y: =40
+                  - lblTabMine:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        Color: =If(gApprovalsTab = "Mine", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                        Fill: =If(gApprovalsTab = "Mine", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                        FontWeight: =If(gApprovalsTab = "Mine", FontWeight.Bold, FontWeight.Semibold)
+                        Height: =28
+                        HoverColor: =RGBA(83, 74, 183, 1)
+                        OnSelect: =Set(gApprovalsTab, "Mine"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        Size: =11
+                        Text: ="My Requests"
+                        Width: =110
+                        X: =40
+                        Y: =40
+                  - lblTabHistory:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        Color: =If(gApprovalsTab = "History", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                        Fill: =If(gApprovalsTab = "History", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                        FontWeight: =If(gApprovalsTab = "History", FontWeight.Bold, FontWeight.Semibold)
+                        Height: =28
+                        HoverColor: =RGBA(83, 74, 183, 1)
+                        OnSelect: =Set(gApprovalsTab, "History"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        Size: =11
+                        Text: ="History"
+                        Visible: =gUserRole = "Executive"
+                        Width: =90
+                        X: =40
+                        Y: =40
             - lblTabBack:
                 Control: Label@2.5.1
                 Properties:
@@ -331,6 +355,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
+                  Height: =80
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   LayoutMinHeight: =56
@@ -367,7 +392,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =If(gSelectedCR.RequestType.Value = "Delete", RGBA(252, 235, 235, 1), RGBA(241, 239, 232, 1))
                   FillPortions: =0
-                  Height: =70
+                  Height: =100
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =2
                   PaddingBottom: =8
@@ -393,7 +418,7 @@ Screens:
                   - lblReasonValue:
                       Control: Label@2.5.1
                       Properties:
-                        Height: =34
+                        Height: =60
                         Overflow: =Overflow.Scroll
                         Size: =11
                         Text: =gSelectedCR.RequestReason
@@ -830,7 +855,6 @@ Screens:
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
-                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =8
                   LayoutMinHeight: =240

@@ -124,13 +124,14 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(241, 239, 232, 1)
                   FillPortions: =0
+                  Height: =160
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutMinHeight: =80
                   LayoutWrap: =true
-                  PaddingBottom: =12
+                  PaddingBottom: =20
                   PaddingLeft: =20
                   PaddingRight: =20
-                  PaddingTop: =12
+                  PaddingTop: =20
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
@@ -146,6 +147,7 @@ Screens:
                         Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
+                        LayoutMinHeight: =60
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -177,6 +179,7 @@ Screens:
                         Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
+                        LayoutMinHeight: =60
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -208,6 +211,7 @@ Screens:
                         Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
+                        LayoutMinHeight: =60
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -239,6 +243,7 @@ Screens:
                         Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
+                        LayoutMinHeight: =60
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -270,6 +275,7 @@ Screens:
                         Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
+                        LayoutMinHeight: =60
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -301,6 +307,7 @@ Screens:
                         Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
+                        LayoutMinHeight: =80
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -353,7 +360,7 @@ Screens:
                       Control: Label@2.5.1
                       Properties:
                         FontWeight: =FontWeight.Semibold
-                        Height: =70
+                        Height: =60
                         Overflow: =Overflow.Scroll
                         Size: =11
                         Text: =gSelectedProject.ProjectDescription
@@ -393,13 +400,13 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =130
+                  Height: =140
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   PaddingBottom: =8
                   PaddingLeft: =20
                   PaddingRight: =20
-                  PaddingTop: =8
+                  PaddingTop: =20
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
@@ -517,7 +524,7 @@ Screens:
                               FontWeight: =FontWeight.Bold
                               Height: =24
                               Size: =12
-                              Text: ="Reason (optional)"
+                              Text: ="Reason *"
                               Width: =300
                         - txtUpdateReason:
                             Control: ModernTextInput@1.1.1
@@ -567,9 +574,15 @@ Screens:
                     =With(
                         {wNewEndDate: Coalesce(dpNewEndDate.SelectedDate, gSelectedProject.EndDate)},
                         If(
-                            txtNewDescription.Value = gSelectedProject.ProjectDescription && wNewEndDate = gSelectedProject.EndDate,
-                            Notify("No changes to submit", NotificationType.Warning),
-                            With(
+                            IsBlank(txtUpdateReason.Text),
+                            Notify("Reason is required", NotificationType.Error),
+                            If(
+                                wNewEndDate <= gSelectedProject.StartDate,
+                                Notify("New End Date must be after the current Start Date", NotificationType.Error),
+                                If(
+                                    txtNewDescription.Value = gSelectedProject.ProjectDescription && wNewEndDate = gSelectedProject.EndDate,
+                                    Notify("No changes to submit", NotificationType.Warning),
+                                    With(
                                 {wCR: Patch(
                                     Project_ChangeRequests,
                                     Defaults(Project_ChangeRequests),
@@ -610,6 +623,8 @@ Screens:
                                 )
                             )
                         )
+                    )
+                    )
                     )
                   Text: ="Submit Update Request →"
                   Width: =220
