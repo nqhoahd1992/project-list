@@ -41,10 +41,10 @@ project-list/
 |---|---|
 | `Project_List` | Master, approved data only — written ONLY by the Executive-approve handler |
 | `Project_ChangeRequests` | Staging: every Create/Update/Delete intent + the approval state machine |
-| `Project_User` | Roles: Requester / Manager / Executive / Admin (absent ⇒ Requester) |
+| `Project_User` | Roles: Manager / Executive only (absent or inactive ⇒ internal `Requester` — not an approver, but can still create change requests) |
 | `Project_ApprovalLog` | Decision log — StepNumber **1 = Manager, 2 = Executive** |
 | `Employee List` | Shared staff directory (existing; internal names `email`/`department` lowercase) |
-| `Product_Database_SKU_Master` | Product catalog (existing, read-only) — `RelatedSKU` lookup target |
+| `Product_Database_SKU_Master` | Product catalog (existing, read-only) — `RelatedSKU` lookup target (multi-select) |
 
 Flow: `Project_Notify` (PowerAppsV2, 9 positional args) — email on submit / manager-approve / final result. Spec + templates in `docs/approval-workflow-plan.md`.
 
@@ -65,7 +65,7 @@ Pending Manager ──approve──▶ Pending Executive ──approve──▶ 
 
 Generated at apply time from the new row's SharePoint ID (two-step Patch):
 `"PROJ-" & <DeptCode> & "-" & Text(Year(Today())) & "-" & Text(wNew.ID, "000")`
-DeptCode = `Switch(First(Department).Value, "Quality Assurance","QA", "Regulatory Affairs","RA", "Marketing","MK", "Sales","SL", "Supply Chain","SC", "Finance","FN", "IT","IT", "R&D","RD", "HR","HR", "Operations","OP", "GN")`.
+DeptCode = `Switch(Department, "Quality Assurance","QA", "Regulatory Affairs","RA", "Marketing","MK", "Sales","SL", "Supply Chain","SC", "Finance","FN", "IT","IT", "R&D","RD", "HR","HR", "Operations","OP", "GN")`. `Department` is a single Text value (see `docs/sharepoint-schema.md`), not a Choice column.
 The numeric part is a global sequence (not per-department/year) — accepted trade-off; count-based schemes race and hit delegation limits. If the app dies between the two Patches the row has a blank ProjectID — the gallery shows `PROJ-PENDING-<ID>` via `Coalesce`; fix by patching ProjectID manually.
 
 ## Global state (App.OnStart)
@@ -74,20 +74,22 @@ The numeric part is a global sequence (not per-department/year) — accepted tra
 
 ## Role-based visibility
 
+Anyone with an email in the tenant can create change requests, including Managers and Executives — there is no separate "Requester" role in `Project_User`; it is only the internal default `gUserRole` for anyone with no active `Project_User` row.
+
 | Role | Sees |
 |---|---|
-| Requester (default) | All Projects; own change requests (Mine tab) |
+| Requester (default, no `Project_User` row) | All Projects; own change requests (Mine tab) |
 | Manager | + Approvals queue filtered `Pending Manager` (acts as Step 1) |
-| Executive | + Approvals queue filtered `Pending Executive` (acts as Step 2 + applies) |
-| Admin | + Both queues, can act at either step; History tab; Show-deleted toggle |
+| Executive | + Approvals queue filtered `Pending Executive` (acts as Step 2 + applies); History tab; Show-deleted toggle |
 
 ## Conventions
 
 - **UI text and all source: English only.**
 - Guarded writes: `With({wX: Patch(...)}, If(IsBlank(wX.ID), Notify(error), <next step>))` — chain nested `With` for multi-step (log → status → notify).
-- Choice: write `{Value: "..."}`; multi-choice: table of `{Value}` records; Lookup/Person: `{Id, Value}`; Currency/Number: plain numbers.
+- Choice: write `{Value: "..."}`; multi-choice: table of `{Value}` records; Lookup/Person: `{Id, Value}`; multi-lookup (`RelatedSKU`): table of `{Id, Value}` records; Currency/Number: plain numbers. Exception: `Department` is plain Text (options sourced from `Distinct('Employee List', department.Value)`), not a Choice column.
 - Status strings (`Pending Manager`, `Pending Executive`, `Approved`, `Rejected`, `Deleted`, …) are **literals in every screen** — no shared constant; renaming one means touching every filter, color map, and Patch.
 - Join key for logs: `ChangeRequestIDText = Text(cr.ID)` (delegable), never lookup-column comparison.
+- `Project_User.Title` is never populated — always resolve a user's display name/email through its `EmployeeID` lookup into `Employee List`, never read `Project_User.Title` directly.
 - Inline `RGBA(...)` colors; brand purple `RGBA(83, 74, 183, 1)`; status pill palette mirrors procurement (green `RGBA(15,110,86,1)` / red `RGBA(163,45,45,1)` / amber `RGBA(133,79,11,1)`).
 - Control versions and YAML pitfalls: **`.claude/pa-yaml-rules.md` is binding** (`Label@2.5.1`, `Button@0.0.45`, `TextInput@0.0.54`, `Radio@0.0.25` no Default, `ComboBox@0.0.51` DefaultSelectedItems=Filter, `CheckBox@0.0.30`, `Gallery@2.15.0`, `GroupContainer@1.5.0`, `Rectangle@2.3.0`; `|-` block literal for any formula containing `: `; `FillPortions: =0` for AutoLayout children with explicit Height).
 - `ActualCost` is display-only everywhere — reserved for the future procurement cost-sync flow (`docs/approval-workflow-plan.md` §Future).
@@ -101,8 +103,8 @@ The numeric part is a global sequence (not per-department/year) — accepted tra
 - Decisions locked with the user: staging list `Project_ChangeRequests`; single shared Approvals screen; Update limited to Description + End Date; soft delete; **Budget Approved column dropped** (Budget Amount only); SKU lookup target = `Product_Database_SKU_Master`; emails on submit / manager-approve / final result.
 
 ### Next — manual setup outside this repo (in order)
-1. Create the 4 SharePoint lists per `docs/sharepoint-schema.md` — Choice value sets on `Project_ChangeRequests` must exactly match `Project_List`.
-2. Seed `Project_User` with at least one account per role (Requester/Manager/Executive/Admin).
+1. Create the 4 SharePoint lists per `docs/sharepoint-schema.md` — Choice value sets on `Project_ChangeRequests` must exactly match `Project_List`. Apply the permission model in `docs/sharepoint-schema.md` §SharePoint list permissions (custom "Add Items only" level on `Project_ChangeRequests`/`Project_ApprovalLog` for non-approvers; Read-only on `Project_List`).
+2. Seed `Project_User` with at least one account per role (Manager/Executive).
 3. Build the `Project_Notify` flow per `docs/approval-workflow-plan.md` §3 (declare all 9 trigger input types explicitly; Switch with Default → Terminate; pin the `app.admin@maxbiocare.com` connection in Run-only users).
 4. Create the canvas app in Power Apps Studio, add the 6 data sources + the flow, then paste the `Src/*.pa.yaml` screens (order: App OnStart, then screens). Verify the exact modern-control version Studio assigns to `DatePicker`/`Toggle` and add it to `.claude/pa-yaml-rules.md`.
 5. Verify two unconfirmed schema points before wiring: the display/Title column of `Product_Database_SKU_Master`, and Employee List internal name `email` (lowercase).
@@ -113,6 +115,7 @@ The numeric part is a global sequence (not per-department/year) — accepted tra
 
 - `ProjectStatus.Value <> "Deleted"` raises a delegation warning on SharePoint choice columns — acceptable while the list stays well under 2000 rows.
 - Per-row `LookUp` badges (pending-change on All Projects, manager trail on Approvals) are N+1 queries — fine at portfolio scale; revisit past ~500 rows.
-- Choice value sets are duplicated between `Project_List` and `Project_ChangeRequests` and must stay identical, or the apply Patch fails.
+- Choice value sets are duplicated between `Project_List` and `Project_ChangeRequests` and must stay identical, or the apply Patch fails. (`Department` is the exception — plain Text on both, no Choice value set to sync.)
 - `Product_Database_SKU_Master` schema and Employee List internal names must be verified in SharePoint before first Studio wiring.
 - DatePicker/Toggle modern-control versions are not yet in `pa-yaml-rules.md` — verify in Studio on first paste and add them.
+- Manager/Executive need raw `Edit Items` on `Project_ChangeRequests`/`Project_List` for their approve-step `Patch` to work — they could in principle bypass the app's guarded formulas by editing those lists directly in SharePoint. Not closable with list permissions alone (see `docs/sharepoint-schema.md` §SharePoint list permissions); would need moving the apply step into a Power Automate flow with a locked-down connection.

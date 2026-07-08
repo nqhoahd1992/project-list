@@ -133,6 +133,7 @@ Screens:
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
+                  FillPortions: =0
                   LayoutAlignItems: =LayoutAlignItems.Center
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutMinHeight: =60
@@ -160,6 +161,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(241, 239, 232, 1)
+                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutMinHeight: =80
                   LayoutWrap: =true
@@ -178,6 +180,8 @@ Screens:
                       Variant: AutoLayout
                       Properties:
                         DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
                         RadiusBottomLeft: =0
@@ -207,6 +211,8 @@ Screens:
                       Variant: AutoLayout
                       Properties:
                         DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
                         RadiusBottomLeft: =0
@@ -236,6 +242,8 @@ Screens:
                       Variant: AutoLayout
                       Properties:
                         DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
                         RadiusBottomLeft: =0
@@ -265,6 +273,8 @@ Screens:
                       Variant: AutoLayout
                       Properties:
                         DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
                         RadiusBottomLeft: =0
@@ -294,6 +304,8 @@ Screens:
                       Variant: AutoLayout
                       Properties:
                         DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
                         RadiusBottomLeft: =0
@@ -323,6 +335,8 @@ Screens:
                       Variant: AutoLayout
                       Properties:
                         DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
                         RadiusBottomLeft: =0
@@ -353,6 +367,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(252, 235, 235, 1)
+                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   LayoutMinHeight: =90

@@ -54,6 +54,8 @@ In a Canvas App AutoLayout container, if a child does NOT declare `FillPortions`
 
 **Rule:** Any child GroupContainer that has an explicit or dynamic `Height` formula (e.g. `Height: =If(...)`, `Height: =68`) must also declare `FillPortions: =0` to opt out of proportional fill and honour its own `Height`. Applies to `OnSelect`, `OnFailure`, `OnSuccess`, `Text`, or any other property. Common triggers: error messages with `"reference: "`, `"error: "`, URLs with `https://`, etc.
 
+**Also applies to `LayoutMinHeight` rows, not just fixed `Height` ones.** A row/column sized with `LayoutMinHeight` (meant to auto-size to its content, with a floor) is just as stretch-eligible as one with a hardcoded `Height` — if its siblings in a `Vertical` AutoLayout parent have unused space (e.g. a short screen like `UpdateProjectScreen`/`DeleteProjectScreen` where `containerScroll`'s fixed `Height` exceeds total content height), the parent inflates the `LayoutMinHeight` row far past its natural content height. Symptom actually seen in Studio: a `Horizontal` + `LayoutWrap: =true` row of label/value info-columns (`rowProjectInfo`) got stretched tall, so its second wrapped line rendered near the bottom of the oversized box and the next sibling row butted up against it with no gap. **Rule: every row/column that should hug its content — whether via `Height` or `LayoutMinHeight` — must declare `FillPortions: =0`.** Only rows that are genuinely meant to grow and fill leftover space should omit it.
+
 ---
 
 ## 3. Form control belongs INSIDE the scrollable container

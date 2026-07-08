@@ -16,13 +16,13 @@ Requester submits (Create / Update / Delete form)
         │  Patch Project_ChangeRequests → ApprovalStatus = "Pending Manager"
         │  Project_Notify.Run("SubmittedToManager", <active Manager emails>)
         ▼
-Pending Manager ── ApprovalsScreen, role Manager/Admin, StepNumber 1 ──
+Pending Manager ── ApprovalsScreen, role Manager, StepNumber 1 ──
         │  Approve → log(1, Approved) → CR = "Pending Executive"
         │            → Notify("ManagerApprovedToExecutive", <active Executive emails>)
         │  Reject  → Remark ⚠ → log(1, Rejected, Remark) → CR = "Rejected"
         │            → Notify("FinalRejected", requester)
         ▼
-Pending Executive ── ApprovalsScreen, role Executive/Admin, StepNumber 2 ──
+Pending Executive ── ApprovalsScreen, role Executive, StepNumber 2 ──
         │  Reject  → Remark ⚠ → log(2, Rejected, Remark) → CR = "Rejected"
         │            → Notify("FinalRejected", requester)
         │  Approve → APPLY to Project_List (Switch on RequestType, guarded Patch)
@@ -33,7 +33,7 @@ Pending Executive ── ApprovalsScreen, role Executive/Admin, StepNumber 2 ─
 Approved / Rejected (terminal)
 ```
 
-Admin sees both queues and can act at either step (substitute approver).
+Anyone with a tenant email can submit (`Requester` above is not a `Project_User` role — Managers and Executives can submit requests too). There is no substitute-approver role: each step can only be acted on by its own role.
 
 ### Apply logic per RequestType (Executive approve)
 

@@ -103,7 +103,7 @@ Screens:
                             Switch(gUserRole,
                                 "Manager", ApprovalStatus.Value = "Pending Manager",
                                 "Executive", ApprovalStatus.Value = "Pending Executive",
-                                ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive"
+                                false
                             )
                         )
                     ) & ")"
@@ -359,7 +359,7 @@ Screens:
                   PaddingRight: =8
                   Size: =11
                   Text: =If(gShowDeleted, "Hide Deleted", "Show Deleted")
-                  Visible: =gUserRole = "Admin" || gUserRole = "Executive"
+                  Visible: =gUserRole = "Executive"
                   Width: =110
       - rectFilterBarBorder:
           Control: Rectangle@2.3.0

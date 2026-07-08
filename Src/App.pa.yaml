@@ -21,8 +21,7 @@ App:
       Set(gUserRole, gCurrentUser.Role.Value);
       Set(gIsApprover,
           gUserRole = "Manager" ||
-          gUserRole = "Executive" ||
-          gUserRole = "Admin"
+          gUserRole = "Executive"
       );
       Set(gSelectedProject, Blank());
       Set(gSelectedCR, Blank());

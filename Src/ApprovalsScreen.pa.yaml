@@ -101,7 +101,7 @@ Screens:
                   PaddingRight: =10
                   Size: =11
                   Text: ="History"
-                  Visible: =gUserRole = "Executive" || gUserRole = "Admin"
+                  Visible: =gUserRole = "Executive"
                   Width: =90
             - lblTabBack:
                 Control: Label@2.5.1
@@ -136,11 +136,6 @@ Screens:
                           Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager"),
                           "Executive",
                           Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Executive"),
-                          "Admin",
-                          Filter(Project_ChangeRequests,
-                              ApprovalStatus.Value = "Pending Manager" ||
-                              ApprovalStatus.Value = "Pending Executive"
-                          ),
                           Filter(Project_ChangeRequests, RequesterEmail = User().Email)
                       )
                   ),
@@ -336,6 +331,7 @@ Screens:
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
+                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   LayoutMinHeight: =56
@@ -409,6 +405,7 @@ Screens:
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
+                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =12
                   LayoutMinHeight: =260
@@ -501,7 +498,7 @@ Screens:
                               Color: =RGBA(136, 135, 128, 1)
                               Height: =18
                               Size: =9
-                              Text: ="Department(s)"
+                              Text: ="Department"
                               Width: =260
                         - lblPDeptValue:
                             Control: Label@2.5.1
@@ -509,7 +506,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =Concat(gSelectedCR.Department, Value, ", ")
+                              Text: =gSelectedCR.Department
                               Width: =260
                   - colPOwner:
                       Control: GroupContainer@1.5.0
@@ -704,7 +701,7 @@ Screens:
                               Color: =RGBA(136, 135, 128, 1)
                               Height: =18
                               Size: =9
-                              Text: ="Cost Center / Country"
+                              Text: ="Cost Center"
                               Width: =220
                         - lblPCostCenterValue:
                             Control: Label@2.5.1
@@ -712,7 +709,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =gSelectedCR.CostCenter.Value & " / " & gSelectedCR.Country.Value
+                              Text: =gSelectedCR.CostCenter.Value
                               Width: =220
                   - colPSKU:
                       Control: GroupContainer@1.5.0
@@ -741,7 +738,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =If(IsBlank(gSelectedCR.RelatedSKU.Value), "—", gSelectedCR.RelatedSKU.Value)
+                              Text: =If(CountRows(gSelectedCR.RelatedSKU) = 0, "—", Concat(gSelectedCR.RelatedSKU, Value, ", "))
                               Width: =220
                   - colPLevel:
                       Control: GroupContainer@1.5.0
@@ -835,6 +832,7 @@ Screens:
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
+                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =8
                   LayoutMinHeight: =240
@@ -931,6 +929,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(252, 235, 235, 1)
+                  FillPortions: =0
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   LayoutMinHeight: =120
@@ -1154,8 +1153,8 @@ Screens:
             Visible: |-
               =!IsBlank(gSelectedCR.ID) &&
               (
-                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager" && (gUserRole = "Manager" || gUserRole = "Admin")) ||
-                  (gSelectedCR.ApprovalStatus.Value = "Pending Executive" && (gUserRole = "Executive" || gUserRole = "Admin"))
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager" && gUserRole = "Manager") ||
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Executive" && gUserRole = "Executive")
               )
             Width: =Parent.Width - 441
             X: =441
@@ -1246,12 +1245,11 @@ Screens:
                                     ProjectStatus: gSelectedCR.ProjectStatus,
                                     BudgetAmount: gSelectedCR.BudgetAmount,
                                     CapexOpex: gSelectedCR.CapexOpex,
-                                    RelatedSKU: If(IsBlank(gSelectedCR.RelatedSKU.Id), Blank(), {Id: gSelectedCR.RelatedSKU.Id, Value: gSelectedCR.RelatedSKU.Value}),
+                                    RelatedSKU: gSelectedCR.RelatedSKU,
                                     Market: gSelectedCR.Market,
                                     Channel: gSelectedCR.Channel,
                                     StrategicObjective: gSelectedCR.StrategicObjective,
                                     CostCenter: gSelectedCR.CostCenter,
-                                    Country: gSelectedCR.Country,
                                     ProjectDocuments: gSelectedCR.ProjectDocuments,
                                     ProjectLevel: gSelectedCR.ProjectLevel,
                                     RootProjectID: gSelectedCR.RootProjectID,
@@ -1268,7 +1266,7 @@ Screens:
                                         wNew,
                                         {
                                             ProjectID: "PROJ-" &
-                                                Switch(First(gSelectedCR.Department).Value,
+                                                Switch(gSelectedCR.Department,
                                                     "Quality Assurance", "QA",
                                                     "Regulatory Affairs", "RA",
                                                     "Marketing", "MK",
