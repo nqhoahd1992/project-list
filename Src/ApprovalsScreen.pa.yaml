@@ -54,7 +54,7 @@ Screens:
             RadiusBottomRight: =0
             RadiusTopLeft: =0
             RadiusTopRight: =0
-            Width: =440
+            Width: =600
             Y: =60
           Children:
             - rowTabsBtn:
@@ -66,11 +66,12 @@ Screens:
                   LayoutAlignItems: =LayoutAlignItems.Center
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutMinHeight: =28
+                  LayoutMinWidth: =230
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
-                  Width: =440
+                  Width: =590
                   Y: =60
                 Children:
                   - lblTabToApprove:
@@ -85,10 +86,34 @@ Screens:
                         OnSelect: =Set(gApprovalsTab, "To Approve"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
                         PaddingLeft: =10
                         PaddingRight: =10
-                        Size: =11
-                        Text: ="To Approve"
+                        Size: =10
+                        Text: |-
+                          ="To Approve (" &
+                          CountRows(
+                              Switch(gUserRole,
+                                  "Manager",
+                                  Filter(
+                                      Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager"),
+                                      If(
+                                          RequestType.Value = "Create",
+                                          ProjectManager.Id = gCurrentEmployee.ID,
+                                          LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
+                                      )
+                                  ),
+                                  "Executive",
+                                  Filter(
+                                      Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Executive"),
+                                      If(
+                                          RequestType.Value = "Create",
+                                          ProjectOwner.Id = gCurrentEmployee.ID,
+                                          LookUp(Project_List, ID = TargetItemID).ProjectOwner.Id = gCurrentEmployee.ID
+                                      )
+                                  ),
+                                  Filter(Project_ChangeRequests, false)
+                              )
+                          ) & ")"
                         Visible: =gIsApprover
-                        Width: =110
+                        Width: =120
                         X: =40
                         Y: =40
                   - lblTabMine:
@@ -103,7 +128,7 @@ Screens:
                         OnSelect: =Set(gApprovalsTab, "Mine"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
                         PaddingLeft: =10
                         PaddingRight: =10
-                        Size: =11
+                        Size: =10
                         Text: ="My Requests"
                         Width: =110
                         X: =40
@@ -120,10 +145,33 @@ Screens:
                         OnSelect: =Set(gApprovalsTab, "History"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
                         PaddingLeft: =10
                         PaddingRight: =10
-                        Size: =11
+                        Size: =10
                         Text: ="History"
                         Visible: =gUserRole = "Manager" || gUserRole = "Executive"
                         Width: =90
+                        X: =40
+                        Y: =40
+                  - lblTabAssignManager:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Center
+                        Color: =If(gApprovalsTab = "Assign Manager", RGBA(83, 74, 183, 1), RGBA(136, 135, 128, 1))
+                        Fill: =If(gApprovalsTab = "Assign Manager", RGBA(237, 235, 254, 1), RGBA(0, 0, 0, 0))
+                        FontWeight: =If(gApprovalsTab = "Assign Manager", FontWeight.Bold, FontWeight.Semibold)
+                        Height: =28
+                        HoverColor: =RGBA(83, 74, 183, 1)
+                        OnSelect: =Set(gApprovalsTab, "Assign Manager"); Set(gSelectedCR, Blank()); Set(gLiveTarget, Blank()); Set(gShowRejectPanel, false)
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        Size: =10
+                        Text: |-
+                          ="Assign Manager (" &
+                          CountRows(
+                              Filter(Project_ChangeRequests,
+                                  ApprovalStatus.Value = "Pending Sponsor" &&
+                                  ProjectSponsor.Id = gCurrentEmployee.ID
+                              )
+                          ) & ")"
                         X: =40
                         Y: =40
             - lblTabBack:
@@ -151,11 +199,16 @@ Screens:
                   Switch(gApprovalsTab,
                       "Mine",
                       Filter(Project_ChangeRequests, RequesterEmail = User().Email),
+                      "Assign Manager",
+                      Filter(Project_ChangeRequests,
+                          ApprovalStatus.Value = "Pending Sponsor" &&
+                          ProjectSponsor.Id = gCurrentEmployee.ID
+                      ),
                       "History",
                       Switch(gUserRole,
                           "Manager",
-                          Filter(Project_ChangeRequests,
-                              (ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected") &&
+                          Filter(
+                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected"),
                               If(
                                   RequestType.Value = "Create",
                                   ProjectManager.Id = gCurrentEmployee.ID,
@@ -163,8 +216,8 @@ Screens:
                               )
                           ),
                           "Executive",
-                          Filter(Project_ChangeRequests,
-                              (ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected") &&
+                          Filter(
+                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected"),
                               If(
                                   RequestType.Value = "Create",
                                   ProjectOwner.Id = gCurrentEmployee.ID,
@@ -175,8 +228,8 @@ Screens:
                       ),
                       Switch(gUserRole,
                           "Manager",
-                          Filter(Project_ChangeRequests,
-                              ApprovalStatus.Value = "Pending Manager" &&
+                          Filter(
+                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager"),
                               If(
                                   RequestType.Value = "Create",
                                   ProjectManager.Id = gCurrentEmployee.ID,
@@ -184,8 +237,8 @@ Screens:
                               )
                           ),
                           "Executive",
-                          Filter(Project_ChangeRequests,
-                              ApprovalStatus.Value = "Pending Executive" &&
+                          Filter(
+                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Executive"),
                               If(
                                   RequestType.Value = "Create",
                                   ProjectOwner.Id = gCurrentEmployee.ID,
@@ -208,7 +261,7 @@ Screens:
               );
               Set(gShowRejectPanel, false)
             TemplateSize: =84
-            Width: =440
+            Width: =600
             Y: =108
           Children:
             - rectRowHitArea:
@@ -350,7 +403,7 @@ Screens:
             Fill: =RGBA(210, 209, 199, 1)
             Height: =Parent.Height - 60
             Width: =1
-            X: =440
+            X: =600
             Y: =60
       - lblSelectHint:
           Control: Label@2.5.1
@@ -361,8 +414,8 @@ Screens:
             Size: =12
             Text: ="Select a change request on the left to review it."
             Visible: =IsBlank(gSelectedCR.ID)
-            Width: =Parent.Width - 441
-            X: =441
+            Width: =Parent.Width - 600
+            X: =600
             Y: =200
       - containerDetail:
           Control: GroupContainer@1.5.0
@@ -377,8 +430,8 @@ Screens:
             RadiusTopLeft: =0
             RadiusTopRight: =0
             Visible: =!IsBlank(gSelectedCR.ID)
-            Width: =Parent.Width - 441
-            X: =441
+            Width: =Parent.Width - 600
+            X: =600
             Y: =60
           Children:
             - rowCRTitle:
@@ -462,7 +515,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =420
+                  Height: =500
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =12
                   LayoutMinHeight: =220
@@ -564,9 +617,10 @@ Screens:
                             Control: Label@2.5.1
                             Properties:
                               FontWeight: =FontWeight.Semibold
-                              Height: =24
+                              Height: =48
                               Size: =11
                               Text: =gSelectedCR.Department
+                              VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.Width
                   - colPOwner:
                       Control: GroupContainer@1.5.0
@@ -575,7 +629,7 @@ Screens:
                         DropShadow: =DropShadow.None
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
-                        LayoutMinHeight: =60
+                        LayoutMinHeight: =84
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -588,15 +642,16 @@ Screens:
                               Color: =RGBA(136, 135, 128, 1)
                               Height: =18
                               Size: =9
-                              Text: ="Owner / Manager"
+                              Text: ="Owner / Sponsor / Manager"
                               Width: =220
                         - lblPOwnerValue:
                             Control: Label@2.5.1
                             Properties:
                               FontWeight: =FontWeight.Semibold
-                              Height: =24
+                              Height: =48
                               Size: =11
-                              Text: =gSelectedCR.ProjectOwner.Value & " / " & gSelectedCR.ProjectManager.Value
+                              Text: =gSelectedCR.ProjectOwner.Value & " / " & gSelectedCR.ProjectSponsor.Value & " / " & Coalesce(gSelectedCR.ProjectManager.Value, "Not yet assigned")
+                              VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.Width
                   - colPPriority:
                       Control: GroupContainer@1.5.0
@@ -755,7 +810,7 @@ Screens:
                         DropShadow: =DropShadow.None
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
-                        LayoutMinHeight: =60
+                        LayoutMinHeight: =84
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
@@ -773,10 +828,13 @@ Screens:
                         - lblPCostCenterValue:
                             Control: Label@2.5.1
                             Properties:
+                              FillPortions: =1
                               FontWeight: =FontWeight.Semibold
-                              Height: =24
+                              Height: =48
+                              LayoutMinHeight: =48
                               Size: =11
                               Text: =gSelectedCR.CostCenter.Value
+                              VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.Width
                   - colPSKU:
                       Control: GroupContainer@1.5.0
@@ -806,7 +864,7 @@ Screens:
                               FillPortions: =1
                               FontWeight: =FontWeight.Semibold
                               Height: =24
-                              LayoutMinHeight: =60
+                              LayoutMinHeight: =48
                               Size: =11
                               Text: =If(CountRows(gSelectedCR.RelatedSKU) = 0, "—", Concat(gSelectedCR.RelatedSKU, Value, ", "))
                               VerticalAlign: =VerticalAlign.Top
@@ -906,6 +964,129 @@ Screens:
                               Text: =If(IsBlank(gSelectedCR.ProjectDocuments), "—", gSelectedCR.ProjectDocuments)
                               VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.Width
+            - rowAssignManager:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(250, 238, 218, 1)
+                  FillPortions: =0
+                  Height: =125
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =8
+                  PaddingBottom: =16
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =16
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: |-
+                    =gSelectedCR.ApprovalStatus.Value = "Pending Sponsor" &&
+                    gSelectedCR.ProjectSponsor.Id = gCurrentEmployee.ID
+                  Width: =Parent.Width
+                Children:
+                  - lblAssignManagerLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(133, 79, 11, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =22
+                        Size: =12
+                        Text: ="⚠ Assign a Project Manager to submit this request for approval"
+                        Width: =Parent.Width - 40
+                  - ColAssignManager:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =70
+                        LayoutAlignItems: =LayoutAlignItems.Center
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        LayoutGap: =10
+                        LayoutMinHeight: =36
+                        LayoutMinWidth: =16
+                        PaddingBottom: =10
+                        PaddingTop: =10
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width
+                      Children:
+                        - cmbAssignManager:
+                            Control: ModernCombobox@1.1.1
+                            Properties:
+                              AllowExternalSelectedItems: =false
+                              FillPortions: =1
+                              FontWeight: =""
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an employee"
+                              ItemDisplayText: =ThisItem.Title
+                              Items: |-
+                                =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Manager"), {ID: EmployeeID.Id, Title: EmployeeID.Value}), Title, SortOrder.Ascending)
+                              SelectMultiple: =false
+                              Size: =0
+                              Width: =360
+                              X: =40
+                              Y: =40
+                        - btnConfirmAssignManager:
+                            Control: ModernButton@1.0.0
+                            Properties:
+                              Align: =Align.Center
+                              FontWeight: =""
+                              Height: =40
+                              OnSelect: |-
+                                =If(
+                                    IsBlank(cmbAssignManager.Selected.ID),
+                                    Notify("Please select a Project Manager", NotificationType.Error),
+                                    With(
+                                        {wCR: Patch(
+                                            Project_ChangeRequests,
+                                            gSelectedCR,
+                                            {
+                                                ProjectManager: {Id: cmbAssignManager.Selected.ID, Value: cmbAssignManager.Selected.Title},
+                                                ApprovalStatus: {Value: "Pending Manager"}
+                                            }
+                                        )},
+                                        If(
+                                            IsBlank(wCR.ID),
+                                            Notify("Failed to assign the Project Manager. Please try again.", NotificationType.Error),
+                                            Project_Notify.Run(
+                                                "SubmittedToManager",
+                                                Coalesce(
+                                                    LookUp('Employee List', ID = cmbAssignManager.Selected.ID).Email,
+                                                    "app.admin@maxbiocare.com"
+                                                ),
+                                                gSelectedCR.Title,
+                                                gSelectedCR.ID,
+                                                gSelectedCR.RequestType.Value,
+                                                gSelectedCR.ProjectName,
+                                                gSelectedCR.RequesterID.Value,
+                                                gCurrentEmployee.Title,
+                                                ""
+                                            );
+                                            Notify("Project Manager assigned. Request submitted for Manager approval.", NotificationType.Success);
+                                            Set(gSelectedCR, Blank());
+                                            Set(gLiveTarget, Blank())
+                                        )
+                                    )
+                                )
+                              PaddingBottom: =5
+                              PaddingLeft: =12
+                              PaddingRight: =12
+                              PaddingTop: =5
+                              RadiusBottomLeft: =4
+                              RadiusBottomRight: =4
+                              RadiusTopLeft: =4
+                              RadiusTopRight: =4
+                              Text: ="Submit for Manager Approval"
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: =220
+                              X: =40
+                              Y: =40
             - rowLiveTargetInfo:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -1886,8 +2067,8 @@ Screens:
                   (gSelectedCR.ApprovalStatus.Value = "Pending Executive" && gUserRole = "Executive" &&
                       If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectOwner.Id, gLiveTarget.ProjectOwner.Id) = gCurrentEmployee.ID)
               )
-            Width: =Parent.Width - 441
-            X: =441
+            Width: =Parent.Width - 600
+            X: =600
             Y: =Parent.Height - 60
           Children:
             - btnReject:
@@ -1972,6 +2153,7 @@ Screens:
                                     Department: gSelectedCR.Department,
                                     RequestedBy: {Id: gSelectedCR.RequesterID.Id, Value: gSelectedCR.RequesterID.Value},
                                     ProjectOwner: If(IsBlank(gSelectedCR.ProjectOwner.Id), Blank(), {Id: gSelectedCR.ProjectOwner.Id, Value: gSelectedCR.ProjectOwner.Value}),
+                                    ProjectSponsor: If(IsBlank(gSelectedCR.ProjectSponsor.Id), Blank(), {Id: gSelectedCR.ProjectSponsor.Id, Value: gSelectedCR.ProjectSponsor.Value}),
                                     ProjectManager: If(IsBlank(gSelectedCR.ProjectManager.Id), Blank(), {Id: gSelectedCR.ProjectManager.Id, Value: gSelectedCR.ProjectManager.Value}),
                                     Priority: gSelectedCR.Priority,
                                     StartDate: gSelectedCR.StartDate,

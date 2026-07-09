@@ -25,7 +25,15 @@ App:
       );
       Set(gApprovalsPendingCount,
           CountRows(
-              Filter(Project_ChangeRequests,
+              Filter(
+                  Filter(Project_ChangeRequests,
+                      ApprovalStatus.Value = "Pending Sponsor" ||
+                      ApprovalStatus.Value = "Pending Manager" ||
+                      ApprovalStatus.Value = "Pending Executive"
+                  ),
+                  (ApprovalStatus.Value = "Pending Sponsor" &&
+                      ProjectSponsor.Id = gCurrentEmployee.ID
+                  ) ||
                   (gUserRole = "Manager" && ApprovalStatus.Value = "Pending Manager" &&
                       If(
                           RequestType.Value = "Create",

@@ -30,13 +30,15 @@ Assign via 3 SharePoint groups (Requester = default site Members/Visitors — ev
 | `Employee List` | Read | Read | Read |
 | `Project_User` | Read (required — every user's `App.OnStart` reads this to resolve `gUserRole`) | Read | Read |
 | `Product_Database_SKU_Master` | Read | Read | Read |
-| `Project_ChangeRequests` | **Add Items + Read only** (custom permission level, see below) | Edit (needed to Patch `ApprovalStatus` + write the Step 1 log) | Edit (needed to Patch `ApprovalStatus` at Step 2) |
+| `Project_ChangeRequests` | **Edit** — broadened from the original "Add Items + Read only" design specifically so that any employee picked as a `ProjectSponsor` (not a `Project_User`-gated role, see `Project_List.ProjectSponsor` below) can `Patch` `ProjectManager` + `ApprovalStatus` at Step 0 ("Assign Manager") without needing a separate grant | Edit (needed to Patch `ApprovalStatus` + write the Step 1 log) | Edit (needed to Patch `ApprovalStatus` at Step 2) |
 | `Project_ApprovalLog` | Read only | **Add Items + Read only** — the app only ever inserts new log rows, never edits one | **Add Items + Read only** |
 | `Project_List` | Read only | Read only | Edit (needed to Patch the apply step) |
 
-**"Add Items + Read only" is not a SharePoint built-in level** — create a custom Permission Level (Site Settings → Permission Levels → copy `Read`, additionally check `Add Items`, leave `Edit Items`/`Delete Items` unchecked). This lets Requesters submit a CR and read the list (needed for the `Mine` tab) but blocks them from tampering with any CR — their own or anyone else's — once submitted.
+**"Add Items + Read only" is not a SharePoint built-in level** — create a custom Permission Level (Site Settings → Permission Levels → copy `Read`, additionally check `Add Items`, leave `Edit Items`/`Delete Items` unchecked). Still used for `Project_ApprovalLog` (Manager/Executive can insert log rows but never edit one); no longer used for `Project_ChangeRequests`/Requester since that was broadened to plain `Edit` — a built-in level, nothing custom to create there.
 
-**Known residual risk — cannot be fully closed without an architecture change:** Manager needs raw `Edit Items` on `Project_ChangeRequests`, and Executive needs raw `Edit Items` on both `Project_ChangeRequests` and `Project_List`, because `Patch()` always executes under the acting user's own identity. A Manager/Executive with SharePoint UI access could in principle bypass the app's guarded formulas (e.g. hand-flip a CR to `Approved`, or edit `Project_List` directly). Closing this fully would mean moving the apply-step `Patch` into a Power Automate flow with a locked-down "Run only users" connection (the flow's own connection does the write, not the human's) — a deliberate, larger architecture change, not something list permissions alone can fix. Not pursued unless explicitly requested.
+**Accepted trade-off — every user, not just Manager/Executive, now has raw `Edit` on `Project_ChangeRequests`.** This was a deliberate choice (not a default) to solve the Sponsor permission gap: since `ProjectSponsor` can be any employee rather than someone in a dedicated `Project_User`/SharePoint group, there was no way to grant *only* the right people `Edit` for the "Assign Manager" step without granting it to everyone. The cost: the tamper-protection that "Add Items + Read only" gave Requesters — blocking them from editing any CR, their own or anyone else's, once submitted — is gone for **all** users, not only Sponsors. Anyone with SharePoint UI access can now hand-edit any CR's fields directly (e.g. flip `ApprovalStatus`, rewrite proposed values) bypassing the app's guarded `Patch` formulas entirely. Revisit if this turns out to matter in practice — the narrower fix (Power Automate flow with a locked-down connection for just the Step 0 Patch, mirrored on the residual-risk note below) is still available later.
+
+**Known residual risk — cannot be fully closed without an architecture change:** Executive needs raw `Edit Items` on `Project_List` (everyone else stays Read-only there), because `Patch()` always executes under the acting user's own identity. An Executive with SharePoint UI access could in principle bypass the app's guarded formulas and edit `Project_List` directly (the `Project_ChangeRequests` version of this risk is no longer Manager/Executive-specific — see the accepted trade-off above, which extends it to everyone). Closing this fully would mean moving the apply-step `Patch` into a Power Automate flow with a locked-down "Run only users" connection (the flow's own connection does the write, not the human's) — a deliberate, larger architecture change, not something list permissions alone can fix. Not pursued unless explicitly requested.
 
 ---
 
@@ -51,8 +53,9 @@ Required ⚠: `ProjectStatus`, `ApprovalStatus`, `ProjectLevel`.
 | `ProjectDescription` | Text (multiline) | Detailed scope |
 | `ProjectType` | Choice | `New Product Development`, `Product Improvement`, `Regulatory & Compliance`, `Marketing Campaign`, `Market Expansion`, `Operational Improvement`, `IT & Digital`, `Research & Clinical`, `Other` |
 | `Department` | Text | Single department name; picker options come from `Choices('Employee List'.department)`, not a Choice column itself — see `.department` on Employee List |
-| `ProjectOwner` | Lookup→Employee List | Business owner, `{Id, Value}` (→Title). Picker on `CreateProjectScreen` is scoped to active `Project_User` accounts with `Role.Value = "Executive"` (`ForAll(Filter(Project_User, IsActive && Role.Value = "Executive"), {ID: EmployeeID.Id, Title: EmployeeID.Value})` — reshapes the already-available `EmployeeID` fields, no secondary `LookUp` needed) — only Executives are selectable |
-| `ProjectManager` | Lookup→Employee List | Execution lead, `{Id, Value}` (→Title). Same pattern as `ProjectOwner` but scoped to `Role.Value = "Manager"` — only Managers are selectable |
+| `ProjectOwner` | Lookup→Employee List | Business owner, `{Id, Value}` (→Title). Picker on `CreateProjectScreen` is scoped to active `Project_User` accounts with `Role.Value = "Executive"` (`ForAll(Filter(Project_User, IsActive && Role.Value = "Executive"), {ID: EmployeeID.Id, Title: EmployeeID.Value})` — reshapes the already-available `EmployeeID` fields, no secondary `LookUp` needed) — only Executives are selectable. Does Step 2 approval |
+| `ProjectSponsor` | Lookup→Employee List | Owns the project's outcome — **not** a supervisory role — `{Id, Value}` (→Title). **Not gated by a `Project_User` role, unlike `ProjectOwner`/`ProjectManager`** — the picker on `CreateProjectScreen` sources directly from `Employee List` (`Sort('Employee List', Title, SortOrder.Ascending)`), so any employee can be picked, not just accounts with a `Project_User` row. Set at Create time; sole job is picking the `ProjectManager` on the CR right after submit (`ApprovalsScreen`'s "Assign Manager" tab) — takes no further part in the approval chain itself. `Project_ChangeRequests` permissions were broadened to plain `Edit` for everyone specifically so any Sponsor can complete that Patch — see §SharePoint list permissions |
+| `ProjectManager` | Lookup→Employee List | Execution lead / supervisor, `{Id, Value}` (→Title). Scoped to `Role.Value = "Manager"`. **Not chosen on `CreateProjectScreen`** — blank on a newly-created row's originating CR until the `ProjectSponsor` assigns it (see `ApprovalStatus` below); always populated by the time a row reaches `Project_List` (apply only happens after Step 2, by which point a Manager was assigned and Step 1 completed). Does Step 1 approval |
 | `Priority` | Choice | `Low`, `Medium`, `High`, `Critical` |
 | `StartDate` | Date | Planned start |
 | `EndDate` | Date | Planned completion |
@@ -91,7 +94,7 @@ Required ⚠: `RequestType`, `ApprovalStatus`, `RequesterEmail`.
 |---|---|---|
 | `Title` | Text | Auto-built: `<RequestType> - <ProjectName> - <requester> - dd/mm/yyyy` |
 | `RequestType` ⚠ | Choice | `Create`, `Update`, `Delete` |
-| `ApprovalStatus` ⚠ | Choice | `Pending Manager` → `Pending Executive` → `Approved` \| `Rejected` (exact strings — used as literals across all screens) |
+| `ApprovalStatus` ⚠ | Choice | `Pending Sponsor` → `Pending Manager` → `Pending Executive` → `Approved` \| `Rejected` (exact strings — used as literals across all screens). **`Pending Sponsor` exists only on Create CRs** — the state between submit and the `ProjectSponsor` assigning a `ProjectManager` (`ApprovalsScreen`'s "Assign Manager" tab); Update/Delete CRs skip it and start directly at `Pending Manager`, since their target project already has a `ProjectManager` from its own original Create flow |
 | `TargetItemID` | Number | SharePoint `ID` of the master row (Update/Delete only) — join key for live-diff lookups |
 | `TargetProjectID` | Text | Business `ProjectID` snapshot for display (Update/Delete only) |
 | `RequesterEmail` ⚠ | Text | `User().Email`; "my requests" filter key |
@@ -115,7 +118,8 @@ Same column names and **identical Choice value sets** as `Project_List` (keep th
 | `StrategicObjective` | Choice — `Revenue Growth`, `Market Expansion`, `Brand Building`, `Product Innovation`, `Operational Excellence`, `Regulatory Compliance`, `Cost Optimization` |
 | `CostCenter` | Choice — `Office Melbourne (Head Quarter)`, `Port Melbourne Warehouse`, `Max Biocare Research Park - Natural Inspirations@Yinnar`, `Max Biocare Research Park - Mar-Nuka Bay`, `Malay Warehouse`, `Singapore Warehouse` |
 | `Department` | Text (same convention as master — single value, options sourced from Employee List) |
-| `ProjectOwner`, `ProjectManager` | Lookup→Employee List |
+| `ProjectOwner`, `ProjectSponsor` | Lookup→Employee List — both set on the Create form |
+| `ProjectManager` | Lookup→Employee List — **blank on submit**; set by the `ProjectSponsor` right after, via `ApprovalsScreen`'s "Assign Manager" tab (`ApprovalStatus` flips `Pending Sponsor` → `Pending Manager` in that same Patch) |
 | `StartDate`, `EndDate` | Date |
 | `BudgetAmount` | **Number** (not Currency) |
 | `Currency` | Text — same convention as `Project_List.Currency` above; set at Create time from the form's `currency` control, carried through unchanged on Update/Delete CRs (not user-editable on those screens) |
@@ -135,7 +139,7 @@ Required ⚠: `Role`, `IsActive`, `EmployeeID`.
 | Column | Type | Notes |
 |---|---|---|
 | `Title` | Text | **Not populated by the app** — the record is already tied to an employee via `EmployeeID`. For display, resolve the name through `EmployeeID.Value` / `LookUp('Employee List', ID = EmployeeID.Id).Title`, never `Project_User.Title` |
-| `Role` ⚠ | Choice | `Manager`, `Executive` — no `Requester`/`Admin` value; any tenant email can create change requests regardless of role |
+| `Role` ⚠ | Choice | `Manager`, `Executive` — no `Requester`/`Admin`/`Sponsor` value; any tenant email can create change requests regardless of role. `ProjectSponsor` is deliberately **not** a `Project_User` role — see `Project_List.ProjectSponsor` above |
 | `IsActive` ⚠ | Yes/No | default true |
 | `EmployeeID` ⚠ | Lookup→Employee List | `{Id, Value}` (→Title) only — confirmed `EmployeeID.Email` does not resolve even with SharePoint's "additional columns" Lookup setting configured for `Email` and the Power Apps data source refreshed; use `LookUp('Employee List', ID = EmployeeID.Id).Email` for email instead |
 | `Note` | Text | |
@@ -189,11 +193,11 @@ Picker: `ComboBox@0.0.51`, `SelectMultiple: =true`, `Items: =Sort(Product_Databa
 
 Called from Power Fx after every successful state transition. **Always pass all 9 args** — use `""` for unused remark. Declare each trigger input's type explicitly when building the flow (Blank-type inference bug — see invoice-batch-app `docs/finalize-invoice-flow-plan.md`).
 
-**Recipients are the CR's/project's specific `ProjectManager`/`ProjectOwner`, not a role broadcast** (see `CLAUDE.md` §Role-based visibility for the full authorization model) — always wrapped in `Coalesce(LookUp('Employee List', ID = <ProjectManager.Id or ProjectOwner.Id>).Email, "app.admin@maxbiocare.com")` so a blank/unassigned person never leaves the flow's "Send an email (V2)" action with an empty `To`.
+**Recipients are the CR's/project's specific `ProjectSponsor`/`ProjectManager`/`ProjectOwner`, not a role broadcast** (see `CLAUDE.md` §Role-based visibility for the full authorization model) — always wrapped in `Coalesce(LookUp('Employee List', ID = <...Id>).Email, "app.admin@maxbiocare.com")` so a blank/unassigned person never leaves the flow's "Send an email (V2)" action with an empty `To`.
 
 | # | Trigger param (rename from Power Automate default) | Type | Meaning |
 |---|---|---|---|
-| 1 | `notificationType` (default `text`) | Text | `SubmittedToManager` \| `ManagerApprovedToExecutive` \| `FinalApproved` \| `FinalRejected` \| `FinalApprovedManagerCopy` \| `FinalRejectedManagerCopy` |
+| 1 | `notificationType` (default `text`) | Text | `SubmittedToSponsor` \| `SubmittedToManager` \| `ManagerApprovedToExecutive` \| `FinalApproved` \| `FinalRejected` \| `FinalApprovedManagerCopy` \| `FinalRejectedManagerCopy` |
 | 2 | `recipientEmails` (default `text_1`) | Text | recipient email — always exactly one recipient per call (each `notificationType` = one recipient + one template, see `approval-workflow-plan.md` §2a); the underlying "Send an email (V2)" action natively accepts a `;`-separated list, but the app never relies on that |
 | 3 | `requestTitle` (default `text_2`) | Text | change request title |
 | 4 | `requestId` (default `number`) | Number | change request ID |
