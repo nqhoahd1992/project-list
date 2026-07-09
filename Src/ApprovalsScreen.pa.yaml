@@ -47,8 +47,8 @@ Screens:
             LayoutGap: =8
             LayoutJustifyContent: =LayoutJustifyContent.SpaceBetween
             PaddingBottom: =10
-            PaddingLeft: =20
-            PaddingRight: =10
+            PaddingLeft: =12
+            PaddingRight: =12
             PaddingTop: =10
             RadiusBottomLeft: =0
             RadiusBottomRight: =0
@@ -131,6 +131,7 @@ Screens:
                 Properties:
                   Align: =Align.Center
                   Color: =RGBA(136, 135, 128, 1)
+                  FontWeight: =FontWeight.Semibold
                   Height: =28
                   HoverColor: =RGBA(83, 74, 183, 1)
                   OnSelect: =Navigate(AllProjectsScreen)

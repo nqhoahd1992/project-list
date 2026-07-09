@@ -100,10 +100,14 @@ Screens:
                   Text: ="All Projects"
                   Width: =300
             - txtSearch:
-                Control: TextInput@0.0.54
+                Control: ModernTextInput@1.1.1
                 Properties:
+                  FontWeight: =""
                   Height: =36
+                  MaxLength: =-1
                   Placeholder: ="Search by name or Project ID"
+                  Size: =0
+                  TriggerOutput: =TriggerOutput.FocusOut
                   Width: =260
             - btnMyRequests:
                 Control: ModernButton@1.0.0
@@ -522,9 +526,9 @@ Screens:
                           (gLevelFilter = "Root" && ProjectLevel = 0) ||
                           (gLevelFilter = "Child" && ProjectLevel = 1)
                       ) &&
-                      (IsBlank(txtSearch.Value) ||
-                          StartsWith(Title, txtSearch.Value) ||
-                          StartsWith(ProjectID, txtSearch.Value)
+                      (IsBlank(txtSearch.Text) ||
+                          StartsWith(Title, txtSearch.Text) ||
+                          StartsWith(ProjectID, txtSearch.Text)
                       )
                   ),
                   "ID", SortOrder.Descending

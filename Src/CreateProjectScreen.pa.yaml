@@ -79,6 +79,95 @@ Screens:
                         Size: =11
                         Text: ="This request will be applied only after Manager and Executive approval."
                         Width: =Parent.Width - 40
+            - rowHierarchy:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(241, 239, 232, 1)
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =110
+                  LayoutWrap: =true
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - colLevel:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =420
+                      Children:
+                        - lblLevelLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Project Level *"
+                              Width: =Parent.Width
+                        - rdoLevel:
+                            Control: Radio@0.0.25
+                            Properties:
+                              Items: =["Root Project (Level 0)", "Child Project (Level 1)"]
+                              Layout: ='RadioGroupCanvas.Layout'.Horizontal
+                              Width: =Parent.Width
+                  - colRootProject:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =StartsWith(rdoLevel.Selected.Value, "Child")
+                        Width: =420
+                      Children:
+                        - lblRootProjectLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Root Project *"
+                              Width: =Parent.Width
+                        - cmbRootProject:
+                            Control: ModernCombobox@1.1.1
+                            Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
+                              Height: =40
+                              InputTextPlaceholder: ="Choose the parent project"
+                              ItemDisplayText: =ThisItem.Title
+                              Items: |-
+                                =Filter(Project_List, ProjectLevel = 0 &&
+                                    (ProjectStatus.Value = "Not Started" ||
+                                        ProjectStatus.Value = "In Planning" ||
+                                        ProjectStatus.Value = "In Progress" ||
+                                        ProjectStatus.Value = "On Hold" ||
+                                        ProjectStatus.Value = "Completed" ||
+                                        ProjectStatus.Value = "Cancelled")
+                                )
+                              SelectMultiple: =false
+                              Size: =0
+                              Width: =Parent.Width
             - rowNameType:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -758,95 +847,6 @@ Screens:
                               InputTextPlaceholder: ="Choose one or more products"
                               ItemDisplayText: =ThisItem.Title
                               Items: =Sort(Product_Database_SKU_Master, Title, SortOrder.Ascending)
-                              Size: =0
-                              Width: =Parent.Width
-            - rowHierarchy:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  Fill: =RGBA(241, 239, 232, 1)
-                  LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =20
-                  LayoutMinHeight: =110
-                  LayoutWrap: =true
-                  PaddingBottom: =12
-                  PaddingLeft: =20
-                  PaddingRight: =20
-                  PaddingTop: =12
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                  Width: =Parent.Width
-                Children:
-                  - colLevel:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =420
-                      Children:
-                        - lblLevelLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Project Level *"
-                              Width: =Parent.Width
-                        - rdoLevel:
-                            Control: Radio@0.0.25
-                            Properties:
-                              Items: =["Root Project (Level 0)", "Child Project (Level 1)"]
-                              Layout: ='RadioGroupCanvas.Layout'.Horizontal
-                              Width: =Parent.Width
-                  - colRootProject:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Visible: =StartsWith(rdoLevel.Selected.Value, "Child")
-                        Width: =420
-                      Children:
-                        - lblRootProjectLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Root Project *"
-                              Width: =Parent.Width
-                        - cmbRootProject:
-                            Control: ModernCombobox@1.1.1
-                            Properties:
-                              AllowExternalSelectedItems: =false
-                              FontWeight: =""
-                              Height: =40
-                              InputTextPlaceholder: ="Choose the parent project"
-                              ItemDisplayText: =ThisItem.Title
-                              Items: |-
-                                =Filter(Project_List, ProjectLevel = 0 &&
-                                    (ProjectStatus.Value = "Not Started" ||
-                                        ProjectStatus.Value = "In Planning" ||
-                                        ProjectStatus.Value = "In Progress" ||
-                                        ProjectStatus.Value = "On Hold" ||
-                                        ProjectStatus.Value = "Completed" ||
-                                        ProjectStatus.Value = "Cancelled")
-                                )
-                              SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
             - rowDescription:
