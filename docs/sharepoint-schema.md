@@ -191,8 +191,8 @@ Called from Power Fx after every successful state transition. **Always pass all 
 
 | # | Trigger param (rename from Power Automate default) | Type | Meaning |
 |---|---|---|---|
-| 1 | `notificationType` (default `text`) | Text | `SubmittedToManager` \| `ManagerApprovedToExecutive` \| `FinalApproved` \| `FinalRejected` |
-| 2 | `recipientEmails` (default `text_1`) | Text | recipient emails, `;`-separated |
+| 1 | `notificationType` (default `text`) | Text | `SubmittedToManager` \| `ManagerApprovedToExecutive` \| `FinalApproved` \| `FinalRejected` \| `FinalApprovedManagerCopy` \| `FinalRejectedManagerCopy` |
+| 2 | `recipientEmails` (default `text_1`) | Text | recipient email — always exactly one recipient per call (each `notificationType` = one recipient + one template, see `approval-workflow-plan.md` §2a); the underlying "Send an email (V2)" action natively accepts a `;`-separated list, but the app never relies on that |
 | 3 | `requestTitle` (default `text_2`) | Text | change request title |
 | 4 | `requestId` (default `number`) | Number | change request ID |
 | 5 | `requestType` (default `text_3`) | Text | request type (`Create`/`Update`/`Delete`) |
@@ -201,7 +201,9 @@ Called from Power Fx after every successful state transition. **Always pass all 
 | 8 | `actionByName` (default `text_6`) | Text | action-by display name |
 | 9 | `remark` (default `text_7`) | Text | remark (`""` when N/A — never omit) |
 
-Rename each "Ask in PowerApps" input to the name above when building the flow (Power Automate defaults to `text`/`text_1`/`number`/... if left unrenamed). Power Apps still calls `Project_Notify.Run(...)` **positionally** in this exact order — renaming only changes the identifier used inside the flow body (`triggerBody()['notificationType']`, etc.) and the intellisense hint shown in the Power Apps formula bar.
+Rename each "Ask in PowerApps" input to the name above when building the flow (Power Automate defaults to `text`/`text_1`/`number`/... if left unrenamed). Power Apps still calls `Project_Notify.Run(...)` **positionally** in this exact order.
+
+**Renaming does NOT change the key used inside the flow body.** It only relabels the input in the designer and in the Power Apps formula-bar intellisense hint. Every expression inside the flow itself (the `Switch`'s `On` field, both `Set variable` actions, the email templates) must still reference the field by its **original default key**, with the safe-navigation `?` operator — e.g. `@{triggerBody()?['text_2']}` for `requestTitle` (the 3rd input added), never `@{triggerBody()?['requestTitle']}`. See `docs/approval-workflow-plan.md` §3 for the full default-key mapping and `flows/Project_Notify/templates/` for templates already written against the correct keys.
 
 Flow body: **Switch on `notificationType`** (not nested If) → each case sets `Subject`/`Body` variables → single "Send an email (V2)" with To = `recipientEmails`. Switch **Default → Terminate (Failed, "Unknown notificationType")**. Full email templates in `docs/approval-workflow-plan.md`.
 

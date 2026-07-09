@@ -335,9 +335,11 @@ Screens:
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =120
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
-                  LayoutMinHeight: =110
+                  LayoutMinHeight: =90
                   PaddingBottom: =8
                   PaddingLeft: =20
                   PaddingRight: =20

@@ -24,16 +24,29 @@ Pending Manager ── ApprovalsScreen, StepNumber 1, actor = the CR's/project's
         ▼
 Pending Executive ── ApprovalsScreen, StepNumber 2, actor = the CR's/project's ProjectOwner only ──
         │  Reject  → Remark ⚠ → log(2, Rejected, Remark) → CR = "Rejected"
-        │            → Notify("FinalRejected", requester)
+        │            → Notify("FinalRejected", requester); Notify("FinalRejectedManagerCopy", that project's ProjectManager)
         │  Approve → APPLY to Project_List (Switch on RequestType, guarded Patch)
         │            success → log(2, Approved) → CR = "Approved"
-        │                      → Notify("FinalApproved", requester)
+        │                      → Notify("FinalApproved", requester); Notify("FinalApprovedManagerCopy", that project's ProjectManager)
         │            failure → Notify error, CR STAYS "Pending Executive" (retryable)
         ▼
 Approved / Rejected (terminal)
 ```
 
 Anyone with a tenant email can submit (`Requester` above is not a `Project_User` role — Managers and Executives can submit requests too).
+
+### 2a. Notification matrix
+
+Who gets emailed for each decision — **the Manager is only ever cc'd at the Executive step**, not at their own step (they already know they just acted):
+
+| Step | Actor | Decision | Notified |
+|---|---|---|---|
+| 1 (Manager) | ProjectManager | Approve | Executive (`ManagerApprovedToExecutive`) |
+| 1 (Manager) | ProjectManager | Reject ⚠ Remark | Requester (`FinalRejected`) |
+| 2 (Executive) | ProjectOwner | Approve | Requester (`FinalApproved`) **+ Manager (`FinalApprovedManagerCopy`)** |
+| 2 (Executive) | ProjectOwner | Reject ⚠ Remark | Requester (`FinalRejected`) **+ Manager (`FinalRejectedManagerCopy`)** |
+
+The bolded **+ Manager** legs are the delta from the original spec. Each recipient gets its own `notificationType`/template/`Project_Notify.Run` call rather than being folded into one `;`-joined `recipientEmails` — the Requester and Manager copies read differently ("your request" vs. "a project you manage"), and this keeps the existing "one `notificationType` = one recipient + one template" contract from `SubmittedToManager`/`ManagerApprovedToExecutive` intact (9-arg trigger schema unchanged; no new args, just 2 new `Switch` cases). At Step 2 the app therefore chains two `Project_Notify.Run(...)` calls with `;` (same statement-chaining pattern already used elsewhere in `ApprovalsScreen.pa.yaml`, e.g. `Project_Notify.Run(...); Notify(...); Navigate(...)`). At Step 1, `FinalRejected` keeps its original single-call, requester-only form since there is no "Manager" leg to add at that step.
 
 **Authorization is per-project, not per-role.** Having `Role = "Manager"` in `Project_User` is necessary but not sufficient to act on a given CR — the user must also be that specific CR's/project's `ProjectManager` (Step 1) or `ProjectOwner` (Step 2). For a Create CR, "that project" means the values proposed on the CR itself (`ProjectManager`/`ProjectOwner`, since the project doesn't exist yet); for Update/Delete, it means the live target row in `Project_List` (via `TargetItemID`). There is no substitute-approver role — a Manager who isn't the assigned `ProjectManager` for a project never sees that project's CR in their queue at all. See `CLAUDE.md` §Role-based visibility for the exact formula and the 3 places it's duplicated.
 
@@ -56,27 +69,31 @@ Anyone with a tenant email can submit (`Requester` above is not a `Project_User`
 
 - **Trigger**: Power Apps (V2). Add 9 inputs in this exact order, declaring types explicitly (do NOT let a Blank in the first test run infer the type), and rename each from its Power Automate default:
   `notificationType` (Text, default `text`), `recipientEmails` (Text, default `text_1`), `requestTitle` (Text, default `text_2`), `requestId` (Number, default `number`), `requestType` (Text, default `text_3`), `projectName` (Text, default `text_4`), `requesterName` (Text, default `text_5`), `actionByName` (Text, default `text_6`), `remark` (Text, default `text_7`) — meanings in `sharepoint-schema.md` §Flows.
-- **Actions**:
-  1. `Initialize variable` — `varSubject` (String), `varBody` (String).
-  2. `Switch` on `notificationType` with 4 cases setting `varSubject` / `varBody` (templates below). **Default branch → Terminate (Failed, "Unknown notificationType")** so a typo in the app surfaces as a flow failure instead of silent no-mail.
-  3. `Send an email (V2)` — To: `recipientEmails` (semicolon-separated works natively), Subject: `varSubject`, Body: `varBody` (HTML on).
+  **Renaming only relabels the input in the designer/Power Apps intellisense — it does NOT change the underlying trigger-body key.** Every expression inside this flow (Switch's `On`, both `Set variable` actions, every email template) must still address the field by its **original default key** (`text`, `text_1`, `text_2`, `number`, `text_3`, `text_4`, `text_5`, `text_6`, `text_7`, in that add-order) with the safe-navigation `?` operator, e.g. `@{triggerBody()?['text_2']}` for `requestTitle` — never `@{triggerBody()?['requestTitle']}`.
+- **Actions** (each `Initialize variable` below is its own separate action — the action only ever initializes one variable, it cannot be shared across three):
+  1. `Initialize variable` → `varSubject` (String, blank initial value).
+  2. `Initialize variable` → `varBody` (String, blank initial value — holds **HTML**, not plain text).
+  3. `Initialize variable` → `varAppLink` (String) = the app deep link, set **once** here (fill in after the app is published): `https://apps.powerapps.com/play/e/<ENV_ID>/a/<APP_ID>?tenantId=<TENANT_ID>`.
+  4. `Switch` on `notificationType` with 6 cases, each using `Set variable` to set `varSubject` / `varBody` (templates below). **Default branch → Terminate (Failed, "Unknown notificationType")** so a typo in the app surfaces as a flow failure instead of silent no-mail.
+  5. `Send an email (V2)` — To: `recipientEmails` (always exactly one recipient per call, see §2a), Subject: `varSubject`, Body: `varBody`, **Is HTML = Yes**.
 - **Connection**: `app.admin@maxbiocare.com` shared mailbox connection; pin it under *Run only users* so every app user sends through the same connection.
-- App deep link used in bodies (fill after the app is published):
-  `https://apps.powerapps.com/play/e/<ENV_ID>/a/<APP_ID>?tenantId=<TENANT_ID>`
+- Every email body links back to the app via `@{variables('varAppLink')}` — set the URL once in action 3 above and every template (all 6 cases) picks it up; nothing to edit per-template. See `flows/Project_Notify/README.md`.
 
 ### Email templates (English)
 
+**Body is HTML, not plain text.** The ready-to-paste HTML source for `varBody` in each `Switch` case lives in [`flows/Project_Notify/templates/`](../flows/Project_Notify/) (one file per case — see [`flows/Project_Notify/README.md`](../flows/Project_Notify/README.md) for how to paste it into Power Automate's Body field via Code View). What follows below is the **content spec** (subject line + body copy in plain-text form) — the source of truth for wording; the HTML files are that same copy laid out in a branded table template.
+
 **Case `SubmittedToManager`** — To: all active Managers
 
-- Subject: `[Project List] Approval needed: @{triggerBody()['requestTitle']}`
+- Subject: `[Project List] Approval needed: @{triggerBody()?['text_2']}`
 - Body:
   ```
   A new project change request is waiting for your review.
 
-  Request:      @{triggerBody()['requestTitle']} (#@{triggerBody()['requestId']})
-  Type:         @{triggerBody()['requestType']}
-  Project:      @{triggerBody()['projectName']}
-  Requested by: @{triggerBody()['requesterName']}
+  Request:      @{triggerBody()?['text_2']} (#@{triggerBody()?['number']})
+  Type:         @{triggerBody()?['text_3']}
+  Project:      @{triggerBody()?['text_4']}
+  Requested by: @{triggerBody()?['text_5']}
 
   Please open the Project List app → Approvals to review it.
   <app deep link>
@@ -84,41 +101,70 @@ Anyone with a tenant email can submit (`Requester` above is not a `Project_User`
 
 **Case `ManagerApprovedToExecutive`** — To: all active Executives
 
-- Subject: `[Project List] Executive approval needed: @{triggerBody()['requestTitle']}`
-- Body: same layout, plus `Manager approved by: @{triggerBody()['actionByName']}`.
+- Subject: `[Project List] Executive approval needed: @{triggerBody()?['text_2']}`
+- Body: same layout, plus `Manager approved by: @{triggerBody()?['text_6']}`.
 
 **Case `FinalApproved`** — To: requester
 
-- Subject: `[Project List] Approved: @{triggerBody()['requestTitle']}`
+- Subject: `[Project List] Approved: @{triggerBody()?['text_2']}`
 - Body:
   ```
   Your request has been fully approved and applied.
 
-  Request:     @{triggerBody()['requestTitle']} (#@{triggerBody()['requestId']})
-  Type:        @{triggerBody()['requestType']}
-  Project:     @{triggerBody()['projectName']}
-  Approved by: @{triggerBody()['actionByName']}
+  Request:     @{triggerBody()?['text_2']} (#@{triggerBody()?['number']})
+  Type:        @{triggerBody()?['text_3']}
+  Project:     @{triggerBody()?['text_4']}
+  Approved by: @{triggerBody()?['text_6']}
   ```
 
 **Case `FinalRejected`** — To: requester
 
-- Subject: `[Project List] Rejected: @{triggerBody()['requestTitle']}`
+- Subject: `[Project List] Rejected: @{triggerBody()?['text_2']}`
 - Body:
   ```
   Your request has been rejected.
 
-  Request:     @{triggerBody()['requestTitle']} (#@{triggerBody()['requestId']})
-  Type:        @{triggerBody()['requestType']}
-  Project:     @{triggerBody()['projectName']}
-  Rejected by: @{triggerBody()['actionByName']}
-  Remark:      @{triggerBody()['remark']}
+  Request:     @{triggerBody()?['text_2']} (#@{triggerBody()?['number']})
+  Type:        @{triggerBody()?['text_3']}
+  Project:     @{triggerBody()?['text_4']}
+  Rejected by: @{triggerBody()?['text_6']}
+  Remark:      @{triggerBody()?['text_7']}
 
   You may submit a new request after addressing the remark.
   ```
 
+**Case `FinalApprovedManagerCopy`** — To: that project's ProjectManager (Step 2/Executive approve only — Manager-facing copy of `FinalApproved`, distinct wording since the Manager isn't the requester)
+
+- Subject: `[Project List] Project approved: @{triggerBody()?['text_2']}`
+- Body:
+  ```
+  A project you manage has been fully approved by the Executive and applied.
+
+  Request:      @{triggerBody()?['text_2']} (#@{triggerBody()?['number']})
+  Type:         @{triggerBody()?['text_3']}
+  Project:      @{triggerBody()?['text_4']}
+  Requested by: @{triggerBody()?['text_5']}
+  Approved by:  @{triggerBody()?['text_6']}
+  ```
+
+**Case `FinalRejectedManagerCopy`** — To: that project's ProjectManager (Step 2/Executive reject only — Manager-facing copy of `FinalRejected`, distinct wording since the Manager isn't the requester)
+
+- Subject: `[Project List] Project rejected: @{triggerBody()?['text_2']}`
+- Body:
+  ```
+  A project you manage was rejected by the Executive.
+
+  Request:      @{triggerBody()?['text_2']} (#@{triggerBody()?['number']})
+  Type:         @{triggerBody()?['text_3']}
+  Project:      @{triggerBody()?['text_4']}
+  Requested by: @{triggerBody()?['text_5']}
+  Rejected by:  @{triggerBody()?['text_6']}
+  Remark:       @{triggerBody()?['text_7']}
+  ```
+
 ### Recipient resolution (app side, Power Fx)
 
-Per-project, not a role broadcast — see `CLAUDE.md` §Role-based visibility for the full authorization model.
+Per-project, not a role broadcast — see `CLAUDE.md` §Role-based visibility for the full authorization model. Each `notificationType` is always exactly one recipient — never a `;`-joined list.
 
 ```
 // SubmittedToManager: the CR's/project's specific ProjectManager
@@ -127,13 +173,15 @@ Coalesce(
     "app.admin@maxbiocare.com"
 )
 // ManagerApprovedToExecutive: the CR's/project's specific ProjectOwner, same Coalesce fallback
-// FinalApproved / FinalRejected (requester): gSelectedCR.RequesterEmail
+// FinalRejected / FinalApproved (requester leg, both steps): gSelectedCR.RequesterEmail
+// FinalApprovedManagerCopy / FinalRejectedManagerCopy (Step 2 only, Manager leg): the CR's/project's specific ProjectManager, same Coalesce fallback as ProjectOwner above
 ```
 
 `<ProjectManager.Id>` / `<ProjectOwner.Id>` resolve differently depending on where the call happens:
 - Submitting a Create request (`CreateProjectScreen`): the form's own `cmbManager.Selected.ID` (the CR doesn't exist yet).
 - Submitting an Update/Delete request (`Update`/`DeleteProjectScreen`): the target project's `gSelectedProject.ProjectManager.Id`.
 - Manager approving (`ApprovalsScreen`, Step 1 → notifies the Executive): `If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectOwner.Id, gLiveTarget.ProjectOwner.Id)`.
+- Executive approving/rejecting (`ApprovalsScreen`, Step 2 → notifies requester, then separately the Manager): same `Create` vs. live-target branch as above, but resolving `ProjectManager.Id` instead of `ProjectOwner.Id` for the second `Project_Notify.Run` call.
 
 ## 4. FUTURE — `Project_SyncActualCost` (placeholder, do not build yet)
 

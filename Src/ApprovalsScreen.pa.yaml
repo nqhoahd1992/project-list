@@ -65,7 +65,6 @@ Screens:
                   Height: =48
                   LayoutAlignItems: =LayoutAlignItems.Center
                   LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =8
                   LayoutMinHeight: =28
                   RadiusBottomLeft: =0
                   RadiusBottomRight: =0
@@ -262,7 +261,7 @@ Screens:
                   Text: =ThisItem.RequestType.Value
                   Width: =60
                   X: =12
-                  Y: =10
+                  Y: =15
             - lblCRProjectName:
                 Control: Label@2.5.1
                 Properties:
@@ -282,7 +281,7 @@ Screens:
                   Text: =ThisItem.ProjectName
                   Width: =Parent.Width - 200
                   X: =80
-                  Y: =10
+                  Y: =15
             - lblCRStatus:
                 Control: Label@2.5.1
                 Properties:
@@ -300,7 +299,7 @@ Screens:
                         RGBA(250, 238, 218, 1)
                     )
                   FontWeight: =FontWeight.Semibold
-                  Height: =22
+                  Height: =28
                   OnSelect: |-
                     =Set(gSelectedCR, ThisItem);
                     Set(gLiveTarget,
@@ -313,9 +312,9 @@ Screens:
                     Set(gShowRejectPanel, false)
                   Size: =10
                   Text: =ThisItem.ApprovalStatus.Value
-                  Width: =130
-                  X: =Parent.Width - 145
-                  Y: =38
+                  Width: =120
+                  X: =Parent.Width - 135
+                  Y: =40
             - lblCRMeta:
                 Control: Label@2.5.1
                 Properties:
@@ -335,7 +334,7 @@ Screens:
                   Text: ="#" & ThisItem.ID & " | " & ThisItem.RequesterID.Value & " | " & Text(ThisItem.Created, "dd/mm/yyyy")
                   Width: =Parent.Width - 160
                   X: =12
-                  Y: =40
+                  Y: =45
             - rectSeparator_1:
                 Control: Rectangle@2.3.0
                 Properties:
@@ -369,7 +368,7 @@ Screens:
           Variant: AutoLayout
           Properties:
             DropShadow: =DropShadow.None
-            Height: =Parent.Height - 120
+            Height: =Parent.Height - 60 - If(conActionBar.Visible, 60, 0)
             LayoutDirection: =LayoutDirection.Vertical
             LayoutOverflowY: =LayoutOverflow.Scroll
             RadiusBottomLeft: =0
@@ -1820,6 +1819,25 @@ Screens:
                                                         gCurrentEmployee.Title,
                                                         txtRejectRemark.Value
                                                     );
+                                                    If(
+                                                        gSelectedCR.ApprovalStatus.Value = "Pending Executive",
+                                                        Project_Notify.Run(
+                                                            "FinalRejectedManagerCopy",
+                                                            Coalesce(
+                                                                LookUp('Employee List',
+                                                                    ID = If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectManager.Id, gLiveTarget.ProjectManager.Id)
+                                                                ).Email,
+                                                                "app.admin@maxbiocare.com"
+                                                            ),
+                                                            gSelectedCR.Title,
+                                                            gSelectedCR.ID,
+                                                            gSelectedCR.RequestType.Value,
+                                                            gSelectedCR.ProjectName,
+                                                            gSelectedCR.RequesterID.Value,
+                                                            gCurrentEmployee.Title,
+                                                            txtRejectRemark.Value
+                                                        )
+                                                    );
                                                     Notify("Request rejected", NotificationType.Success);
                                                     Set(gShowRejectPanel, false);
                                                     Set(gSelectedCR, Blank());
@@ -2030,6 +2048,20 @@ Screens:
                                                         gCurrentEmployee.Title,
                                                         ""
                                                     );
+                                                    Project_Notify.Run(
+                                                        "FinalApprovedManagerCopy",
+                                                        Coalesce(
+                                                            LookUp('Employee List', ID = gSelectedCR.ProjectManager.Id).Email,
+                                                            "app.admin@maxbiocare.com"
+                                                        ),
+                                                        gSelectedCR.Title,
+                                                        gSelectedCR.ID,
+                                                        "Create",
+                                                        gSelectedCR.ProjectName,
+                                                        gSelectedCR.RequesterID.Value,
+                                                        gCurrentEmployee.Title,
+                                                        ""
+                                                    );
                                                     Notify("Approved — project created as " & wPID.ProjectID, NotificationType.Success);
                                                     Set(gSelectedCR, Blank());
                                                     Set(gLiveTarget, Blank())
@@ -2091,6 +2123,20 @@ Screens:
                                                             gCurrentEmployee.Title,
                                                             ""
                                                         );
+                                                        Project_Notify.Run(
+                                                            "FinalApprovedManagerCopy",
+                                                            Coalesce(
+                                                                LookUp('Employee List', ID = gLiveTarget.ProjectManager.Id).Email,
+                                                                "app.admin@maxbiocare.com"
+                                                            ),
+                                                            gSelectedCR.Title,
+                                                            gSelectedCR.ID,
+                                                            "Update",
+                                                            gSelectedCR.ProjectName,
+                                                            gSelectedCR.RequesterID.Value,
+                                                            gCurrentEmployee.Title,
+                                                            ""
+                                                        );
                                                         Notify("Approved — update applied to the project", NotificationType.Success);
                                                         Set(gSelectedCR, Blank());
                                                         Set(gLiveTarget, Blank())
@@ -2142,6 +2188,20 @@ Screens:
                                                         Project_Notify.Run(
                                                             "FinalApproved",
                                                             gSelectedCR.RequesterEmail,
+                                                            gSelectedCR.Title,
+                                                            gSelectedCR.ID,
+                                                            "Delete",
+                                                            gSelectedCR.ProjectName,
+                                                            gSelectedCR.RequesterID.Value,
+                                                            gCurrentEmployee.Title,
+                                                            ""
+                                                        );
+                                                        Project_Notify.Run(
+                                                            "FinalApprovedManagerCopy",
+                                                            Coalesce(
+                                                                LookUp('Employee List', ID = wTarget.ProjectManager.Id).Email,
+                                                                "app.admin@maxbiocare.com"
+                                                            ),
                                                             gSelectedCR.Title,
                                                             gSelectedCR.ID,
                                                             "Delete",

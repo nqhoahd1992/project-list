@@ -334,6 +334,78 @@ Screens:
                   RadiusTopRight: =0
                   Width: =Parent.Width
                 Children:
+                  - colMarket:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =200
+                        X: =40
+                        Y: =40
+                      Children:
+                        - lblMarketLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Market *"
+                              Width: =Parent.Width
+                        - cmbMarket:
+                            Control: ModernCombobox@1.1.1
+                            Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              ItemDisplayText: =ThisItem.Value
+                              Items: =Choices(Project_ChangeRequests.Market)
+                              SelectMultiple: =false
+                              Size: =0
+                              Width: =Parent.Width
+                              X: =40
+                              Y: =40
+                  - colCostCenter:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =4
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =240
+                        X: =40
+                        Y: =40
+                      Children:
+                        - lblCostCenterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: ="Cost Center *"
+                              Width: =Parent.Width
+                        - cmbCostCenter:
+                            Control: ModernCombobox@1.1.1
+                            Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
+                              Height: =40
+                              InputTextPlaceholder: ="Choose an option"
+                              ItemDisplayText: =ThisItem.Value
+                              Items: =Choices(Project_ChangeRequests.CostCenter)
+                              SelectMultiple: =false
+                              Size: =0
+                              Width: =Parent.Width
                   - colBudgetAmount:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -355,12 +427,71 @@ Screens:
                               Size: =11
                               Text: ="Budget Amount *"
                               Width: =Parent.Width
-                        - txtBudgetAmount:
-                            Control: TextInput@0.0.54
+                        - colBudgetAmountRow:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
                             Properties:
+                              DropShadow: =DropShadow.None
+                              FillPortions: =0
                               Height: =40
-                              Placeholder: ="0"
-                              Width: =Parent.Width
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              LayoutGap: =10
+                              LayoutMinHeight: =16
+                              LayoutMinWidth: =16
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                            Children:
+                              - txtBudgetAmount:
+                                  Control: ModernTextInput@1.1.1
+                                  Properties:
+                                    FillPortions: =1
+                                    FontWeight: =""
+                                    Height: =40
+                                    LayoutMinWidth: =120
+                                    MaxLength: =-1
+                                    Placeholder: ="0"
+                                    Size: =0
+                                    TriggerOutput: =TriggerOutput.FocusOut
+                                    Width: =Parent.Width
+                                    X: =40
+                                    Y: =40
+                              - currency:
+                                  Control: ModernText@1.0.0
+                                  Properties:
+                                    Align: =Align.Center
+                                    Fill: =RGBA(214, 221, 224, 1)
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =40
+                                    LayoutMinHeight: =16
+                                    LayoutMinWidth: =16
+                                    PaddingBottom: =0
+                                    PaddingLeft: =0
+                                    PaddingRight: =0
+                                    PaddingTop: =0
+                                    Size: =13
+                                    Text: =Switch(cmbMarket.Selected.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", "")
+                                    Width: =100
+            - rowBusiness:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =20
+                  LayoutMinHeight: =90
+                  LayoutWrap: =true
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
                   - colCapexOpex:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -373,6 +504,8 @@ Screens:
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
                         Width: =240
+                        X: =40
+                        Y: =40
                       Children:
                         - lblCapexOpexLabel:
                             Control: Label@2.5.1
@@ -383,11 +516,16 @@ Screens:
                               Text: ="CapEx / OpEx *"
                               Width: =Parent.Width
                         - cmbCapexOpex:
-                            Control: ComboBox@0.0.51
+                            Control: ModernCombobox@1.1.1
                             Properties:
+                              AllowExternalSelectedItems: =false
+                              FontWeight: =""
                               Height: =40
                               InputTextPlaceholder: ="Choose an option"
+                              ItemDisplayText: =ThisItem.Value
                               Items: =Choices(Project_ChangeRequests.CapexOpex)
+                              SelectMultiple: =false
+                              Size: =0
                               Width: =Parent.Width
                   - colObjective:
                       Control: GroupContainer@1.5.0
@@ -421,93 +559,6 @@ Screens:
                               InputTextPlaceholder: ="Choose an option"
                               ItemDisplayText: =ThisItem.Value
                               Items: =Choices(Project_ChangeRequests.StrategicObjective)
-                              SelectMultiple: =false
-                              Size: =0
-                              Width: =Parent.Width
-            - rowBusiness:
-                Control: GroupContainer@1.5.0
-                Variant: AutoLayout
-                Properties:
-                  DropShadow: =DropShadow.None
-                  LayoutDirection: =LayoutDirection.Horizontal
-                  LayoutGap: =20
-                  LayoutMinHeight: =90
-                  LayoutWrap: =true
-                  PaddingBottom: =8
-                  PaddingLeft: =20
-                  PaddingRight: =20
-                  PaddingTop: =8
-                  RadiusBottomLeft: =0
-                  RadiusBottomRight: =0
-                  RadiusTopLeft: =0
-                  RadiusTopRight: =0
-                  Width: =Parent.Width
-                Children:
-                  - colMarket:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =200
-                      Children:
-                        - lblMarketLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Market *"
-                              Width: =Parent.Width
-                        - cmbMarket:
-                            Control: ModernCombobox@1.1.1
-                            Properties:
-                              AllowExternalSelectedItems: =false
-                              FontWeight: =""
-                              Height: =40
-                              InputTextPlaceholder: ="Choose an option"
-                              ItemDisplayText: =ThisItem.Value
-                              Items: =Choices(Project_ChangeRequests.Market)
-                              SelectMultiple: =false
-                              Size: =0
-                              Width: =Parent.Width
-                  - colCostCenter:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =240
-                        X: =40
-                        Y: =40
-                      Children:
-                        - lblCostCenterLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Cost Center *"
-                              Width: =Parent.Width
-                        - cmbCostCenter:
-                            Control: ModernCombobox@1.1.1
-                            Properties:
-                              AllowExternalSelectedItems: =false
-                              FontWeight: =""
-                              Height: =40
-                              InputTextPlaceholder: ="Choose an option"
-                              ItemDisplayText: =ThisItem.Value
-                              Items: =Choices(Project_ChangeRequests.CostCenter)
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
@@ -902,7 +953,7 @@ Screens:
                                             IsBlank(cmbCostCenter.Selected.Value),
                                             Notify("Cost Center is required", NotificationType.Error),
                                             If(
-                                                IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Value) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text),
+                                                IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Text) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text),
                                                 Notify("Please fill in all required fields (Start/End Date, Budget Amount, CapEx/OpEx, Strategic Objective, Market, Channel, Project Documents URL, Project Description)", NotificationType.Error),
                                                 If(
                                                     StartsWith(rdoLevel.Selected.Value, "Child") && IsBlank(cmbRootProject.Selected.ProjectID),
@@ -930,7 +981,7 @@ Screens:
                                                                 StartDate: dpStartDate.SelectedDate,
                                                                 EndDate: dpEndDate.SelectedDate,
                                                                 ProjectStatus: {Value: "Not Started"},
-                                                                BudgetAmount: Value(txtBudgetAmount.Value),
+                                                                BudgetAmount: Value(txtBudgetAmount.Text),
                                                                 CapexOpex: {Value: cmbCapexOpex.Selected.Value},
                                                                 RelatedSKU: ForAll(cmbSKU.SelectedItems, {Id: ID, Value: Title}),
                                                                 Market: {Value: cmbMarket.Selected.Value},

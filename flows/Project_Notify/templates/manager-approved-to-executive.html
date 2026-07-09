@@ -1,0 +1,66 @@
+<!-- notificationType: ManagerApprovedToExecutive | To: the CR's/project's specific ProjectOwner -->
+<!-- Paste into Power Automate "Send an email (V2)" -> Body, using the Code View (</>) editor. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F1EFE8;padding:24px 0;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#FFFFFF;border-radius:8px;overflow:hidden;font-family:'Segoe UI',Arial,sans-serif;">
+        <tr>
+          <td style="background-color:#534AB7;padding:20px 32px;">
+            <span style="color:#FFFFFF;font-size:16px;font-weight:600;">Max Biocare Project List</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px 32px 8px 32px;">
+            <span style="display:inline-block;background-color:#854F0B;color:#FFFFFF;font-size:11px;font-weight:700;letter-spacing:0.5px;padding:4px 10px;border-radius:999px;">ACTION REQUIRED</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 32px 0 32px;">
+            <span style="color:#1F2430;font-size:18px;font-weight:600;">Executive approval needed: @{triggerBody()?['text_2']}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:12px 32px 0 32px;">
+            <span style="color:#4B5563;font-size:14px;line-height:20px;">The Manager has approved this request. It now needs your review as Project Owner.</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 32px 0 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+              <tr>
+                <td style="padding:6px 0;color:#6B7280;font-size:13px;width:140px;">Request</td>
+                <td style="padding:6px 0;color:#1F2430;font-size:13px;">@{triggerBody()?['text_2']} (#@{triggerBody()?['number']})</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6B7280;font-size:13px;">Type</td>
+                <td style="padding:6px 0;color:#1F2430;font-size:13px;">@{triggerBody()?['text_3']}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6B7280;font-size:13px;">Project</td>
+                <td style="padding:6px 0;color:#1F2430;font-size:13px;">@{triggerBody()?['text_4']}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6B7280;font-size:13px;">Requested by</td>
+                <td style="padding:6px 0;color:#1F2430;font-size:13px;">@{triggerBody()?['text_5']}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6B7280;font-size:13px;">Manager approved by</td>
+                <td style="padding:6px 0;color:#1F2430;font-size:13px;">@{triggerBody()?['text_6']}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px 32px 0 32px;">
+            <a href="@{variables('varAppLink')}" style="display:inline-block;background-color:#534AB7;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;padding:10px 20px;border-radius:6px;">Open Approvals</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:32px 32px 24px 32px;">
+            <span style="color:#9CA3AF;font-size:12px;">This is an automated message from the Max Biocare Project List app. Please do not reply to this email.</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

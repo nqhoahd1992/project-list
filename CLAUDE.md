@@ -24,7 +24,11 @@ project-list/
 ├── .claude/pa-yaml-rules.md        ← Power Apps YAML gotchas (control versions, YAML pitfalls) — READ BEFORE EDITING ANY .pa.yaml
 ├── docs/
 │   ├── sharepoint-schema.md        ← authoritative data model (4 lists + flow trigger args)
-│   └── approval-workflow-plan.md   ← state machine, Project_Notify flow spec, email templates
+│   └── approval-workflow-plan.md   ← state machine, Project_Notify flow spec, email templates (content spec)
+├── flows/Project_Notify/
+│   ├── README.md                   ← how to paste the HTML into Power Automate's Send-an-email Body
+│   ├── BUILD_GUIDE.md              ← click-by-click steps to build the whole flow from scratch in the portal
+│   └── templates/*.html            ← ready-to-paste HTML body per notificationType case (6 files)
 └── Src/
     ├── _EditorState.pa.yaml        ← screen order
     ├── App.pa.yaml                 ← App.OnStart global state
@@ -118,13 +122,13 @@ Email notifications follow the same per-project targeting, not a role broadcast:
 ### Done — repo authoring phase complete
 - All docs written: `docs/sharepoint-schema.md` (4 lists + `Project_Notify` 9-arg table), `docs/approval-workflow-plan.md` (state machine, flow build spec, 4 English email templates, future cost-sync placeholder), this CLAUDE.md, `.claude/pa-yaml-rules.md` (copied from procurement-procedure).
 - All 8 `Src/*.pa.yaml` files written and YAML-validated: `_EditorState`, `App` (OnStart role resolution), `AllProjectsScreen` (filters, search, pending-change badge, approvals counter), `CreateProjectScreen` (full form, Actual Cost read-only, Root/Child hierarchy picker), `ViewProjectScreen` (read-only project details, gallery row tap + View button target), `UpdateProjectScreen` (Description + End Date only, pending-CR guard, owner-only edit), `DeleteProjectScreen` (reason + confirm required, active-children guard), `ApprovalsScreen` (master-detail, update diff view, manager/executive approve chains with apply-before-flip, reject with required remark).
-- Cross-checked: column names in formulas match the schema doc; status strings consistent; 8 `Project_Notify.Run` call sites all pass 9 args.
+- Cross-checked: column names in formulas match the schema doc; status strings consistent; 12 `Project_Notify.Run` call sites all pass 9 args (includes the `FinalApprovedManagerCopy`/`FinalRejectedManagerCopy` Manager-copy calls added at the Executive step — see §Known caveats history).
 - Decisions locked with the user: staging list `Project_ChangeRequests`; single shared Approvals screen; Update limited to Description + End Date; soft delete; **Budget Approved column dropped** (Budget Amount only); SKU lookup target = `Product_Database_SKU_Master`; emails on submit / manager-approve / final result.
 
 ### Next — manual setup outside this repo (in order)
 1. Create the 4 SharePoint lists per `docs/sharepoint-schema.md` — Choice value sets on `Project_ChangeRequests` must exactly match `Project_List`. Apply the permission model in `docs/sharepoint-schema.md` §SharePoint list permissions (custom "Add Items only" level on `Project_ChangeRequests`/`Project_ApprovalLog` for non-approvers; Read-only on `Project_List`).
 2. Seed `Project_User` with at least one account per role (Manager/Executive).
-3. Build the `Project_Notify` flow per `docs/approval-workflow-plan.md` §3 (declare all 9 trigger input types explicitly; Switch with Default → Terminate; pin the `app.admin@maxbiocare.com` connection in Run-only users).
+3. Build the `Project_Notify` flow per `docs/approval-workflow-plan.md` §3 (declare all 9 trigger input types explicitly; Switch with Default → Terminate; pin the `app.admin@maxbiocare.com` connection in Run-only users) — click-by-click steps in `flows/Project_Notify/BUILD_GUIDE.md`; HTML bodies to paste in `flows/Project_Notify/templates/`.
 4. Create the canvas app in Power Apps Studio, add the 6 data sources + the flow, then paste the `Src/*.pa.yaml` screens (order: App OnStart, then screens). Verify the exact modern-control version Studio assigns to `DatePicker`/`Toggle` and add it to `.claude/pa-yaml-rules.md`.
 5. Verify two unconfirmed schema points before wiring: the display/Title column of `Product_Database_SKU_Master`, and Employee List internal name `email` (lowercase).
 6. Run the E2E test checklist: create → 2-step approve → row created with generated ProjectID + 2 log rows; update diff + apply; delete (reason required, soft delete, restore via Show Deleted); reject at each step with remark; duplicate-pending guard; child-project root picker.
@@ -141,3 +145,4 @@ Email notifications follow the same per-project targeting, not a role broadcast:
 - `Product_Database_SKU_Master` schema and Employee List internal names must be verified in SharePoint before first Studio wiring.
 - DatePicker/Toggle modern-control versions are not yet in `pa-yaml-rules.md` — verify in Studio on first paste and add them.
 - Manager/Executive need raw `Edit Items` on `Project_ChangeRequests`/`Project_List` for their approve-step `Patch` to work — they could in principle bypass the app's guarded formulas by editing those lists directly in SharePoint. Not closable with list permissions alone (see `docs/sharepoint-schema.md` §SharePoint list permissions); would need moving the apply step into a Power Automate flow with a locked-down connection.
+- **Manager-copy notifications are app-side done, flow-side pending**: at the Executive step (Step 2), `ApprovalsScreen.pa.yaml`'s `btnConfirmReject` (guarded by `gSelectedCR.ApprovalStatus.Value = "Pending Executive"` — Step 1 rejects stay requester-only) and all 3 `FinalApproved` apply blocks (Create/Update/Delete) now chain a second `Project_Notify.Run("FinalApprovedManagerCopy"/"FinalRejectedManagerCopy", <that project's ProjectManager email>, ...)` alongside the existing requester-facing call — see `docs/approval-workflow-plan.md` §2a/§3 for the full spec and email templates. **Still outstanding**: the `Project_Notify` flow itself needs those 2 new `Switch` cases added in the Power Automate portal (manual setup step 3 in §Next) — until then these 2 call sites will hit the flow's `Default → Terminate (Failed, "Unknown notificationType")` branch.
