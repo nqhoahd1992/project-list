@@ -35,7 +35,7 @@ project-list/
     ├── AllProjectsScreen.pa.yaml   ← home: approved projects gallery
     ├── CreateProjectScreen.pa.yaml ← full form → Create change request
     ├── ViewProjectScreen.pa.yaml   ← read-only project details (gallery row tap + View button)
-    ├── UpdateProjectScreen.pa.yaml ← Description + End Date only → Update change request (owner-only)
+    ├── UpdateProjectScreen.pa.yaml ← Description + Deliverables + End Date only → Update change request (owner-only)
     ├── DeleteProjectScreen.pa.yaml ← confirmation + reason → Delete change request
     └── ApprovalsScreen.pa.yaml     ← shared approval queue (role-filtered) + apply logic
 ```
@@ -66,7 +66,7 @@ Update/Delete CRs skip `Pending Sponsor` entirely and start at `Pending Manager`
 
 - **`ProjectManager` is never chosen on the Create form.** The requester picks a `ProjectSponsor` instead (owns the project's outcome, not a supervisor); the CR sits at `Pending Sponsor` until that Sponsor opens `ApprovalsScreen`'s "Assign Manager" tab, picks a `ProjectManager`, and submits — which is what flips the CR to `Pending Manager` and starts the approval chain proper. No log row is written for this step (it's an assignment, not an approve/reject decision).
 - **Apply-before-flip**: on Executive approve, the master Patch runs FIRST; the CR becomes `Approved` only if it succeeds. Never mark a CR Approved before its change is applied.
-- Apply per type — Create: new master row (+ 2nd Patch for ProjectID) · Update: only `ProjectDescription` + `EndDate` · Delete: soft delete `ProjectStatus = "Deleted"`.
+- Apply per type — Create: new master row (+ 2nd Patch for ProjectID) · Update: only `ProjectDescription` + `Deliverables` + `EndDate` · Delete: soft delete `ProjectStatus = "Deleted"`.
 - Guards: one pending CR per target project; a level-0 project with active children cannot be deleted; Reject requires Remark.
 
 ## ProjectID generation (race-free)
@@ -125,9 +125,9 @@ Email notifications follow the same per-project targeting, not a role broadcast:
 
 ### Done — repo authoring phase complete
 - All docs written: `docs/sharepoint-schema.md` (4 lists + `Project_Notify` 9-arg table), `docs/approval-workflow-plan.md` (state machine, flow build spec, 4 English email templates, future cost-sync placeholder), this CLAUDE.md, `.claude/pa-yaml-rules.md` (copied from procurement-procedure).
-- All 8 `Src/*.pa.yaml` files written and YAML-validated: `_EditorState`, `App` (OnStart role resolution), `AllProjectsScreen` (filters, search, pending-change badge, approvals counter), `CreateProjectScreen` (full form, Actual Cost read-only, Root/Child hierarchy picker), `ViewProjectScreen` (read-only project details, gallery row tap + View button target), `UpdateProjectScreen` (Description + End Date only, pending-CR guard, owner-only edit), `DeleteProjectScreen` (reason + confirm required, active-children guard), `ApprovalsScreen` (master-detail, update diff view, manager/executive approve chains with apply-before-flip, reject with required remark).
+- All 8 `Src/*.pa.yaml` files written and YAML-validated: `_EditorState`, `App` (OnStart role resolution), `AllProjectsScreen` (filters, search, pending-change badge, approvals counter), `CreateProjectScreen` (full form, Actual Cost read-only, Root/Child hierarchy picker), `ViewProjectScreen` (read-only project details, gallery row tap + View button target), `UpdateProjectScreen` (Description + Deliverables + End Date only, pending-CR guard, owner-only edit), `DeleteProjectScreen` (reason + confirm required, active-children guard), `ApprovalsScreen` (master-detail, update diff view, manager/executive approve chains with apply-before-flip, reject with required remark).
 - Cross-checked: column names in formulas match the schema doc; status strings consistent; 13 `Project_Notify.Run` call sites all pass 9 args (includes the `FinalApprovedManagerCopy`/`FinalRejectedManagerCopy` Manager-copy calls at the Executive step, and the `SubmittedToSponsor`/Sponsor-triggered `SubmittedToManager` calls added for the Sponsor-assigns-Manager step — see §Known caveats history).
-- Decisions locked with the user: staging list `Project_ChangeRequests`; single shared Approvals screen; Update limited to Description + End Date; soft delete; **Budget Approved column dropped** (Budget Amount only); SKU lookup target = `Product_Database_SKU_Master`; emails on submit / sponsor-assigns-manager / manager-approve / final result; **`ProjectManager` is chosen by a separate `ProjectSponsor` role after Create-submit, not by the requester on the Create form** (Sponsor owns the outcome, Manager supervises — see `docs/approval-workflow-plan.md` §2).
+- Decisions locked with the user: staging list `Project_ChangeRequests`; single shared Approvals screen; Update limited to Description + Deliverables + End Date; soft delete; **Budget Approved column dropped** (Budget Amount only); SKU lookup target = `Product_Database_SKU_Master`; emails on submit / sponsor-assigns-manager / manager-approve / final result; **`ProjectManager` is chosen by a separate `ProjectSponsor` role after Create-submit, not by the requester on the Create form** (Sponsor owns the outcome, Manager supervises — see `docs/approval-workflow-plan.md` §2).
 
 ### Next — manual setup outside this repo (in order)
 1. Create the 4 SharePoint lists per `docs/sharepoint-schema.md` — Choice value sets on `Project_ChangeRequests` must exactly match `Project_List`. Apply the permission model in `docs/sharepoint-schema.md` §SharePoint list permissions: plain `Edit` for everyone on `Project_ChangeRequests` (broadened from the original "Add Items only" design so any employee picked as `ProjectSponsor` can complete the "Assign Manager" Patch — accepted trade-off, see that section); custom "Add Items + Read only" level still applies to `Project_ApprovalLog`; Read-only on `Project_List` (except Executive: Edit).

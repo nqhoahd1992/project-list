@@ -367,6 +367,43 @@ Screens:
                         Size: =11
                         Text: =gSelectedProject.ProjectDescription
                         Width: =Parent.Width - 40
+            - rowCurrentDeliverables:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =120
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =90
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblCurrentDeliverablesLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =20
+                        Size: =9
+                        Text: ="Current Deliverables"
+                        Width: =Parent.Width
+                  - lblCurrentDeliverablesValue:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =60
+                        Overflow: =Overflow.Scroll
+                        Size: =11
+                        Text: =gSelectedProject.Deliverables
+                        Width: =Parent.Width - 40
             - rowEditableNote:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -394,7 +431,7 @@ Screens:
                         FontWeight: =FontWeight.Semibold
                         Height: =28
                         Size: =11
-                        Text: ="Only Project Description and End Date can be updated. Changes take effect after Manager and Executive approval."
+                        Text: ="Only Project Description, Deliverables, and End Date can be updated. Changes take effect after Manager and Executive approval."
                         Width: =Parent.Width - 40
             - rowNewDescription:
                 Control: GroupContainer@1.5.0
@@ -433,6 +470,45 @@ Screens:
                         Placeholder: ="Describe the project scope"
                         Size: =0
                         TriggerOutput: =TriggerOutput.FocusOut
+                        Width: =Parent.Width - 40
+            - rowNewDeliverables:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =160
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =20
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblNewDeliverablesLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Bold
+                        Height: =24
+                        Size: =12
+                        Text: ="New Deliverables"
+                        Width: =300
+                  - txtNewDeliverables:
+                      Control: ModernTextInput@1.1.1
+                      Properties:
+                        Default: =gSelectedProject.Deliverables
+                        FontWeight: =""
+                        Height: =100
+                        MaxLength: =-1
+                        Placeholder: ="List the expected deliverables for this project"
+                        Size: =0
+                        TriggerOutput: =TriggerOutput.FocusOut
+                        Type: =TextInputType.Multiline
                         Width: =Parent.Width - 40
             - rowNewEndDate:
                 Control: GroupContainer@1.5.0
@@ -599,7 +675,7 @@ Screens:
                                 wNewEndDate <= gSelectedProject.StartDate,
                                 Notify("New End Date must be after the current Start Date", NotificationType.Error),
                                 If(
-                                    txtNewDescription.Text = gSelectedProject.ProjectDescription && wNewEndDate = gSelectedProject.EndDate,
+                                    txtNewDescription.Text = gSelectedProject.ProjectDescription && txtNewDeliverables.Text = gSelectedProject.Deliverables && wNewEndDate = gSelectedProject.EndDate,
                                     Notify("No changes to submit", NotificationType.Warning),
                                     With(
                                 {wCR: Patch(
@@ -616,6 +692,7 @@ Screens:
                                         TargetProjectID: gSelectedProject.ProjectID,
                                         ProjectName: gSelectedProject.Title,
                                         ProjectDescription: txtNewDescription.Text,
+                                        Deliverables: txtNewDeliverables.Text,
                                         EndDate: wNewEndDate
                                     }
                                 )},

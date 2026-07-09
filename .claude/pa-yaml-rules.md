@@ -214,6 +214,33 @@ When `Items` is a raw table of records (e.g. `Sort('Employee List', Title, ...)`
 
 ---
 
+## 6c. Multiline + pre-filled text input: `ModernTextInput@1.1.1` with `Type`, not `TextInput@0.0.54` with `Mode`
+
+Two different "multiline" incantations exist for two different controls in this app family, and mixing them up trips a `PA2108`:
+
+- `TextInput@0.0.54` (legacy control, used for fresh/blank remark-style fields like reject remarks, delete reasons): multiline via `Mode: ='TextInputCanvas.Mode'.Multiline`. **Has no `Default` property at all** — confirmed by Studio error (`PA2108: Unknown property 'Default' for control type 'TextInput@0.0.54'`) and by grepping the sibling `procurement-procedure`/`invoice-batch-app` repos, where every usage of this control is always a fresh/empty field, never pre-filled. Use this control only when the field starts blank every time.
+- `ModernTextInput@1.1.1` (used everywhere in this app for pre-filled/editable fields, e.g. `txtNewDescription`, `txtDetailInvoiceNumber` in the sibling invoice-batch-app): **does** support `Default`, and multiline is `Type: =TextInputType.Multiline` — **not** `Mode: ='TextInputCanvas.Mode'.Multiline` (that's the legacy control's enum; pasting it onto `ModernTextInput` is a different `PA2108`).
+
+**Correct — multiline field that also needs to show/edit an existing value:**
+```yaml
+- txtNewDeliverables:
+    Control: ModernTextInput@1.1.1
+    Properties:
+      Default: =gSelectedProject.Deliverables
+      FontWeight: =""
+      Height: =100
+      MaxLength: =-1
+      Placeholder: ="List the expected deliverables for this project"
+      Size: =0
+      TriggerOutput: =TriggerOutput.FocusOut
+      Type: =TextInputType.Multiline
+      Width: =Parent.Width - 40
+```
+
+**Rule:** need `Default` (pre-filled/editable) → `ModernTextInput@1.1.1` + `Type: =TextInputType.Multiline` for multiline. Need only a fresh/blank field (remark, reason) → `TextInput@0.0.54` + `Mode: ='TextInputCanvas.Mode'.Multiline` is fine and simpler. Never combine a control with the other control's enum.
+
+---
+
 ## 4. Global var initialisation
 
 Declare all attachment globals in `App.OnStart`:

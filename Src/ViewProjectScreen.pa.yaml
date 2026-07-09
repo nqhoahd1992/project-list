@@ -741,6 +741,42 @@ Screens:
                         Size: =11
                         Text: =gSelectedProject.ProjectDescription
                         Width: =Parent.Width - 40
+            - rowDeliverables_2:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =110
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =150
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblDeliverablesLabel_2:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =20
+                        Size: =9
+                        Text: ="Deliverables"
+                        Width: =Parent.Width
+                  - lblDeliverablesValue_2:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Overflow: =Overflow.Scroll
+                        Size: =11
+                        Text: =gSelectedProject.Deliverables
+                        Width: =Parent.Width - 40
       - conActionBar_4:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout

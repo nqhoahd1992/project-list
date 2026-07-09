@@ -515,7 +515,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =630
+                  Height: =730
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =12
                   LayoutMinHeight: =220
@@ -931,6 +931,40 @@ Screens:
                               Overflow: =Overflow.Scroll
                               Size: =11
                               Text: =gSelectedCR.ProjectDescription
+                              VerticalAlign: =VerticalAlign.Top
+                              Width: =Parent.Width
+                  - colPDeliverables:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =700
+                        X: =40
+                        Y: =40
+                      Children:
+                        - lblPDeliverablesLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =18
+                              Size: =9
+                              Text: ="Deliverables"
+                              Width: =Parent.Width
+                        - lblPDeliverablesValue:
+                            Control: Label@2.5.1
+                            Properties:
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Semibold
+                              Height: =60
+                              Overflow: =Overflow.Scroll
+                              Size: =11
+                              Text: =gSelectedCR.Deliverables
                               VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.Width
                   - colPDocs:
@@ -1740,6 +1774,49 @@ Screens:
                         Size: =11
                         Text: =gSelectedCR.ProjectDescription
                         Width: =Parent.Width - 40
+                  - lblDiffDeliverablesCurrentLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =18
+                        Size: =9
+                        Text: ="Deliverables — current"
+                        Width: =Parent.Width - 40
+                  - lblDiffDeliverablesCurrent:
+                      Control: Label@2.5.1
+                      Properties:
+                        Fill: =RGBA(241, 239, 232, 1)
+                        FontWeight: =FontWeight.Semibold
+                        Height: =100
+                        Overflow: =Overflow.Scroll
+                        PaddingLeft: =8
+                        Size: =11
+                        Text: =gLiveTarget.Deliverables
+                        Width: =Parent.Width - 40
+                  - lblDiffDeliverablesProposedLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(136, 135, 128, 1)
+                        Height: =18
+                        Size: =9
+                        Text: ="Deliverables — proposed"
+                        Width: =Parent.Width - 40
+                  - lblDiffDeliverablesProposed:
+                      Control: Label@2.5.1
+                      Properties:
+                        Fill: |-
+                          =If(
+                              gLiveTarget.Deliverables <> gSelectedCR.Deliverables,
+                              RGBA(250, 238, 218, 1),
+                              RGBA(255, 255, 255, 1)
+                          )
+                        FontWeight: =FontWeight.Semibold
+                        Height: =100
+                        Overflow: =Overflow.Scroll
+                        PaddingLeft: =8
+                        Size: =11
+                        Text: =gSelectedCR.Deliverables
+                        Width: =Parent.Width - 40
                   - lblDiffEndDate:
                       Control: Label@2.5.1
                       Properties:
@@ -2149,6 +2226,7 @@ Screens:
                                 {
                                     Title: gSelectedCR.ProjectName,
                                     ProjectDescription: gSelectedCR.ProjectDescription,
+                                    Deliverables: gSelectedCR.Deliverables,
                                     ProjectType: gSelectedCR.ProjectType,
                                     Department: gSelectedCR.Department,
                                     RequestedBy: {Id: gSelectedCR.RequesterID.Id, Value: gSelectedCR.RequesterID.Value},
@@ -2268,6 +2346,7 @@ Screens:
                                         wTarget,
                                         {
                                             ProjectDescription: gSelectedCR.ProjectDescription,
+                                            Deliverables: gSelectedCR.Deliverables,
                                             EndDate: gSelectedCR.EndDate
                                         }
                                     )},

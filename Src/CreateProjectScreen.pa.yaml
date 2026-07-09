@@ -885,6 +885,44 @@ Screens:
                         Size: =0
                         TriggerOutput: =TriggerOutput.FocusOut
                         Width: =Parent.Width - 40
+            - rowDeliverables:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =160
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  PaddingBottom: =8
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =8
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                Children:
+                  - lblDeliverablesLabel:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =24
+                        Size: =11
+                        Text: ="Deliverables *"
+                        Width: =300
+                  - txtDeliverables:
+                      Control: ModernTextInput@1.1.1
+                      Properties:
+                        FontWeight: =""
+                        Height: =100
+                        MaxLength: =-1
+                        Placeholder: ="List the expected deliverables for this project"
+                        Size: =0
+                        TriggerOutput: =TriggerOutput.FocusOut
+                        Type: =TextInputType.Multiline
+                        Width: =Parent.Width - 40
       - conActionBar_1:
           Control: GroupContainer@1.5.0
           Variant: AutoLayout
@@ -951,8 +989,8 @@ Screens:
                                             IsBlank(cmbCostCenter.Selected.Value),
                                             Notify("Cost Center is required", NotificationType.Error),
                                             If(
-                                                IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Text) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text),
-                                                Notify("Please fill in all required fields (Start/End Date, Budget Amount, CapEx/OpEx, Strategic Objective, Market, Channel, Project Documents URL, Project Description)", NotificationType.Error),
+                                                IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Text) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text) || IsBlank(txtDeliverables.Text),
+                                                Notify("Please fill in all required fields (Start/End Date, Budget Amount, CapEx/OpEx, Strategic Objective, Market, Channel, Project Documents URL, Project Description, Deliverables)", NotificationType.Error),
                                                 If(
                                                     StartsWith(rdoLevel.Selected.Value, "Child") && IsBlank(cmbRootProject.Selected.ProjectID),
                                                 Notify("Please select the root project", NotificationType.Error),
@@ -971,6 +1009,7 @@ Screens:
                                                                 RequesterID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
                                                                 ProjectName: txtProjectName.Text,
                                                                 ProjectDescription: txtDescription.Text,
+                                                                Deliverables: txtDeliverables.Text,
                                                                 ProjectType: {Value: cmbProjectType.Selected.Value},
                                                                 Department: cmbDepartment.Selected.Value,
                                                                 ProjectOwner: {Id: cmbOwner.Selected.ID, Value: cmbOwner.Selected.Title},
