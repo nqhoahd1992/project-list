@@ -54,7 +54,7 @@ Screens:
             RadiusBottomRight: =0
             RadiusTopLeft: =0
             RadiusTopRight: =0
-            Width: =600
+            Width: =599
             Y: =60
           Children:
             - rowTabsBtn:
@@ -261,7 +261,7 @@ Screens:
               );
               Set(gShowRejectPanel, false)
             TemplateSize: =84
-            Width: =600
+            Width: =599
             Y: =108
           Children:
             - rectRowHitArea:
@@ -403,7 +403,7 @@ Screens:
             Fill: =RGBA(210, 209, 199, 1)
             Height: =Parent.Height - 60
             Width: =1
-            X: =600
+            X: =599
             Y: =60
       - lblSelectHint:
           Control: Label@2.5.1
@@ -515,7 +515,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =500
+                  Height: =630
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =12
                   LayoutMinHeight: =220

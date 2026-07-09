@@ -402,7 +402,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =140
+                  Height: =100
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   PaddingBottom: =8
@@ -421,14 +421,18 @@ Screens:
                         FontWeight: =FontWeight.Bold
                         Height: =24
                         Size: =12
-                        Text: ="New Project Description"
+                        Text: ="New Project Short Description"
                         Width: =300
                   - txtNewDescription:
-                      Control: TextInput@0.0.54
+                      Control: ModernTextInput@1.1.1
                       Properties:
-                        Height: =80
-                        Mode: ='TextInputCanvas.Mode'.Multiline
-                        Value: =gSelectedProject.ProjectDescription
+                        Default: =gSelectedProject.ProjectDescription
+                        FontWeight: =""
+                        Height: =40
+                        MaxLength: =-1
+                        Placeholder: ="Describe the project scope"
+                        Size: =0
+                        TriggerOutput: =TriggerOutput.FocusOut
                         Width: =Parent.Width - 40
             - rowNewEndDate:
                 Control: GroupContainer@1.5.0
@@ -561,16 +565,29 @@ Screens:
             Y: =Parent.Height - 60
           Children:
             - btnCancelUpdate:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
+                  FontWeight: =""
                   Height: =36
                   OnSelect: =Navigate(AllProjectsScreen)
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
                   Text: ="Cancel"
+                  VerticalAlign: =VerticalAlign.Middle
                   Width: =120
             - btnSubmitUpdate:
-                Control: Button@0.0.45
+                Control: ModernButton@1.0.0
                 Properties:
+                  Align: =Align.Center
                   DisplayMode: =If(gHasPendingCR, DisplayMode.Disabled, DisplayMode.Edit)
+                  FontWeight: =""
                   Height: =36
                   OnSelect: |-
                     =With(
@@ -582,7 +599,7 @@ Screens:
                                 wNewEndDate <= gSelectedProject.StartDate,
                                 Notify("New End Date must be after the current Start Date", NotificationType.Error),
                                 If(
-                                    txtNewDescription.Value = gSelectedProject.ProjectDescription && wNewEndDate = gSelectedProject.EndDate,
+                                    txtNewDescription.Text = gSelectedProject.ProjectDescription && wNewEndDate = gSelectedProject.EndDate,
                                     Notify("No changes to submit", NotificationType.Warning),
                                     With(
                                 {wCR: Patch(
@@ -598,7 +615,7 @@ Screens:
                                         TargetItemID: gSelectedProject.ID,
                                         TargetProjectID: gSelectedProject.ProjectID,
                                         ProjectName: gSelectedProject.Title,
-                                        ProjectDescription: txtNewDescription.Value,
+                                        ProjectDescription: txtNewDescription.Text,
                                         EndDate: wNewEndDate
                                     }
                                 )},
@@ -627,5 +644,14 @@ Screens:
                     )
                     )
                     )
+                  PaddingBottom: =5
+                  PaddingLeft: =12
+                  PaddingRight: =12
+                  PaddingTop: =5
+                  RadiusBottomLeft: =4
+                  RadiusBottomRight: =4
+                  RadiusTopLeft: =4
+                  RadiusTopRight: =4
                   Text: ="Submit Update Request →"
+                  VerticalAlign: =VerticalAlign.Middle
                   Width: =220

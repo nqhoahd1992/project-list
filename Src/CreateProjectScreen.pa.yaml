@@ -873,18 +873,17 @@ Screens:
                         FontWeight: =FontWeight.Semibold
                         Height: =24
                         Size: =11
-                        Text: ="Project Description *"
+                        Text: ="Project Short Description *"
                         Width: =300
                   - txtDescription:
                       Control: ModernTextInput@1.1.1
                       Properties:
                         FontWeight: =""
-                        Height: =80
+                        Height: =40
                         MaxLength: =-1
                         Placeholder: ="Describe the project scope"
                         Size: =0
                         TriggerOutput: =TriggerOutput.FocusOut
-                        Type: =TextInputType.Multiline
                         Width: =Parent.Width - 40
       - conActionBar_1:
           Control: GroupContainer@1.5.0

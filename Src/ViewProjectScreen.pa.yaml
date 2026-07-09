@@ -711,6 +711,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
+                  Height: =110
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   LayoutMinHeight: =150
@@ -736,7 +737,6 @@ Screens:
                       Control: Label@2.5.1
                       Properties:
                         FontWeight: =FontWeight.Semibold
-                        Height: =120
                         Overflow: =Overflow.Scroll
                         Size: =11
                         Text: =gSelectedProject.ProjectDescription
