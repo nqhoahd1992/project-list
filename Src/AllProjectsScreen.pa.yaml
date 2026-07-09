@@ -669,7 +669,23 @@ Screens:
                         Height: =30
                         Icon: ="Delete"
                         Layout: =ButtonLayout.IconOnly
-                        OnSelect: =Set(gSelectedProject, ThisItem); Navigate(DeleteProjectScreen)
+                        OnSelect: |-
+                          =If(
+                              ThisItem.ProjectLevel = 0 &&
+                              !IsBlank(
+                                  LookUp(Project_List,
+                                      RootProjectID = ThisItem.ProjectID &&
+                                      (ProjectStatus.Value = "Not Started" ||
+                                          ProjectStatus.Value = "In Planning" ||
+                                          ProjectStatus.Value = "In Progress" ||
+                                          ProjectStatus.Value = "On Hold" ||
+                                          ProjectStatus.Value = "Completed" ||
+                                          ProjectStatus.Value = "Cancelled")
+                                  )
+                              ),
+                              Notify("This root project has active child projects. Delete all child projects before deleting the root.", NotificationType.Error),
+                              Set(gSelectedProject, ThisItem); Navigate(DeleteProjectScreen)
+                          )
                         PaddingBottom: =5
                         PaddingLeft: =12
                         PaddingRight: =12
