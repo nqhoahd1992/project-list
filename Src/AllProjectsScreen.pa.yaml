@@ -558,8 +558,7 @@ Screens:
                   Height: =28
                   Size: =10
                   Text: =If(ThisItem.ProjectLevel = 1, "↳ " & ThisItem.RootProjectID, "Root")
-                  Width: =120
-                  X: =1091
+                  X: =1066
                   Y: =10
             - lblPendingChangeBadge:
                 Control: Label@2.5.1
@@ -588,7 +587,7 @@ Screens:
                         )
                     )
                   Width: =120
-                  X: =953
+                  X: =938
                   Y: =10
             - galProjectsBtn:
                 Control: GroupContainer@1.5.0
