@@ -729,11 +729,14 @@ Screens:
                   Height: =24
                   Size: =11
                   Text: |-
-                    ="Owner: " & ThisItem.ProjectOwner.Value &
-                    " | Manager: " & ThisItem.ProjectManager.Value &
-                    If(IsBlank(ThisItem.StartDate), "", " | " & Text(ThisItem.StartDate, "dd/mm/yyyy") & " → " & Text(ThisItem.EndDate, "dd/mm/yyyy")) &
-                    If(IsBlank(ThisItem.BudgetAmount) || ThisItem.BudgetAmount = 0, "", " | Budget: " & Text(ThisItem.BudgetAmount, "[#,###]")) &
-                    If(IsBlank(ThisItem.ActualCost) || ThisItem.ActualCost = 0, "", " | Actual: " & Text(ThisItem.ActualCost, "[#,###]"))
+                    =With(
+                        {wCur: Switch(ThisItem.Market.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", "")},
+                        "Owner: " & ThisItem.ProjectOwner.Value &
+                        " | Manager: " & ThisItem.ProjectManager.Value &
+                        If(IsBlank(ThisItem.StartDate), "", " | " & Text(ThisItem.StartDate, "dd/mm/yyyy") & " → " & Text(ThisItem.EndDate, "dd/mm/yyyy")) &
+                        If(IsBlank(ThisItem.BudgetAmount) || ThisItem.BudgetAmount = 0, "", " | Budget: " & Text(ThisItem.BudgetAmount, "[#,###]") & " " & wCur) &
+                        If(IsBlank(ThisItem.ActualCost) || ThisItem.ActualCost = 0, "", " | Actual: " & Text(ThisItem.ActualCost, "[#,###]") & " " & wCur)
+                    )
                   Width: =Parent.Width - 620
                   X: =16
                   Y: =51

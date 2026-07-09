@@ -328,7 +328,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =Text(gSelectedProject.BudgetAmount, "[#,###]") & " / " & If(IsBlank(gSelectedProject.ActualCost), "—", Text(gSelectedProject.ActualCost, "[#,###]"))
+                              Text: =Text(gSelectedProject.BudgetAmount, "[#,###]") & " / " & If(IsBlank(gSelectedProject.ActualCost), "—", Text(gSelectedProject.ActualCost, "[#,###]")) & " " & Switch(gSelectedProject.Market.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", "")
                               Width: =200
             - rowCurrentDescription:
                 Control: GroupContainer@1.5.0
