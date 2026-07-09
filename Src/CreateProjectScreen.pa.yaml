@@ -982,6 +982,7 @@ Screens:
                                                                 EndDate: dpEndDate.SelectedDate,
                                                                 ProjectStatus: {Value: "Not Started"},
                                                                 BudgetAmount: Value(txtBudgetAmount.Text),
+                                                                Currency: currency.Text,
                                                                 CapexOpex: {Value: cmbCapexOpex.Selected.Value},
                                                                 RelatedSKU: ForAll(cmbSKU.SelectedItems, {Id: ID, Value: Title}),
                                                                 Market: {Value: cmbMarket.Selected.Value},

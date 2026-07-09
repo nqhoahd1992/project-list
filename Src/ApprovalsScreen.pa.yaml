@@ -686,7 +686,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =Text(gSelectedCR.BudgetAmount, "[#,###]") & " " & Switch(gSelectedCR.Market.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", "") & " / " & gSelectedCR.CapexOpex.Value
+                              Text: =Text(gSelectedCR.BudgetAmount, "[#,###]") & " " & gSelectedCR.Currency & " / " & gSelectedCR.CapexOpex.Value
                               Width: =Parent.Width
                   - colPMarket:
                       Control: GroupContainer@1.5.0
@@ -1277,7 +1277,7 @@ Screens:
                                     FontWeight: =FontWeight.Semibold
                                     Height: =24
                                     Size: =11
-                                    Text: =Text(gLiveTarget.BudgetAmount, "[#,###]") & " " & Switch(gLiveTarget.Market.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", "")
+                                    Text: =Text(gLiveTarget.BudgetAmount, "[#,###]") & " " & gLiveTarget.Currency
                                     Width: =220
                         - colLTActualCost:
                             Control: GroupContainer@1.5.0
@@ -1309,7 +1309,7 @@ Screens:
                                     FontWeight: =FontWeight.Semibold
                                     Height: =24
                                     Size: =11
-                                    Text: =If(IsBlank(gLiveTarget.ActualCost), "—", Text(gLiveTarget.ActualCost, "[#,###]") & " " & Switch(gLiveTarget.Market.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", ""))
+                                    Text: =If(IsBlank(gLiveTarget.ActualCost), "—", Text(gLiveTarget.ActualCost, "[#,###]") & " " & gLiveTarget.Currency)
                                     Width: =220
                         - colLTCapexOpex:
                             Control: GroupContainer@1.5.0
@@ -1978,6 +1978,7 @@ Screens:
                                     EndDate: gSelectedCR.EndDate,
                                     ProjectStatus: gSelectedCR.ProjectStatus,
                                     BudgetAmount: gSelectedCR.BudgetAmount,
+                                    Currency: gSelectedCR.Currency,
                                     CapexOpex: gSelectedCR.CapexOpex,
                                     RelatedSKU: gSelectedCR.RelatedSKU,
                                     Market: gSelectedCR.Market,

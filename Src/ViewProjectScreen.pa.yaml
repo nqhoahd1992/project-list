@@ -472,7 +472,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =Text(gSelectedProject.BudgetAmount, "[#,###]") & " " & Switch(gSelectedProject.Market.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", "")
+                              Text: =Text(gSelectedProject.BudgetAmount, "[#,###]") & " " & gSelectedProject.Currency
                               Width: =220
                   - colActualCost_2:
                       Control: GroupContainer@1.5.0
@@ -504,7 +504,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =If(IsBlank(gSelectedProject.ActualCost), "—", Text(gSelectedProject.ActualCost, "[#,###]") & " " & Switch(gSelectedProject.Market.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", ""))
+                              Text: =If(IsBlank(gSelectedProject.ActualCost), "—", Text(gSelectedProject.ActualCost, "[#,###]") & " " & gSelectedProject.Currency)
                               Width: =220
                   - colCapexOpex_2:
                       Control: GroupContainer@1.5.0
