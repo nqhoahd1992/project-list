@@ -920,7 +920,7 @@ Screens:
                               Color: =RGBA(136, 135, 128, 1)
                               Height: =18
                               Size: =9
-                              Text: ="Description"
+                              Text: ="Short Description"
                               Width: =Parent.Width
                         - lblPDescriptionValue:
                             Control: Label@2.5.1

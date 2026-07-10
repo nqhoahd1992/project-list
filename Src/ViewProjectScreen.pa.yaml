@@ -250,6 +250,38 @@ Screens:
                               Size: =11
                               Text: =gSelectedProject.Priority.Value
                               Width: =220
+                  - colSponsor_2:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =46
+                        LayoutDirection: =LayoutDirection.Vertical
+                        LayoutGap: =2
+                        LayoutMinHeight: =60
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =220
+                      Children:
+                        - lblSponsorLabel_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              Height: =20
+                              Size: =9
+                              Text: ="Project Sponsor"
+                              Width: =220
+                        - lblSponsorValue_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =11
+                              Text: =gSelectedProject.ProjectSponsor.Value
+                              Width: =220
                   - colOwner_3:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -345,38 +377,6 @@ Screens:
                               Height: =24
                               Size: =11
                               Text: =If(IsBlank(gSelectedProject.RequestedBy.Value), "—", gSelectedProject.RequestedBy.Value)
-                              Width: =220
-                  - colApprovedBy_2:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =46
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =2
-                        LayoutMinHeight: =60
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =220
-                      Children:
-                        - lblApprovedByLabel_2:
-                            Control: Label@2.5.1
-                            Properties:
-                              Color: =RGBA(136, 135, 128, 1)
-                              Height: =20
-                              Size: =9
-                              Text: ="Approved By"
-                              Width: =220
-                        - lblApprovedByValue_2:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: =If(IsBlank(gSelectedProject.ApprovedBy.Value), "—", gSelectedProject.ApprovedBy.Value)
                               Width: =220
                   - colStatus_2:
                       Control: GroupContainer@1.5.0
@@ -731,7 +731,7 @@ Screens:
                         Color: =RGBA(136, 135, 128, 1)
                         Height: =20
                         Size: =9
-                        Text: ="Project Description"
+                        Text: ="Project Short Description"
                         Width: =Parent.Width
                   - lblCurrentDescValue_2:
                       Control: Label@2.5.1
@@ -747,7 +747,7 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =110
+                  Height: =140
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   LayoutMinHeight: =150
@@ -759,6 +759,11 @@ Screens:
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
+                  Visible: |-
+                    =gSelectedProject.RequestedBy.Id = gCurrentEmployee.ID ||
+                        gSelectedProject.ProjectSponsor.Id = gCurrentEmployee.ID ||
+                        gSelectedProject.ProjectManager.Id = gCurrentEmployee.ID ||
+                        gSelectedProject.ProjectOwner.Id = gCurrentEmployee.ID
                   Width: =Parent.Width
                 Children:
                   - lblDeliverablesLabel_2:
@@ -773,6 +778,7 @@ Screens:
                       Control: Label@2.5.1
                       Properties:
                         FontWeight: =FontWeight.Semibold
+                        Height: =80
                         Overflow: =Overflow.Scroll
                         Size: =11
                         Text: =gSelectedProject.Deliverables
