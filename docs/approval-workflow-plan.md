@@ -72,7 +72,7 @@ The bolded **+ Manager** legs are the delta from the original spec. Each recipie
 
 | RequestType | Apply |
 |---|---|
-| `Create` | Patch new `Project_List` row from CR values (`ApprovalStatus: Approved`, `ApprovedBy` = sponsor) → 2nd Patch sets `ProjectID = "PROJ-" & <MarketCode> & "-" & <DeptCode> & "-" & <Year> & "-" & Text(newRow.ID, "000")` (e.g. `PROJ-AU-GN-2026-002`; MarketCode = `Market.Value`, already `AU`/`MY`/`SG`/`VN`) |
+| `Create` | Patch new `Project_List` row from CR values → 2nd Patch sets `ProjectID = "PROJ-" & <MarketCode> & "-" & <DeptCode> & "-" & <Year> & "-" & Text(newRow.ID, "000")` (e.g. `PROJ-AU-GN-2026-002`; MarketCode = `Market.Value`, already `AU`/`MY`/`SG`/`VN`) |
 | `Update` | `LookUp` target by `TargetItemID` (guard: still exists) → Patch only `ProjectDescription` + `Deliverables` + `EndDate` |
 | `Delete` | Patch target `ProjectStatus = {Value: "Deleted"}` (soft delete — row is hidden from All Projects by default) |
 

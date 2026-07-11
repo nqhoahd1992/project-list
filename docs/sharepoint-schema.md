@@ -44,7 +44,7 @@ Assign via 3 SharePoint groups (Requester = default site Members/Visitors — ev
 
 ## `Project_List` — master project record (approved data only)
 
-Required ⚠: `ProjectStatus`, `ApprovalStatus`, `ProjectLevel`.
+Required ⚠: `ProjectStatus`, `ProjectLevel`.
 
 | Column (internal) | Type | Notes |
 |---|---|---|
@@ -68,8 +68,6 @@ Required ⚠: `ProjectStatus`, `ApprovalStatus`, `ProjectLevel`.
 | `RelatedSKU` | Lookup→`Product_Database_SKU_Master` (multi) | Table of `{Id, Value}` (→Title) — allow multiple values; verify the target list's Title/display column before wiring the picker |
 | `Market` | Choice | `AU`, `MY`, `SG`, `VN` — no longer the source `Currency` is derived from at display time (that coupling was removed); `Currency` is now its own stored field, only *initially populated* from Market's mapping at Create |
 | `Channel` | Choice | `Retail Pharmacy`, `Hospital`, `Distributor`, `E-commerce`, `Direct-to-Consumer`, `Cross-border`, `Multiple` |
-| `ApprovalStatus` ⚠ | Choice | `Approved` — always `Approved` on master rows (rows only exist after full approval); kept per spec for reporting |
-| `ApprovedBy` | Lookup→Employee List | Sponsor who applied the create (Step 2) |
 | `RequestedBy` ⚠ | Lookup→Employee List | Original requester who submitted the Create request (`{Id, Value}`, copied from `gSelectedCR.RequesterID` at apply time) — **gates who can submit Update/Delete for this project** (`AllProjectsScreen`'s Update/Delete row buttons only show when `RequestedBy.Id = gCurrentEmployee.ID`). Rows created before this column existed have it blank, which locks everyone out of Update/Delete for that row until fixed manually |
 | `ProjectDocuments` | Text (URL) | Document link — plain text column, NOT the Hyperlink column type (awkward to Patch) |
 | `StrategicObjective` | Choice | `Revenue Growth`, `Market Expansion`, `Brand Building`, `Product Innovation`, `Operational Excellence`, `Regulatory Compliance`, `Cost Optimization` |
