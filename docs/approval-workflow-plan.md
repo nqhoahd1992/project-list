@@ -1,12 +1,14 @@
 # Approval Workflow & Notification Flow — Design Spec
 
-How the 2-level approval (Manager → Executive) works, and the spec for the `Project_Notify` Power Automate flow. Data model in `docs/sharepoint-schema.md`.
+How the 2-level approval (Manager → Sponsor) works, and the spec for the `Project_Notify` Power Automate flow. Data model in `docs/sharepoint-schema.md`.
+
+> **Model note (2026-07-11):** The former "Executive/Owner" second approver was merged into the **Sponsor** — the Sponsor now does both Step 0 (assign Manager) and Step 2 (final approve + apply); there is no `ProjectOwner`. `Project_User.Role` value `Executive` → `Sponsor`; status `Pending Manager` → `Pending Manager Approval`, `Pending Executive` → `Pending Sponsor Approval`. The `Project_Notify` `notificationType` `ManagerApprovedToExecutive` was also renamed `ManagerApprovedToSponsor` (email wording updated too); the other type identifiers were already role-neutral and are unchanged. **The matching `Switch` case in the Power Automate flow must be renamed to `ManagerApprovedToSponsor`**, or that leg hits the `Default → Terminate` branch.
 
 ## 1. Principles
 
-- **No form ever writes `Project_List`.** Every Create / Update / Delete intent is stored as a row in `Project_ChangeRequests` (CR). The master list changes only inside the Executive-approve handler on `ApprovalsScreen`.
+- **No form ever writes `Project_List`.** Every Create / Update / Delete intent is stored as a row in `Project_ChangeRequests` (CR). The master list changes only inside the Sponsor's Step 2 final-approve handler on `ApprovalsScreen`.
 - **Apply happens via Power Apps `Patch`**, not a flow — synchronous error feedback, consistent with the procurement app. Flows are used only for email.
-- **Apply BEFORE flipping CR status.** On Executive approve the master Patch runs first; only if it succeeds does the CR become `Approved`. A failed apply leaves the CR at `Pending Executive` so the Executive can retry. (This ordering differs from procurement on purpose — a CR marked Approved but never applied would be unrecoverable without admin surgery.)
+- **Apply BEFORE flipping CR status.** On the Sponsor's Step 2 approve the master Patch runs first; only if it succeeds does the CR become `Approved`. A failed apply leaves the CR at `Pending Sponsor Approval` so the Sponsor can retry. (This ordering differs from procurement on purpose — a CR marked Approved but never applied would be unrecoverable without admin surgery.)
 - **Reject requires a Remark** at either step — enforced in the app before the log Patch.
 - **`ProjectManager` is never chosen by the requester.** On a Create request the requester instead picks a `ProjectSponsor` (owns the project's outcome, not a supervisory role); right after submit, that Sponsor is the one who assigns the actual `ProjectManager` (who then runs Step 1). Update/Delete requests skip this — they target an existing project whose `ProjectManager` was already assigned at its own Create time.
 
@@ -19,58 +21,58 @@ Requester submits (Create / Update / Delete form)
         ├─ Create ──▶ ApprovalStatus = "Pending Sponsor"
         │             Project_Notify.Run("SubmittedToSponsor", <picked ProjectSponsor's email>)
         │             ▼
-        │             Pending Sponsor ── ApprovalsScreen "Assign Manager" tab, actor = that CR's ProjectSponsor only ──
+        │             Pending Sponsor ── ApprovalsScreen "Assign Manager" tab, actor = that CR's ProjectSponsor only (Step 0) ──
         │             │  Sponsor picks a ProjectManager, submits
-        │             │      → ApprovalStatus = "Pending Manager"
+        │             │      → ApprovalStatus = "Pending Manager Approval"
         │             │      → Notify("SubmittedToManager", newly-assigned Manager's email)
         │             ▼
-        └─ Update / Delete ──▶ ApprovalStatus = "Pending Manager" directly (target project already has a ProjectManager)
+        └─ Update / Delete ──▶ ApprovalStatus = "Pending Manager Approval" directly (target project already has a ProjectManager)
                       Project_Notify.Run("SubmittedToManager", <that project's existing ProjectManager email>)
         ▼
-Pending Manager ── ApprovalsScreen, StepNumber 1, actor = the CR's/project's ProjectManager only ──
-        │  Approve → log(1, Approved) → CR = "Pending Executive"
-        │            → Notify("ManagerApprovedToExecutive", <that project's ProjectOwner email>)
+Pending Manager Approval ── ApprovalsScreen, StepNumber 1, actor = the CR's/project's ProjectManager only ──
+        │  Approve → log(1, Approved) → CR = "Pending Sponsor Approval"
+        │            → Notify("ManagerApprovedToSponsor", <that CR's/project's ProjectSponsor email>)
         │  Reject  → Remark ⚠ → log(1, Rejected, Remark) → CR = "Rejected"
         │            → Notify("FinalRejected", requester)
         ▼
-Pending Executive ── ApprovalsScreen, StepNumber 2, actor = the CR's/project's ProjectOwner only ──
+Pending Sponsor Approval ── ApprovalsScreen, StepNumber 2, actor = the CR's/project's ProjectSponsor only ──
         │  Reject  → Remark ⚠ → log(2, Rejected, Remark) → CR = "Rejected"
         │            → Notify("FinalRejected", requester); Notify("FinalRejectedManagerCopy", that project's ProjectManager)
         │  Approve → APPLY to Project_List (Switch on RequestType, guarded Patch)
         │            success → log(2, Approved) → CR = "Approved"
         │                      → Notify("FinalApproved", requester); Notify("FinalApprovedManagerCopy", that project's ProjectManager)
-        │            failure → Notify error, CR STAYS "Pending Executive" (retryable)
+        │            failure → Notify error, CR STAYS "Pending Sponsor Approval" (retryable)
         ▼
 Approved / Rejected (terminal)
 ```
 
-Anyone with a tenant email can submit (`Requester` above is not a `Project_User` role — Managers and Executives can submit requests too).
+Anyone with a tenant email can submit (`Requester` above is not a `Project_User` role — Managers and Sponsors can submit requests too).
 
 ### 2a. Notification matrix
 
-Who gets emailed for each decision — **the Manager is only ever cc'd at the Executive step**, not at their own step (they already know they just acted):
+Who gets emailed for each decision — **the Manager is only ever cc'd at the Sponsor's Step 2**, not at their own step (they already know they just acted):
 
 | Step | Actor | Decision | Notified |
 |---|---|---|---|
 | Submit (Create) | Requester | — | Sponsor (`SubmittedToSponsor`) |
 | Submit (Update/Delete) | Requester | — | Manager (`SubmittedToManager`) |
 | 0 (Sponsor, Create only) | ProjectSponsor | Assign Manager | Manager (`SubmittedToManager`) |
-| 1 (Manager) | ProjectManager | Approve | Executive (`ManagerApprovedToExecutive`) |
+| 1 (Manager) | ProjectManager | Approve | Sponsor (`ManagerApprovedToSponsor`) |
 | 1 (Manager) | ProjectManager | Reject ⚠ Remark | Requester (`FinalRejected`) |
-| 2 (Executive) | ProjectOwner | Approve | Requester (`FinalApproved`) **+ Manager (`FinalApprovedManagerCopy`)** |
-| 2 (Executive) | ProjectOwner | Reject ⚠ Remark | Requester (`FinalRejected`) **+ Manager (`FinalRejectedManagerCopy`)** |
+| 2 (Sponsor) | ProjectSponsor | Approve | Requester (`FinalApproved`) **+ Manager (`FinalApprovedManagerCopy`)** |
+| 2 (Sponsor) | ProjectSponsor | Reject ⚠ Remark | Requester (`FinalRejected`) **+ Manager (`FinalRejectedManagerCopy`)** |
 
 `SubmittedToManager` is reused for two distinct triggers (Update/Delete submit vs. Sponsor's assignment on a Create CR) — same template, same single-recipient shape, just a different code path resolving the recipient.
 
-The bolded **+ Manager** legs are the delta from the original spec. Each recipient gets its own `notificationType`/template/`Project_Notify.Run` call rather than being folded into one `;`-joined `recipientEmails` — the Requester and Manager copies read differently ("your request" vs. "a project you manage"), and this keeps the existing "one `notificationType` = one recipient + one template" contract from `SubmittedToManager`/`ManagerApprovedToExecutive` intact (9-arg trigger schema unchanged; no new args, just 2 new `Switch` cases). At Step 2 the app therefore chains two `Project_Notify.Run(...)` calls with `;` (same statement-chaining pattern already used elsewhere in `ApprovalsScreen.pa.yaml`, e.g. `Project_Notify.Run(...); Notify(...); Navigate(...)`). At Step 1, `FinalRejected` keeps its original single-call, requester-only form since there is no "Manager" leg to add at that step.
+The bolded **+ Manager** legs are the delta from the original spec. Each recipient gets its own `notificationType`/template/`Project_Notify.Run` call rather than being folded into one `;`-joined `recipientEmails` — the Requester and Manager copies read differently ("your request" vs. "a project you manage"), and this keeps the existing "one `notificationType` = one recipient + one template" contract from `SubmittedToManager`/`ManagerApprovedToSponsor` intact (9-arg trigger schema unchanged; no new args, just 2 new `Switch` cases). At Step 2 the app therefore chains two `Project_Notify.Run(...)` calls with `;` (same statement-chaining pattern already used elsewhere in `ApprovalsScreen.pa.yaml`, e.g. `Project_Notify.Run(...); Notify(...); Navigate(...)`). At Step 1, `FinalRejected` keeps its original single-call, requester-only form since there is no "Manager" leg to add at that step.
 
-**Authorization is per-project, not per-role.** For Step 1/Step 2, having `Role = "Manager"`/`"Executive"` in `Project_User` is necessary but not sufficient to act on a given CR — the user must also be that specific CR's/project's `ProjectManager` (Step 1) or `ProjectOwner` (Step 2). Step 0 (Sponsor, Create only) works differently: `ProjectSponsor` carries **no** `Project_User`-role prerequisite at all — being that CR's `ProjectSponsor` is both necessary and sufficient, since anyone in `Employee List` can be picked as one (see `CLAUDE.md` §Role-based visibility). For a Create CR, "that project" means the values proposed on the CR itself (`ProjectSponsor`/`ProjectManager`/`ProjectOwner`, since the project doesn't exist yet); for Update/Delete, it means the live target row in `Project_List` (via `TargetItemID`) — Update/Delete CRs never carry a `ProjectSponsor` value, since Step 0 only ever happens once, at the project's original Create. There is no substitute-approver role — a Manager who isn't the assigned `ProjectManager` for a project never sees that project's CR in their queue at all. See `CLAUDE.md` §Role-based visibility for the exact formula and the places it's duplicated.
+**Authorization is per-project, not per-role.** For Step 1/Step 2, having `Role = "Manager"`/`"Sponsor"` in `Project_User` is necessary but not sufficient to act on a given CR — the user must also be that specific CR's/project's `ProjectManager` (Step 1) or `ProjectSponsor` (Step 2). Step 0 (Sponsor's assign-Manager, Create only) uses the same `ProjectSponsor` check. For a Create CR, "that project" means the values proposed on the CR itself (`ProjectSponsor`/`ProjectManager`, since the project doesn't exist yet); for Update/Delete, it means the live target row in `Project_List` (via `TargetItemID`) — the CR row itself carries no `ProjectSponsor`/`ProjectManager`, but the live project's `ProjectSponsor` is who does its Step 2 (Update/Delete have no Step 0). There is no substitute-approver role — a Manager who isn't the assigned `ProjectManager` for a project never sees that project's CR in their queue at all. See `CLAUDE.md` §Role-based visibility for the exact formula and the places it's duplicated.
 
-### Apply logic per RequestType (Executive approve)
+### Apply logic per RequestType (Sponsor Step 2 approve)
 
 | RequestType | Apply |
 |---|---|
-| `Create` | Patch new `Project_List` row from CR values (`ApprovalStatus: Approved`, `ApprovedBy` = executive) → 2nd Patch sets `ProjectID = "PROJ-" & <MarketCode> & "-" & <DeptCode> & "-" & <Year> & "-" & Text(newRow.ID, "000")` (e.g. `PROJ-AU-GN-2026-002`; MarketCode = `Market.Value`, already `AU`/`MY`/`SG`/`VN`) |
+| `Create` | Patch new `Project_List` row from CR values (`ApprovalStatus: Approved`, `ApprovedBy` = sponsor) → 2nd Patch sets `ProjectID = "PROJ-" & <MarketCode> & "-" & <DeptCode> & "-" & <Year> & "-" & Text(newRow.ID, "000")` (e.g. `PROJ-AU-GN-2026-002`; MarketCode = `Market.Value`, already `AU`/`MY`/`SG`/`VN`) |
 | `Update` | `LookUp` target by `TargetItemID` (guard: still exists) → Patch only `ProjectDescription` + `Deliverables` + `EndDate` |
 | `Delete` | Patch target `ProjectStatus = {Value: "Deleted"}` (soft delete — row is hidden from All Projects by default) |
 
@@ -131,9 +133,9 @@ The bolded **+ Manager** legs are the delta from the original spec. Each recipie
   <app deep link>
   ```
 
-**Case `ManagerApprovedToExecutive`** — To: all active Executives
+**Case `ManagerApprovedToSponsor`** — To: the CR's/project's `ProjectSponsor` (the Sponsor doing Step 2)
 
-- Subject: `[Project List] Executive approval needed: @{triggerBody()?['text_2']}`
+- Subject: `[Project List] Sponsor approval needed: @{triggerBody()?['text_2']}`
 - Body: same layout, plus `Manager approved by: @{triggerBody()?['text_6']}`.
 
 **Case `FinalApproved`** — To: requester
@@ -165,12 +167,12 @@ The bolded **+ Manager** legs are the delta from the original spec. Each recipie
   You may submit a new request after addressing the remark.
   ```
 
-**Case `FinalApprovedManagerCopy`** — To: that project's ProjectManager (Step 2/Executive approve only — Manager-facing copy of `FinalApproved`, distinct wording since the Manager isn't the requester)
+**Case `FinalApprovedManagerCopy`** — To: that project's ProjectManager (Step 2/Sponsor approve only — Manager-facing copy of `FinalApproved`, distinct wording since the Manager isn't the requester)
 
 - Subject: `[Project List] Project approved: @{triggerBody()?['text_2']}`
 - Body:
   ```
-  A project you manage has been fully approved by the Executive and applied.
+  A project you manage has been fully approved by the Sponsor and applied.
 
   Request:      @{triggerBody()?['text_2']} (#@{triggerBody()?['number']})
   Type:         @{triggerBody()?['text_3']}
@@ -179,12 +181,12 @@ The bolded **+ Manager** legs are the delta from the original spec. Each recipie
   Approved by:  @{triggerBody()?['text_6']}
   ```
 
-**Case `FinalRejectedManagerCopy`** — To: that project's ProjectManager (Step 2/Executive reject only — Manager-facing copy of `FinalRejected`, distinct wording since the Manager isn't the requester)
+**Case `FinalRejectedManagerCopy`** — To: that project's ProjectManager (Step 2/Sponsor reject only — Manager-facing copy of `FinalRejected`, distinct wording since the Manager isn't the requester)
 
 - Subject: `[Project List] Project rejected: @{triggerBody()?['text_2']}`
 - Body:
   ```
-  A project you manage was rejected by the Executive.
+  A project you manage was rejected by the Sponsor.
 
   Request:      @{triggerBody()?['text_2']} (#@{triggerBody()?['number']})
   Type:         @{triggerBody()?['text_3']}
@@ -209,17 +211,17 @@ Coalesce(
     LookUp('Employee List', ID = <ProjectManager.Id>).Email,
     "app.admin@maxbiocare.com"
 )
-// ManagerApprovedToExecutive: the CR's/project's specific ProjectOwner, same Coalesce fallback
+// ManagerApprovedToSponsor: the CR's/project's specific ProjectSponsor, same Coalesce fallback
 // FinalRejected / FinalApproved (requester leg, both steps): gSelectedCR.RequesterEmail
-// FinalApprovedManagerCopy / FinalRejectedManagerCopy (Step 2 only, Manager leg): the CR's/project's specific ProjectManager, same Coalesce fallback as ProjectOwner above
+// FinalApprovedManagerCopy / FinalRejectedManagerCopy (Step 2 only, Manager leg): the CR's/project's specific ProjectManager, same Coalesce fallback as ProjectSponsor above
 ```
 
-`<ProjectSponsor.Id>` / `<ProjectManager.Id>` / `<ProjectOwner.Id>` resolve differently depending on where the call happens:
+`<ProjectSponsor.Id>` / `<ProjectManager.Id>` resolve differently depending on where the call happens:
 - Submitting a Create request (`CreateProjectScreen`): the form's own `cmbSponsor.Selected.ID` for `ProjectSponsor` — there is no `ProjectManager` to resolve yet, it's left blank on the CR until the Sponsor assigns one.
 - Submitting an Update/Delete request (`Update`/`DeleteProjectScreen`): the target project's `gSelectedProject.ProjectManager.Id` (no `ProjectSponsor` involved — Step 0 doesn't apply to these).
 - Sponsor assigning a Manager (`ApprovalsScreen`, "Assign Manager" tab, Step 0 → notifies the newly-assigned Manager): the tab's own `cmbAssignManager.Selected.ID`.
-- Manager approving (`ApprovalsScreen`, Step 1 → notifies the Executive): `If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectOwner.Id, gLiveTarget.ProjectOwner.Id)`.
-- Executive approving/rejecting (`ApprovalsScreen`, Step 2 → notifies requester, then separately the Manager): same `Create` vs. live-target branch as above, but resolving `ProjectManager.Id` instead of `ProjectOwner.Id` for the second `Project_Notify.Run` call.
+- Manager approving (`ApprovalsScreen`, Step 1 → notifies the Sponsor): `If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectSponsor.Id, gLiveTarget.ProjectSponsor.Id)`.
+- Sponsor approving/rejecting (`ApprovalsScreen`, Step 2 → notifies requester, then separately the Manager): same `Create` vs. live-target branch as above, but resolving `ProjectManager.Id` instead of `ProjectSponsor.Id` for the second `Project_Notify.Run` call.
 
 ## 4. FUTURE — `Project_SyncActualCost` (placeholder, do not build yet)
 

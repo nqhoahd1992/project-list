@@ -15,7 +15,7 @@ Authoritative data model for the Max Biocare Project List app. Site: `maxbiocare
 - **Exception:** `Department` on `Project_List` / `Project_ChangeRequests` is plain **Text** (not Choice) — Patch the raw string, no `{Value:}` wrapper. Its picker options come from `Choices('Employee List'.department)` — the Choice column's defined value set on `Employee List` (delegable; a `Distinct(Filter(...))` over the data rows hit a SharePoint delegation wall on both `<>` and `Not()`).
 - **Required** columns are flagged ⚠ — a `Patch` that omits them fails.
 - `ChangeRequestIDText` (plain-text copy of the change-request ID) is the delegable join key for log lookups: `LookUp(Project_ApprovalLog, ChangeRequestIDText = Text(cr.ID) && StepNumber = N)`.
-- **The app never writes `Project_List` directly from forms.** The ONLY writer is the Executive-approve handler on `ApprovalsScreen`. All user intent goes through `Project_ChangeRequests`.
+- **The app never writes `Project_List` directly from forms.** The ONLY writer is the Sponsor final-approve handler (Step 2) on `ApprovalsScreen`. All user intent goes through `Project_ChangeRequests`.
 
 ---
 
@@ -23,22 +23,22 @@ Authoritative data model for the Max Biocare Project List app. Site: `maxbiocare
 
 Canvas Apps' SharePoint connector always runs under the **signed-in user's own permissions** — there is no service-account indirection. So "nobody should be able to open a list directly (browser/Excel/REST) and add/edit/delete rows outside the app's guarded `Patch` flow" has to be enforced with SharePoint list permissions, not anything in `Src/*.pa.yaml`.
 
-Assign via 3 SharePoint groups (Requester = default site Members/Visitors — everyone with a tenant account, no explicit group needed; Manager / Executive = dedicated groups mirroring `Project_User.Role`):
+Assign via 3 SharePoint groups (Requester = default site Members/Visitors — everyone with a tenant account, no explicit group needed; Manager / Sponsor = dedicated groups mirroring `Project_User.Role`):
 
-| List | Requester (everyone) | Manager | Executive |
+| List | Requester (everyone) | Manager | Sponsor |
 |---|---|---|---|
 | `Employee List` | Read | Read | Read |
 | `Project_User` | Read (required — every user's `App.OnStart` reads this to resolve `gUserRole`) | Read | Read |
 | `Product_Database_SKU_Master` | Read | Read | Read |
-| `Project_ChangeRequests` | **Edit** — broadened from the original "Add Items + Read only" design specifically so that any employee picked as a `ProjectSponsor` (not a `Project_User`-gated role, see `Project_List.ProjectSponsor` below) can `Patch` `ProjectManager` + `ApprovalStatus` at Step 0 ("Assign Manager") without needing a separate grant | Edit (needed to Patch `ApprovalStatus` + write the Step 1 log) | Edit (needed to Patch `ApprovalStatus` at Step 2) |
+| `Project_ChangeRequests` | **Add Items + Read only** (submit CRs, can't edit a submitted one) | Edit (needed to Patch `ApprovalStatus` + write the Step 1 log) | Edit (needed to Patch `ProjectManager` + `ApprovalStatus` at Step 0, and `ApprovalStatus` at Step 2) |
 | `Project_ApprovalLog` | Read only | **Add Items + Read only** — the app only ever inserts new log rows, never edits one | **Add Items + Read only** |
 | `Project_List` | Read only | Read only | Edit (needed to Patch the apply step) |
 
-**"Add Items + Read only" is not a SharePoint built-in level** — create a custom Permission Level (Site Settings → Permission Levels → copy `Read`, additionally check `Add Items`, leave `Edit Items`/`Delete Items` unchecked). Still used for `Project_ApprovalLog` (Manager/Executive can insert log rows but never edit one); no longer used for `Project_ChangeRequests`/Requester since that was broadened to plain `Edit` — a built-in level, nothing custom to create there.
+**"Add Items + Read only" is not a SharePoint built-in level** — create a custom Permission Level (Site Settings → Permission Levels → copy `Read`, additionally check `Add Items`, leave `Edit Items`/`Delete Items` unchecked). Used for both `Project_ApprovalLog` (Manager/Sponsor insert log rows but never edit one) and `Project_ChangeRequests`/Requester (submit a CR but can't hand-edit one after). Managers and Sponsors get plain built-in `Edit` on `Project_ChangeRequests` since they must Patch the status/assignment fields.
 
-**Accepted trade-off — every user, not just Manager/Executive, now has raw `Edit` on `Project_ChangeRequests`.** This was a deliberate choice (not a default) to solve the Sponsor permission gap: since `ProjectSponsor` can be any employee rather than someone in a dedicated `Project_User`/SharePoint group, there was no way to grant *only* the right people `Edit` for the "Assign Manager" step without granting it to everyone. The cost: the tamper-protection that "Add Items + Read only" gave Requesters — blocking them from editing any CR, their own or anyone else's, once submitted — is gone for **all** users, not only Sponsors. Anyone with SharePoint UI access can now hand-edit any CR's fields directly (e.g. flip `ApprovalStatus`, rewrite proposed values) bypassing the app's guarded `Patch` formulas entirely. Revisit if this turns out to matter in practice — the narrower fix (Power Automate flow with a locked-down connection for just the Step 0 Patch, mirrored on the residual-risk note below) is still available later.
+> **Model change (2026-07-11):** `ProjectSponsor` is now a `Project_User` role (renamed from "Executive"), so — unlike the old design where a Sponsor could be *any* employee — the Step 0 "Assign Manager" Patch no longer forces broadening `Edit` to everyone. Grant `Edit` on `Project_ChangeRequests` to the Manager + Sponsor groups only; Requesters keep the tamper-resistant "Add Items + Read only". Similarly `Project_List` Edit goes to the Sponsor group (they run the apply step), not "Executive".
 
-**Known residual risk — cannot be fully closed without an architecture change:** Executive needs raw `Edit Items` on `Project_List` (everyone else stays Read-only there), because `Patch()` always executes under the acting user's own identity. An Executive with SharePoint UI access could in principle bypass the app's guarded formulas and edit `Project_List` directly (the `Project_ChangeRequests` version of this risk is no longer Manager/Executive-specific — see the accepted trade-off above, which extends it to everyone). Closing this fully would mean moving the apply-step `Patch` into a Power Automate flow with a locked-down "Run only users" connection (the flow's own connection does the write, not the human's) — a deliberate, larger architecture change, not something list permissions alone can fix. Not pursued unless explicitly requested.
+**Known residual risk — cannot be fully closed without an architecture change:** Sponsor needs raw `Edit Items` on `Project_List` (everyone else stays Read-only there), because `Patch()` always executes under the acting user's own identity. A Sponsor (or a Manager on `Project_ChangeRequests`) with SharePoint UI access could in principle bypass the app's guarded formulas and edit those lists directly. Closing this fully would mean moving the apply-step `Patch` into a Power Automate flow with a locked-down "Run only users" connection (the flow's own connection does the write, not the human's) — a deliberate, larger architecture change, not something list permissions alone can fix. Not pursued unless explicitly requested.
 
 ---
 
@@ -54,8 +54,8 @@ Required ⚠: `ProjectStatus`, `ApprovalStatus`, `ProjectLevel`.
 | `Deliverables` | Text (multiline) | Concrete outputs/results the project is expected to produce — required at Create; editable via Update alongside `ProjectDescription`/`EndDate` |
 | `ProjectType` | Choice | `New Product Development`, `Product Improvement`, `Regulatory & Compliance`, `Marketing Campaign`, `Market Expansion`, `Operational Improvement`, `IT & Digital`, `Research & Clinical`, `Other` |
 | `Department` | Text | Single department name; picker options come from `Choices('Employee List'.department)`, not a Choice column itself — see `.department` on Employee List |
-| `ProjectOwner` | Lookup→Employee List | Business owner, `{Id, Value}` (→Title). Picker on `CreateProjectScreen` is scoped to active `Project_User` accounts with `Role.Value = "Executive"` (`ForAll(Filter(Project_User, IsActive && Role.Value = "Executive"), {ID: EmployeeID.Id, Title: EmployeeID.Value})` — reshapes the already-available `EmployeeID` fields, no secondary `LookUp` needed) — only Executives are selectable. Does Step 2 approval |
-| `ProjectSponsor` | Lookup→Employee List | Owns the project's outcome — **not** a supervisory role — `{Id, Value}` (→Title). **Not gated by a `Project_User` role, unlike `ProjectOwner`/`ProjectManager`** — the picker on `CreateProjectScreen` sources directly from `Employee List` (`Sort('Employee List', Title, SortOrder.Ascending)`), so any employee can be picked, not just accounts with a `Project_User` row. Set at Create time; sole job is picking the `ProjectManager` on the CR right after submit (`ApprovalsScreen`'s "Assign Manager" tab) — takes no further part in the approval chain itself. `Project_ChangeRequests` permissions were broadened to plain `Edit` for everyone specifically so any Sponsor can complete that Patch — see §SharePoint list permissions |
+| `ProjectOwner` | Lookup→Employee List | **DEPRECATED — no longer used by the app (2026-07-11).** The former "Owner/Executive" second-approver was merged into `ProjectSponsor`. The SharePoint column may remain for historical rows but is never read or written by any screen. Do not reintroduce it |
+| `ProjectSponsor` | Lookup→Employee List | Owns the project's outcome **and** is the final (Step 2) approver — the merged Owner+Sponsor role, `{Id, Value}` (→Title). **Gated by `Project_User` role** (`Role.Value = "Sponsor"`, renamed from "Executive"): the picker on `CreateProjectScreen` is scoped to active Sponsors (`ForAll(Filter(Project_User, IsActive && Role.Value = "Sponsor"), {ID: EmployeeID.Id, Title: EmployeeID.Value})` — reshapes the already-available `EmployeeID` fields, no secondary `LookUp` needed), so only Sponsors are selectable. Set at Create time; does **two** things: (1) Step 0 — picks the `ProjectManager` on the CR right after submit (`ApprovalsScreen`'s "Assign Manager" tab), (2) Step 2 — final approve + applies to `Project_List` |
 | `ProjectManager` | Lookup→Employee List | Execution lead / supervisor, `{Id, Value}` (→Title). Scoped to `Role.Value = "Manager"`. **Not chosen on `CreateProjectScreen`** — blank on a newly-created row's originating CR until the `ProjectSponsor` assigns it (see `ApprovalStatus` below); always populated by the time a row reaches `Project_List` (apply only happens after Step 2, by which point a Manager was assigned and Step 1 completed). Does Step 1 approval |
 | `Priority` | Choice | `Low`, `Medium`, `High`, `Critical` |
 | `StartDate` | Date | Planned start |
@@ -69,7 +69,7 @@ Required ⚠: `ProjectStatus`, `ApprovalStatus`, `ProjectLevel`.
 | `Market` | Choice | `AU`, `MY`, `SG`, `VN` — no longer the source `Currency` is derived from at display time (that coupling was removed); `Currency` is now its own stored field, only *initially populated* from Market's mapping at Create |
 | `Channel` | Choice | `Retail Pharmacy`, `Hospital`, `Distributor`, `E-commerce`, `Direct-to-Consumer`, `Cross-border`, `Multiple` |
 | `ApprovalStatus` ⚠ | Choice | `Approved` — always `Approved` on master rows (rows only exist after full approval); kept per spec for reporting |
-| `ApprovedBy` | Lookup→Employee List | Executive who applied the create |
+| `ApprovedBy` | Lookup→Employee List | Sponsor who applied the create (Step 2) |
 | `RequestedBy` ⚠ | Lookup→Employee List | Original requester who submitted the Create request (`{Id, Value}`, copied from `gSelectedCR.RequesterID` at apply time) — **gates who can submit Update/Delete for this project** (`AllProjectsScreen`'s Update/Delete row buttons only show when `RequestedBy.Id = gCurrentEmployee.ID`). Rows created before this column existed have it blank, which locks everyone out of Update/Delete for that row until fixed manually |
 | `ProjectDocuments` | Text (URL) | Document link — plain text column, NOT the Hyperlink column type (awkward to Patch) |
 | `StrategicObjective` | Choice | `Revenue Growth`, `Market Expansion`, `Brand Building`, `Product Innovation`, `Operational Excellence`, `Regulatory Compliance`, `Cost Optimization` |
@@ -85,7 +85,7 @@ Required ⚠: `ProjectStatus`, `ApprovalStatus`, `ProjectLevel`.
 
 ## `Project_ChangeRequests` — staging list (the approval state machine lives here)
 
-Every Create / Update / Delete intent becomes one row here. Only after Executive approval does the app apply the change to `Project_List`.
+Every Create / Update / Delete intent becomes one row here. Only after the Sponsor's Step 2 approval does the app apply the change to `Project_List`.
 
 Required ⚠: `RequestType`, `ApprovalStatus`, `RequesterEmail`.
 
@@ -95,7 +95,7 @@ Required ⚠: `RequestType`, `ApprovalStatus`, `RequesterEmail`.
 |---|---|---|
 | `Title` | Text | Auto-built: `<RequestType> - <ProjectName> - <requester> - dd/mm/yyyy` |
 | `RequestType` ⚠ | Choice | `Create`, `Update`, `Delete` |
-| `ApprovalStatus` ⚠ | Choice | `Pending Sponsor` → `Pending Manager` → `Pending Executive` → `Approved` \| `Rejected` (exact strings — used as literals across all screens). **`Pending Sponsor` exists only on Create CRs** — the state between submit and the `ProjectSponsor` assigning a `ProjectManager` (`ApprovalsScreen`'s "Assign Manager" tab); Update/Delete CRs skip it and start directly at `Pending Manager`, since their target project already has a `ProjectManager` from its own original Create flow |
+| `ApprovalStatus` ⚠ | Choice | `Pending Sponsor` → `Pending Manager Approval` → `Pending Sponsor Approval` → `Approved` \| `Rejected` (exact strings — used as literals across all screens). The Sponsor acts twice: `Pending Sponsor` = Step 0 (assign the `ProjectManager`, via `ApprovalsScreen`'s "Assign Manager" tab), `Pending Sponsor Approval` = Step 2 (final approve + apply). **`Pending Sponsor` exists only on Create CRs** — the state between submit and the Sponsor assigning a Manager; Update/Delete CRs skip it and start directly at `Pending Manager Approval`, since their target project already has a `ProjectManager` from its own original Create flow |
 | `TargetItemID` | Number | SharePoint `ID` of the master row (Update/Delete only) — join key for live-diff lookups |
 | `TargetProjectID` | Text | Business `ProjectID` snapshot for display (Update/Delete only) |
 | `RequesterEmail` ⚠ | Text | `User().Email`; "my requests" filter key |
@@ -120,8 +120,8 @@ Same column names and **identical Choice value sets** as `Project_List` (keep th
 | `StrategicObjective` | Choice — `Revenue Growth`, `Market Expansion`, `Brand Building`, `Product Innovation`, `Operational Excellence`, `Regulatory Compliance`, `Cost Optimization` |
 | `CostCenter` | Choice — `Office Melbourne (Head Quarter)`, `Port Melbourne Warehouse`, `Max Biocare Research Park - Natural Inspirations@Yinnar`, `Max Biocare Research Park - Mar-Nuka Bay`, `Malay Warehouse`, `Singapore Warehouse` |
 | `Department` | Text (same convention as master — single value, options sourced from Employee List) |
-| `ProjectOwner`, `ProjectSponsor` | Lookup→Employee List — both set on the Create form |
-| `ProjectManager` | Lookup→Employee List — **blank on submit**; set by the `ProjectSponsor` right after, via `ApprovalsScreen`'s "Assign Manager" tab (`ApprovalStatus` flips `Pending Sponsor` → `Pending Manager` in that same Patch) |
+| `ProjectSponsor` | Lookup→Employee List — set on the Create form (scoped to `Role.Value = "Sponsor"`). `ProjectOwner` is no longer written — see `Project_List.ProjectOwner` (deprecated) |
+| `ProjectManager` | Lookup→Employee List — **blank on submit**; set by the `ProjectSponsor` right after, via `ApprovalsScreen`'s "Assign Manager" tab (`ApprovalStatus` flips `Pending Sponsor` → `Pending Manager Approval` in that same Patch) |
 | `StartDate`, `EndDate` | Date |
 | `BudgetAmount` | **Number** (not Currency) |
 | `Currency` | Text — same convention as `Project_List.Currency` above; set at Create time from the form's `currency` control, carried through unchanged on Update/Delete CRs (not user-editable on those screens) |
@@ -141,7 +141,7 @@ Required ⚠: `Role`, `IsActive`, `EmployeeID`.
 | Column | Type | Notes |
 |---|---|---|
 | `Title` | Text | **Not populated by the app** — the record is already tied to an employee via `EmployeeID`. For display, resolve the name through `EmployeeID.Value` / `LookUp('Employee List', ID = EmployeeID.Id).Title`, never `Project_User.Title` |
-| `Role` ⚠ | Choice | `Manager`, `Executive` — no `Requester`/`Admin`/`Sponsor` value; any tenant email can create change requests regardless of role. `ProjectSponsor` is deliberately **not** a `Project_User` role — see `Project_List.ProjectSponsor` above |
+| `Role` ⚠ | Choice | `Manager`, `Sponsor` (renamed from the former `Executive`) — no `Requester`/`Admin` value; any tenant email can create change requests regardless of role. `ProjectSponsor` **is** the `Sponsor` role (picked on the Create form from active Sponsors) — see `Project_List.ProjectSponsor` above |
 | `IsActive` ⚠ | Yes/No | default true |
 | `EmployeeID` ⚠ | Lookup→Employee List | `{Id, Value}` (→Title) only — confirmed `EmployeeID.Email` does not resolve even with SharePoint's "additional columns" Lookup setting configured for `Email` and the Power Apps data source refreshed; use `LookUp('Employee List', ID = EmployeeID.Id).Email` for email instead |
 | `Note` | Text | |
@@ -150,7 +150,7 @@ Resolved in `App.OnStart` → `gCurrentUser` / `gUserRole`. Employees absent her
 
 ---
 
-## `Project_ApprovalLog` — manager & executive decisions
+## `Project_ApprovalLog` — manager & sponsor decisions
 
 Required ⚠: `ChangeRequestID`, `StepNumber`.
 
@@ -159,7 +159,7 @@ Required ⚠: `ChangeRequestID`, `StepNumber`.
 | `Title` | Text | `Step <n> - <action> - <CR title>` |
 | `ChangeRequestID` ⚠ | Lookup→Project_ChangeRequests (→Title) | `{Id, Value}` |
 | `ChangeRequestIDText` | Text | delegable join key = `Text(cr.ID)` |
-| `StepNumber` ⚠ | Number | **`1` = Manager, `2` = Executive** (document in the column description) |
+| `StepNumber` ⚠ | Number | **`1` = Manager, `2` = Sponsor** (final approve; document in the column description) |
 | `ApproverID` | Lookup→Employee List | `{Id, Value}` |
 | `Action` | Choice | `Approved`, `Rejected` |
 | `Remark` | Text (multiline) | **Required when Action = Rejected** (enforced in app) |
@@ -195,11 +195,11 @@ Picker: `ComboBox@0.0.51`, `SelectMultiple: =true`, `Items: =Sort(Product_Databa
 
 Called from Power Fx after every successful state transition. **Always pass all 9 args** — use `""` for unused remark. Declare each trigger input's type explicitly when building the flow (Blank-type inference bug — see invoice-batch-app `docs/finalize-invoice-flow-plan.md`).
 
-**Recipients are the CR's/project's specific `ProjectSponsor`/`ProjectManager`/`ProjectOwner`, not a role broadcast** (see `CLAUDE.md` §Role-based visibility for the full authorization model) — always wrapped in `Coalesce(LookUp('Employee List', ID = <...Id>).Email, "app.admin@maxbiocare.com")` so a blank/unassigned person never leaves the flow's "Send an email (V2)" action with an empty `To`.
+**Recipients are the CR's/project's specific `ProjectSponsor`/`ProjectManager`, not a role broadcast** (see `CLAUDE.md` §Role-based visibility for the full authorization model) — always wrapped in `Coalesce(LookUp('Employee List', ID = <...Id>).Email, "app.admin@maxbiocare.com")` so a blank/unassigned person never leaves the flow's "Send an email (V2)" action with an empty `To`.
 
 | # | Trigger param (rename from Power Automate default) | Type | Meaning |
 |---|---|---|---|
-| 1 | `notificationType` (default `text`) | Text | `SubmittedToSponsor` \| `SubmittedToManager` \| `ManagerApprovedToExecutive` \| `FinalApproved` \| `FinalRejected` \| `FinalApprovedManagerCopy` \| `FinalRejectedManagerCopy` |
+| 1 | `notificationType` (default `text`) | Text | `SubmittedToSponsor` \| `SubmittedToManager` \| `ManagerApprovedToSponsor` \| `FinalApproved` \| `FinalRejected` \| `FinalApprovedManagerCopy` \| `FinalRejectedManagerCopy` |
 | 2 | `recipientEmails` (default `text_1`) | Text | recipient email — always exactly one recipient per call (each `notificationType` = one recipient + one template, see `approval-workflow-plan.md` §2a); the underlying "Send an email (V2)" action natively accepts a `;`-separated list, but the app never relies on that |
 | 3 | `requestTitle` (default `text_2`) | Text | change request title |
 | 4 | `requestId` (default `number`) | Number | change request ID |

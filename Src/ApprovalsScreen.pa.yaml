@@ -93,20 +93,20 @@ Screens:
                               Switch(gUserRole,
                                   "Manager",
                                   Filter(
-                                      Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager"),
+                                      Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager Approval"),
                                       If(
                                           RequestType.Value = "Create",
                                           ProjectManager.Id = gCurrentEmployee.ID,
                                           LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
                                       )
                                   ),
-                                  "Executive",
+                                  "Sponsor",
                                   Filter(
-                                      Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Executive"),
+                                      Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Sponsor Approval"),
                                       If(
                                           RequestType.Value = "Create",
-                                          ProjectOwner.Id = gCurrentEmployee.ID,
-                                          LookUp(Project_List, ID = TargetItemID).ProjectOwner.Id = gCurrentEmployee.ID
+                                          ProjectSponsor.Id = gCurrentEmployee.ID,
+                                          LookUp(Project_List, ID = TargetItemID).ProjectSponsor.Id = gCurrentEmployee.ID
                                       )
                                   ),
                                   Filter(Project_ChangeRequests, false)
@@ -147,7 +147,7 @@ Screens:
                         PaddingRight: =10
                         Size: =10
                         Text: ="History"
-                        Visible: =gUserRole = "Manager" || gUserRole = "Executive"
+                        Visible: =gUserRole = "Manager" || gUserRole = "Sponsor"
                         Width: =90
                         X: =40
                         Y: =40
@@ -215,13 +215,13 @@ Screens:
                                   LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
                               )
                           ),
-                          "Executive",
+                          "Sponsor",
                           Filter(
                               Filter(Project_ChangeRequests, ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected"),
                               If(
                                   RequestType.Value = "Create",
-                                  ProjectOwner.Id = gCurrentEmployee.ID,
-                                  LookUp(Project_List, ID = TargetItemID).ProjectOwner.Id = gCurrentEmployee.ID
+                                  ProjectSponsor.Id = gCurrentEmployee.ID,
+                                  LookUp(Project_List, ID = TargetItemID).ProjectSponsor.Id = gCurrentEmployee.ID
                               )
                           ),
                           Filter(Project_ChangeRequests, false)
@@ -229,20 +229,20 @@ Screens:
                       Switch(gUserRole,
                           "Manager",
                           Filter(
-                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager"),
+                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager Approval"),
                               If(
                                   RequestType.Value = "Create",
                                   ProjectManager.Id = gCurrentEmployee.ID,
                                   LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
                               )
                           ),
-                          "Executive",
+                          "Sponsor",
                           Filter(
-                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Executive"),
+                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Sponsor Approval"),
                               If(
                                   RequestType.Value = "Create",
-                                  ProjectOwner.Id = gCurrentEmployee.ID,
-                                  LookUp(Project_List, ID = TargetItemID).ProjectOwner.Id = gCurrentEmployee.ID
+                                  ProjectSponsor.Id = gCurrentEmployee.ID,
+                                  LookUp(Project_List, ID = TargetItemID).ProjectSponsor.Id = gCurrentEmployee.ID
                               )
                           ),
                           Filter(Project_ChangeRequests, RequesterEmail = User().Email)
@@ -642,7 +642,7 @@ Screens:
                               Color: =RGBA(136, 135, 128, 1)
                               Height: =18
                               Size: =9
-                              Text: ="Owner / Sponsor / Manager"
+                              Text: ="Sponsor / Manager"
                               Width: =220
                         - lblPOwnerValue:
                             Control: Label@2.5.1
@@ -650,7 +650,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =48
                               Size: =11
-                              Text: =gSelectedCR.ProjectOwner.Value & " / " & gSelectedCR.ProjectSponsor.Value & " / " & Coalesce(gSelectedCR.ProjectManager.Value, "Not yet assigned")
+                              Text: =gSelectedCR.ProjectSponsor.Value & " / " & Coalesce(gSelectedCR.ProjectManager.Value, "Not yet assigned")
                               VerticalAlign: =VerticalAlign.Top
                               Width: =Parent.Width
                   - colPPriority:
@@ -1082,7 +1082,7 @@ Screens:
                                             gSelectedCR,
                                             {
                                                 ProjectManager: {Id: cmbAssignManager.Selected.ID, Value: cmbAssignManager.Selected.Title},
-                                                ApprovalStatus: {Value: "Pending Manager"}
+                                                ApprovalStatus: {Value: "Pending Manager Approval"}
                                             }
                                         )},
                                         If(
@@ -1292,7 +1292,7 @@ Screens:
                                     Color: =RGBA(136, 135, 128, 1)
                                     Height: =20
                                     Size: =9
-                                    Text: ="Project Owner"
+                                    Text: ="Project Sponsor"
                                     Width: =220
                               - lblLTOwnerValue:
                                   Control: Label@2.5.1
@@ -1300,7 +1300,7 @@ Screens:
                                     FontWeight: =FontWeight.Semibold
                                     Height: =24
                                     Size: =11
-                                    Text: =gLiveTarget.ProjectOwner.Value
+                                    Text: =gLiveTarget.ProjectSponsor.Value
                                     Width: =220
                         - colLTManager:
                             Control: GroupContainer@1.5.0
@@ -1895,7 +1895,7 @@ Screens:
                           =If(
                               IsBlank(gLiveTarget.ID),
                               "",
-                              "Owner: " & gLiveTarget.ProjectOwner.Value & " | Manager: " & gLiveTarget.ProjectManager.Value & " | " & Text(gLiveTarget.StartDate, "dd/mm/yyyy") & " → " & Text(gLiveTarget.EndDate, "dd/mm/yyyy")
+                              "Sponsor: " & gLiveTarget.ProjectSponsor.Value & " | Manager: " & gLiveTarget.ProjectManager.Value & " | " & Text(gLiveTarget.StartDate, "dd/mm/yyyy") & " → " & Text(gLiveTarget.EndDate, "dd/mm/yyyy")
                           )
                         Width: =Parent.Width - 40
             - rowManagerTrail:
@@ -1916,7 +1916,7 @@ Screens:
                   RadiusBottomRight: =0
                   RadiusTopLeft: =0
                   RadiusTopRight: =0
-                  Visible: =gSelectedCR.ApprovalStatus.Value <> "Pending Manager"
+                  Visible: =gSelectedCR.ApprovalStatus.Value <> "Pending Manager Approval"
                   Width: =Parent.Width
                 Children:
                   - lblManagerTrail:
@@ -1969,8 +1969,8 @@ Screens:
                               {wTrail: LookUp(Project_ApprovalLog, ChangeRequestIDText = Text(gSelectedCR.ID) && StepNumber = 2)},
                               If(
                                   IsBlank(wTrail.ID),
-                                  "Executive step: no log entry found",
-                                  If(wTrail.Action.Value = "Approved", "✅ ", "❌ ") & "Executive step: " & wTrail.Action.Value & " by " & wTrail.ApproverID.Value & " on " & Text(wTrail.ActionAt, "dd/mm/yyyy hh:mm") & If(IsBlank(wTrail.Remark), "", " — " & wTrail.Remark)
+                                  "Sponsor step: no log entry found",
+                                  If(wTrail.Action.Value = "Approved", "✅ ", "❌ ") & "Sponsor step: " & wTrail.Action.Value & " by " & wTrail.ApproverID.Value & " on " & Text(wTrail.ActionAt, "dd/mm/yyyy hh:mm") & If(IsBlank(wTrail.Remark), "", " — " & wTrail.Remark)
                               )
                           )
                         Width: =Parent.Width - 40
@@ -2049,10 +2049,10 @@ Screens:
                                             Project_ApprovalLog,
                                             Defaults(Project_ApprovalLog),
                                             {
-                                                Title: "Step " & If(gSelectedCR.ApprovalStatus.Value = "Pending Manager", "1", "2") & " - Rejected - " & gSelectedCR.Title,
+                                                Title: "Step " & If(gSelectedCR.ApprovalStatus.Value = "Pending Manager Approval", "1", "2") & " - Rejected - " & gSelectedCR.Title,
                                                 ChangeRequestID: {Id: gSelectedCR.ID, Value: gSelectedCR.Title},
                                                 ChangeRequestIDText: Text(gSelectedCR.ID),
-                                                StepNumber: If(gSelectedCR.ApprovalStatus.Value = "Pending Manager", 1, 2),
+                                                StepNumber: If(gSelectedCR.ApprovalStatus.Value = "Pending Manager Approval", 1, 2),
                                                 ApproverID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
                                                 Action: {Value: "Rejected"},
                                                 Remark: txtRejectRemark.Value,
@@ -2079,7 +2079,7 @@ Screens:
                                                         txtRejectRemark.Value
                                                     );
                                                     If(
-                                                        gSelectedCR.ApprovalStatus.Value = "Pending Executive",
+                                                        gSelectedCR.ApprovalStatus.Value = "Pending Sponsor Approval",
                                                         Project_Notify.Run(
                                                             "FinalRejectedManagerCopy",
                                                             Coalesce(
@@ -2139,10 +2139,10 @@ Screens:
             Visible: |-
               =!IsBlank(gSelectedCR.ID) &&
               (
-                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager" && gUserRole = "Manager" &&
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager Approval" && gUserRole = "Manager" &&
                       If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectManager.Id, gLiveTarget.ProjectManager.Id) = gCurrentEmployee.ID) ||
-                  (gSelectedCR.ApprovalStatus.Value = "Pending Executive" && gUserRole = "Executive" &&
-                      If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectOwner.Id, gLiveTarget.ProjectOwner.Id) = gCurrentEmployee.ID)
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Sponsor Approval" && gUserRole = "Sponsor" &&
+                      If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectSponsor.Id, gLiveTarget.ProjectSponsor.Id) = gCurrentEmployee.ID)
               )
             Width: =Parent.Width - 600
             X: =600
@@ -2179,15 +2179,15 @@ Screens:
                             IsBlank(wLog.ID),
                             Notify("Failed to save the approval log. Please try again.", NotificationType.Error),
                             With(
-                                {wCR: Patch(Project_ChangeRequests, gSelectedCR, {ApprovalStatus: {Value: "Pending Executive"}})},
+                                {wCR: Patch(Project_ChangeRequests, gSelectedCR, {ApprovalStatus: {Value: "Pending Sponsor Approval"}})},
                                 If(
                                     IsBlank(wCR.ID),
                                     Notify("Failed to update the request status. Please try again.", NotificationType.Error),
                                     Project_Notify.Run(
-                                        "ManagerApprovedToExecutive",
+                                        "ManagerApprovedToSponsor",
                                         Coalesce(
                                             LookUp('Employee List',
-                                                ID = If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectOwner.Id, gLiveTarget.ProjectOwner.Id)
+                                                ID = If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectSponsor.Id, gLiveTarget.ProjectSponsor.Id)
                                             ).Email,
                                             "app.admin@maxbiocare.com"
                                         ),
@@ -2199,7 +2199,7 @@ Screens:
                                         gCurrentEmployee.Title,
                                         ""
                                     );
-                                    Notify("Approved — sent to Executive for final approval", NotificationType.Success);
+                                    Notify("Approved — sent to Sponsor for final approval", NotificationType.Success);
                                     Set(gSelectedCR, Blank());
                                     Set(gLiveTarget, Blank())
                                 )
@@ -2207,7 +2207,7 @@ Screens:
                         )
                     )
                   Text: ="Approve →"
-                  Visible: =gSelectedCR.ApprovalStatus.Value = "Pending Manager"
+                  Visible: =gSelectedCR.ApprovalStatus.Value = "Pending Manager Approval"
                   Width: =160
             - btnApproveExecutive:
                 Control: ModernButton@1.0.0
@@ -2230,7 +2230,6 @@ Screens:
                                     ProjectType: gSelectedCR.ProjectType,
                                     Department: gSelectedCR.Department,
                                     RequestedBy: {Id: gSelectedCR.RequesterID.Id, Value: gSelectedCR.RequesterID.Value},
-                                    ProjectOwner: If(IsBlank(gSelectedCR.ProjectOwner.Id), Blank(), {Id: gSelectedCR.ProjectOwner.Id, Value: gSelectedCR.ProjectOwner.Value}),
                                     ProjectSponsor: If(IsBlank(gSelectedCR.ProjectSponsor.Id), Blank(), {Id: gSelectedCR.ProjectSponsor.Id, Value: gSelectedCR.ProjectSponsor.Value}),
                                     ProjectManager: If(IsBlank(gSelectedCR.ProjectManager.Id), Blank(), {Id: gSelectedCR.ProjectManager.Id, Value: gSelectedCR.ProjectManager.Value}),
                                     Priority: gSelectedCR.Priority,
@@ -2495,5 +2494,5 @@ Screens:
                   RadiusTopRight: =4
                   Text: ="Approve & Apply ✓"
                   VerticalAlign: =VerticalAlign.Middle
-                  Visible: =gSelectedCR.ApprovalStatus.Value = "Pending Executive"
+                  Visible: =gSelectedCR.ApprovalStatus.Value = "Pending Sponsor Approval"
                   Width: =180

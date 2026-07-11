@@ -19,7 +19,7 @@ Quick version, per case:
 |---|---|---|
 | `SubmittedToSponsor` | [`templates/submitted-to-sponsor.html`](templates/submitted-to-sponsor.html) | the CR's `ProjectSponsor` (Create requests only) |
 | `SubmittedToManager` | [`templates/submitted-to-manager.html`](templates/submitted-to-manager.html) | that project's `ProjectManager` — fired on Update/Delete submit, or when the Sponsor finishes assigning a Manager on a Create CR |
-| `ManagerApprovedToExecutive` | [`templates/manager-approved-to-executive.html`](templates/manager-approved-to-executive.html) | that project's `ProjectOwner` |
+| `ManagerApprovedToSponsor` | [`templates/manager-approved-to-sponsor.html`](templates/manager-approved-to-sponsor.html) | that CR's/project's `ProjectSponsor` (Step 2 final approver) |
 | `FinalApproved` | [`templates/final-approved.html`](templates/final-approved.html) | the requester |
 | `FinalRejected` | [`templates/final-rejected.html`](templates/final-rejected.html) | the requester |
 | `FinalApprovedManagerCopy` | [`templates/final-approved-manager-copy.html`](templates/final-approved-manager-copy.html) | that project's `ProjectManager` (Step 2/Executive approve only) |
@@ -32,4 +32,4 @@ Quick version, per case:
 - Colors reuse the app's existing brand palette (`CLAUDE.md` §Conventions): brand purple `#534AB7` (`RGBA(83,74,183,1)`) for the header bar, status pill green `#0F6E56` / red `#A32D2D` / amber `#854F0B` matching the in-app status pills.
 - Each file is fully self-contained (no shared partial/include — Power Automate's Code View has no include mechanism, so every template repeats its own header/footer markup verbatim).
 - `remark` only appears in the two reject templates; the other four never reference it (the flow always receives `""` for `remark` on those calls per `docs/approval-workflow-plan.md`, so nothing would render anyway, but the row is omitted rather than left blank for a cleaner layout).
-- **Every template links to the app** using the same solid purple button style — `SubmittedToManager`/`ManagerApprovedToExecutive` label theirs "Open Approvals" (action required), `SubmittedToSponsor` labels its "Open Assign Manager" (also action required), the other 4 label theirs "Open the Project List app →" (FYI-only). All 7 point at `@{variables('varAppLink')}`.
+- **Every template links to the app** using the same solid purple button style — `SubmittedToManager`/`ManagerApprovedToSponsor` label theirs "Open Approvals" (action required), `SubmittedToSponsor` labels its "Open Assign Manager" (also action required), the other 4 label theirs "Open the Project List app →" (FYI-only). All 7 point at `@{variables('varAppLink')}`.

@@ -72,7 +72,7 @@ At this point you have 4 steps total: trigger, `Initialize variable varSubject`,
 4. Click each case's header field and type the exact `notificationType` string (case-sensitive, must match what the app sends):
    - Case 1: `SubmittedToSponsor`
    - Case 2: `SubmittedToManager`
-   - Case 3: `ManagerApprovedToExecutive`
+   - Case 3: `ManagerApprovedToSponsor`
    - Case 4: `FinalApproved`
    - Case 5: `FinalRejected`
    - Case 6: `FinalApprovedManagerCopy`

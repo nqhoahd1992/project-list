@@ -21,31 +21,31 @@ App:
       Set(gUserRole, gCurrentUser.Role.Value);
       Set(gIsApprover,
           gUserRole = "Manager" ||
-          gUserRole = "Executive"
+          gUserRole = "Sponsor"
       );
       Set(gApprovalsPendingCount,
           CountRows(
               Filter(
                   Filter(Project_ChangeRequests,
                       ApprovalStatus.Value = "Pending Sponsor" ||
-                      ApprovalStatus.Value = "Pending Manager" ||
-                      ApprovalStatus.Value = "Pending Executive"
+                      ApprovalStatus.Value = "Pending Manager Approval" ||
+                      ApprovalStatus.Value = "Pending Sponsor Approval"
                   ),
                   (ApprovalStatus.Value = "Pending Sponsor" &&
                       ProjectSponsor.Id = gCurrentEmployee.ID
                   ) ||
-                  (gUserRole = "Manager" && ApprovalStatus.Value = "Pending Manager" &&
+                  (gUserRole = "Manager" && ApprovalStatus.Value = "Pending Manager Approval" &&
                       If(
                           RequestType.Value = "Create",
                           ProjectManager.Id = gCurrentEmployee.ID,
                           LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
                       )
                   ) ||
-                  (gUserRole = "Executive" && ApprovalStatus.Value = "Pending Executive" &&
+                  (gUserRole = "Sponsor" && ApprovalStatus.Value = "Pending Sponsor Approval" &&
                       If(
                           RequestType.Value = "Create",
-                          ProjectOwner.Id = gCurrentEmployee.ID,
-                          LookUp(Project_List, ID = TargetItemID).ProjectOwner.Id = gCurrentEmployee.ID
+                          ProjectSponsor.Id = gCurrentEmployee.ID,
+                          LookUp(Project_List, ID = TargetItemID).ProjectSponsor.Id = gCurrentEmployee.ID
                       )
                   )
               )

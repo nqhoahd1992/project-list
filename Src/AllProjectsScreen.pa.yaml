@@ -10,24 +10,24 @@ Screens:
                 Filter(
                     Filter(Project_ChangeRequests,
                         ApprovalStatus.Value = "Pending Sponsor" ||
-                        ApprovalStatus.Value = "Pending Manager" ||
-                        ApprovalStatus.Value = "Pending Executive"
+                        ApprovalStatus.Value = "Pending Manager Approval" ||
+                        ApprovalStatus.Value = "Pending Sponsor Approval"
                     ),
                     (ApprovalStatus.Value = "Pending Sponsor" &&
                         ProjectSponsor.Id = gCurrentEmployee.ID
                     ) ||
-                    (gUserRole = "Manager" && ApprovalStatus.Value = "Pending Manager" &&
+                    (gUserRole = "Manager" && ApprovalStatus.Value = "Pending Manager Approval" &&
                         If(
                             RequestType.Value = "Create",
                             ProjectManager.Id = gCurrentEmployee.ID,
                             LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
                         )
                     ) ||
-                    (gUserRole = "Executive" && ApprovalStatus.Value = "Pending Executive" &&
+                    (gUserRole = "Sponsor" && ApprovalStatus.Value = "Pending Sponsor Approval" &&
                         If(
                             RequestType.Value = "Create",
-                            ProjectOwner.Id = gCurrentEmployee.ID,
-                            LookUp(Project_List, ID = TargetItemID).ProjectOwner.Id = gCurrentEmployee.ID
+                            ProjectSponsor.Id = gCurrentEmployee.ID,
+                            LookUp(Project_List, ID = TargetItemID).ProjectSponsor.Id = gCurrentEmployee.ID
                         )
                     )
                 )
@@ -501,7 +501,7 @@ Screens:
                         PaddingRight: =8
                         Size: =11
                         Text: =If(gShowDeleted, "Hide Deleted", "Show Deleted")
-                        Visible: =gUserRole = "Executive"
+                        Visible: =gUserRole = "Sponsor"
                         Width: =110
       - rectFilterBarBorder:
           Control: Rectangle@2.3.0
@@ -581,7 +581,7 @@ Screens:
                     =Switch(
                         LookUp(Project_ChangeRequests,
                             TargetItemID = ThisItem.ID &&
-                            (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                            (ApprovalStatus.Value = "Pending Manager Approval" || ApprovalStatus.Value = "Pending Sponsor Approval")
                         ).RequestType.Value,
                         "Update", "Update pending",
                         "Delete", "Delete pending",
@@ -591,7 +591,7 @@ Screens:
                     =!IsBlank(
                         LookUp(Project_ChangeRequests,
                             TargetItemID = ThisItem.ID &&
-                            (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                            (ApprovalStatus.Value = "Pending Manager Approval" || ApprovalStatus.Value = "Pending Sponsor Approval")
                         )
                     )
                   Width: =120
@@ -662,7 +662,7 @@ Screens:
                           IsBlank(
                               LookUp(Project_ChangeRequests,
                                   TargetItemID = ThisItem.ID &&
-                                  (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                                  (ApprovalStatus.Value = "Pending Manager Approval" || ApprovalStatus.Value = "Pending Sponsor Approval")
                               )
                           )
                         Width: =30
@@ -710,7 +710,7 @@ Screens:
                           IsBlank(
                               LookUp(Project_ChangeRequests,
                                   TargetItemID = ThisItem.ID &&
-                                  (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                                  (ApprovalStatus.Value = "Pending Manager Approval" || ApprovalStatus.Value = "Pending Sponsor Approval")
                               )
                           )
                         Width: =30
@@ -753,7 +753,6 @@ Screens:
                   Size: =11
                   Text: |-
                     ="Sponsor: " & ThisItem.ProjectSponsor.Value &
-                    " | Owner: " & ThisItem.ProjectOwner.Value &
                     " | Manager: " & ThisItem.ProjectManager.Value &
                     If(IsBlank(ThisItem.StartDate), "", " | " & Text(ThisItem.StartDate, "dd/mm/yyyy") & " → " & Text(ThisItem.EndDate, "dd/mm/yyyy")) &
                     If(IsBlank(ThisItem.BudgetAmount) || ThisItem.BudgetAmount = 0, "", " | Budget: " & Text(ThisItem.BudgetAmount, "[#,###]") & " " & ThisItem.Currency) &

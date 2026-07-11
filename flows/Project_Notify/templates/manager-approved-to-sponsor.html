@@ -1,4 +1,4 @@
-<!-- notificationType: ManagerApprovedToExecutive | To: the CR's/project's specific ProjectOwner -->
+<!-- notificationType: ManagerApprovedToSponsor | To: the CR's/project's specific ProjectSponsor (Step 2 final approver) -->
 <!-- Paste into Power Automate "Send an email (V2)" -> Body, using the Code View (</>) editor. -->
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F1EFE8;padding:24px 0;">
   <tr>
@@ -16,12 +16,12 @@
         </tr>
         <tr>
           <td style="padding:8px 32px 0 32px;">
-            <span style="color:#1F2430;font-size:18px;font-weight:600;">Executive approval needed: @{triggerBody()?['text_2']}</span>
+            <span style="color:#1F2430;font-size:18px;font-weight:600;">Sponsor approval needed: @{triggerBody()?['text_2']}</span>
           </td>
         </tr>
         <tr>
           <td style="padding:12px 32px 0 32px;">
-            <span style="color:#4B5563;font-size:14px;line-height:20px;">The Manager has approved this request. It now needs your review as Project Owner.</span>
+            <span style="color:#4B5563;font-size:14px;line-height:20px;">The Manager has approved this request. It now needs your final review as Project Sponsor.</span>
           </td>
         </tr>
         <tr>

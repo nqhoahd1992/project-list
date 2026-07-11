@@ -77,7 +77,7 @@ Screens:
                         FontWeight: =FontWeight.Semibold
                         Height: =32
                         Size: =11
-                        Text: ="This request will be applied only after Manager and Executive approval."
+                        Text: ="This request will be applied only after Manager and Sponsor approval."
                         Width: =Parent.Width - 40
             - rowHierarchy:
                 Control: GroupContainer@1.5.0
@@ -336,40 +336,6 @@ Screens:
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
-                  - colOwner:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =4
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =320
-                      Children:
-                        - lblOwnerLabel:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: ="Project Owner *"
-                              Width: =Parent.Width
-                        - cmbOwner:
-                            Control: ModernCombobox@1.1.1
-                            Properties:
-                              AllowExternalSelectedItems: =false
-                              FontWeight: =""
-                              Height: =40
-                              InputTextPlaceholder: ="Choose an employee"
-                              ItemDisplayText: =ThisItem.Title
-                              Items: |-
-                                =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Executive"), {ID: EmployeeID.Id, Title: EmployeeID.Value}), Title, SortOrder.Ascending)
-                              SelectMultiple: =false
-                              Size: =0
-                              Width: =Parent.Width
                   - colSponsor:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -399,7 +365,8 @@ Screens:
                               Height: =40
                               InputTextPlaceholder: ="Choose an employee"
                               ItemDisplayText: =ThisItem.Title
-                              Items: =Sort('Employee List', Title, SortOrder.Ascending)
+                              Items: |-
+                                =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Sponsor"), {ID: EmployeeID.Id, Title: EmployeeID.Value}), Title, SortOrder.Ascending)
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
@@ -980,8 +947,8 @@ Screens:
                                 IsBlank(cmbDepartment.Selected.Value),
                                 Notify("Department is required", NotificationType.Error),
                                 If(
-                                    IsBlank(cmbOwner.Selected.ID) || IsBlank(cmbSponsor.Selected.ID),
-                                    Notify("Project Owner and Project Sponsor are required", NotificationType.Error),
+                                    IsBlank(cmbSponsor.Selected.ID),
+                                    Notify("Project Sponsor is required", NotificationType.Error),
                                     If(
                                         IsBlank(cmbPriority.Selected.Value),
                                         Notify("Priority is required", NotificationType.Error),
@@ -1012,7 +979,6 @@ Screens:
                                                                 Deliverables: txtDeliverables.Text,
                                                                 ProjectType: {Value: cmbProjectType.Selected.Value},
                                                                 Department: cmbDepartment.Selected.Value,
-                                                                ProjectOwner: {Id: cmbOwner.Selected.ID, Value: cmbOwner.Selected.Title},
                                                                 ProjectSponsor: {Id: cmbSponsor.Selected.ID, Value: cmbSponsor.Selected.Title},
                                                                 Priority: {Value: cmbPriority.Selected.Value},
                                                                 StartDate: dpStartDate.SelectedDate,

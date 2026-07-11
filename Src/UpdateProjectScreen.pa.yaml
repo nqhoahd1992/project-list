@@ -7,7 +7,7 @@ Screens:
             !IsBlank(
                 LookUp(Project_ChangeRequests,
                     TargetItemID = gSelectedProject.ID &&
-                    (ApprovalStatus.Value = "Pending Manager" || ApprovalStatus.Value = "Pending Executive")
+                    (ApprovalStatus.Value = "Pending Manager Approval" || ApprovalStatus.Value = "Pending Sponsor Approval")
                 )
             )
         )
@@ -169,38 +169,6 @@ Screens:
                               Height: =24
                               Size: =11
                               Text: =gSelectedProject.ProjectType.Value
-                              Width: =240
-                  - colOwner_2:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =46
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =2
-                        LayoutMinHeight: =60
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Width: =240
-                      Children:
-                        - lblOwnerLabel_2:
-                            Control: Label@2.5.1
-                            Properties:
-                              Color: =RGBA(136, 135, 128, 1)
-                              Height: =20
-                              Size: =9
-                              Text: ="Project Owner"
-                              Width: =240
-                        - lblOwnerValue_1:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: =gSelectedProject.ProjectOwner.Value
                               Width: =240
                   - colManager_2:
                       Control: GroupContainer@1.5.0
@@ -431,7 +399,7 @@ Screens:
                         FontWeight: =FontWeight.Semibold
                         Height: =28
                         Size: =11
-                        Text: ="Only Project Description, Deliverables, and End Date can be updated. Changes take effect after Manager and Executive approval."
+                        Text: ="Only Project Description, Deliverables, and End Date can be updated. Changes take effect after Manager and Sponsor approval."
                         Width: =Parent.Width - 40
             - rowNewDescription:
                 Control: GroupContainer@1.5.0
@@ -684,7 +652,7 @@ Screens:
                                     {
                                         Title: "Update - " & gSelectedProject.Title & " - " & gCurrentEmployee.Title & " - " & Text(Today(), "dd/mm/yyyy"),
                                         RequestType: {Value: "Update"},
-                                        ApprovalStatus: {Value: "Pending Manager"},
+                                        ApprovalStatus: {Value: "Pending Manager Approval"},
                                         RequesterEmail: User().Email,
                                         RequesterID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
                                         RequestReason: txtUpdateReason.Text,
