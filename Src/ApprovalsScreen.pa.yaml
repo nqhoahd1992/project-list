@@ -366,8 +366,8 @@ Screens:
                     Set(gShowRejectPanel, false)
                   Size: =10
                   Text: =ThisItem.ApprovalStatus.Value
-                  Width: =120
-                  X: =Parent.Width - 135
+                  Width: =140
+                  X: =Parent.Width - 140 - 12
                   Y: =40
             - lblCRMeta:
                 Control: Label@2.5.1
@@ -386,7 +386,7 @@ Screens:
                     Set(gShowRejectPanel, false)
                   Size: =10
                   Text: ="#" & ThisItem.ID & " | " & ThisItem.RequesterID.Value & " | " & Text(ThisItem.Created, "dd/mm/yyyy")
-                  Width: =Parent.Width - 160
+                  Width: =Parent.Width - 180
                   X: =12
                   Y: =45
             - rectSeparator_1:

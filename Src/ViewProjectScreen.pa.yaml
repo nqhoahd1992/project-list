@@ -130,7 +130,7 @@ Screens:
                         Height: =28
                         Size: =10
                         Text: =If(gSelectedProject.ProjectLevel = 1, "↳ Child of " & gSelectedProject.RootProjectID, "Root")
-                        Width: =200
+                        Width: =230
             - rowProjectInfo_2:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
