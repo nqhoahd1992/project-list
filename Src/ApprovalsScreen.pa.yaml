@@ -90,26 +90,25 @@ Screens:
                         Text: |-
                           ="To Approve (" &
                           CountRows(
-                              Switch(gUserRole,
-                                  "Manager",
-                                  Filter(
-                                      Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager Approval"),
+                              Filter(
+                                  Filter(Project_ChangeRequests,
+                                      ApprovalStatus.Value = "Pending Manager Approval" ||
+                                      ApprovalStatus.Value = "Pending Sponsor Approval"
+                                  ),
+                                  (ApprovalStatus.Value = "Pending Manager Approval" &&
                                       If(
                                           RequestType.Value = "Create",
                                           ProjectManager.Id = gCurrentEmployee.ID,
                                           LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
                                       )
-                                  ),
-                                  "Sponsor",
-                                  Filter(
-                                      Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Sponsor Approval"),
+                                  ) ||
+                                  (gUserRole = "Sponsor" && ApprovalStatus.Value = "Pending Sponsor Approval" &&
                                       If(
                                           RequestType.Value = "Create",
                                           ProjectSponsor.Id = gCurrentEmployee.ID,
                                           LookUp(Project_List, ID = TargetItemID).ProjectSponsor.Id = gCurrentEmployee.ID
                                       )
-                                  ),
-                                  Filter(Project_ChangeRequests, false)
+                                  )
                               )
                           ) & ")"
                         Visible: =gIsApprover
@@ -147,7 +146,7 @@ Screens:
                         PaddingRight: =10
                         Size: =10
                         Text: ="History"
-                        Visible: =gUserRole = "Manager" || gUserRole = "Sponsor"
+                        Visible: =gIsApprover
                         Width: =90
                         X: =40
                         Y: =40
@@ -206,47 +205,40 @@ Screens:
                           ProjectSponsor.Id = gCurrentEmployee.ID
                       ),
                       "History",
-                      Switch(gUserRole,
-                          "Manager",
-                          Filter(
-                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected"),
-                              If(
-                                  RequestType.Value = "Create",
-                                  ProjectManager.Id = gCurrentEmployee.ID,
-                                  LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
-                              )
-                          ),
-                          "Sponsor",
-                          Filter(
-                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected"),
+                      Filter(
+                          Filter(Project_ChangeRequests, ApprovalStatus.Value = "Approved" || ApprovalStatus.Value = "Rejected"),
+                          If(
+                              RequestType.Value = "Create",
+                              ProjectManager.Id = gCurrentEmployee.ID,
+                              LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
+                          ) ||
+                          (gUserRole = "Sponsor" &&
                               If(
                                   RequestType.Value = "Create",
                                   ProjectSponsor.Id = gCurrentEmployee.ID,
                                   LookUp(Project_List, ID = TargetItemID).ProjectSponsor.Id = gCurrentEmployee.ID
                               )
-                          ),
-                          Filter(Project_ChangeRequests, false)
+                          )
                       ),
-                      Switch(gUserRole,
-                          "Manager",
-                          Filter(
-                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Manager Approval"),
+                      Filter(
+                          Filter(Project_ChangeRequests,
+                              ApprovalStatus.Value = "Pending Manager Approval" ||
+                              ApprovalStatus.Value = "Pending Sponsor Approval"
+                          ),
+                          (ApprovalStatus.Value = "Pending Manager Approval" &&
                               If(
                                   RequestType.Value = "Create",
                                   ProjectManager.Id = gCurrentEmployee.ID,
                                   LookUp(Project_List, ID = TargetItemID).ProjectManager.Id = gCurrentEmployee.ID
                               )
-                          ),
-                          "Sponsor",
-                          Filter(
-                              Filter(Project_ChangeRequests, ApprovalStatus.Value = "Pending Sponsor Approval"),
+                          ) ||
+                          (gUserRole = "Sponsor" && ApprovalStatus.Value = "Pending Sponsor Approval" &&
                               If(
                                   RequestType.Value = "Create",
                                   ProjectSponsor.Id = gCurrentEmployee.ID,
                                   LookUp(Project_List, ID = TargetItemID).ProjectSponsor.Id = gCurrentEmployee.ID
                               )
-                          ),
-                          Filter(Project_ChangeRequests, RequesterEmail = User().Email)
+                          )
                       )
                   ),
                   "ID", SortOrder.Descending
@@ -469,7 +461,7 @@ Screens:
                         Height: =22
                         Size: =10
                         Text: |-
-                          ="Requested by: " & gSelectedCR.RequesterID.Value & " | Submitted: " & Text(gSelectedCR.Created, "dd/mm/yyyy hh:mm") & " | Status: " & gSelectedCR.ApprovalStatus.Value & If(IsBlank(gSelectedCR.TargetProjectID), "", " | Target: " & gSelectedCR.TargetProjectID)
+                          ="Requested by: " & gSelectedCR.RequesterID.Value & " | Submitted: " & Text(gSelectedCR.Created, "dd/mm/yyyy hh:mm") & If(IsBlank(gSelectedCR.TargetProjectID), "", " | Target: " & gSelectedCR.TargetProjectID)
                         Width: =Parent.Width - 40
             - rowRequestReason:
                 Control: GroupContainer@1.5.0
@@ -1060,8 +1052,7 @@ Screens:
                               Height: =40
                               InputTextPlaceholder: ="Choose an employee"
                               ItemDisplayText: =ThisItem.Title
-                              Items: |-
-                                =Sort(ForAll(Filter(Project_User, IsActive && Role.Value = "Manager"), {ID: EmployeeID.Id, Title: EmployeeID.Value}), Title, SortOrder.Ascending)
+                              Items: =Sort('Employee List', Title, SortOrder.Ascending)
                               SelectMultiple: =false
                               Size: =0
                               Width: =360
@@ -1207,6 +1198,7 @@ Screens:
                                     Size: =11
                                     Text: =gLiveTarget.ProjectType.Value
                                     Width: =220
+                                    Wrap: =false
                         - colLTDept:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -1239,6 +1231,7 @@ Screens:
                                     Size: =11
                                     Text: =gLiveTarget.Department
                                     Width: =220
+                                    Wrap: =false
                         - colLTPriority:
                             Control: GroupContainer@1.5.0
                             Variant: AutoLayout
@@ -1673,6 +1666,7 @@ Screens:
                         Size: =11
                         Text: =If(IsBlank(gLiveTarget.ProjectDocuments), "—", gLiveTarget.ProjectDocuments)
                         Width: =Parent.Width - 40
+                        Wrap: =false
             - rowDiffUpdate:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -1680,7 +1674,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =8
-                  LayoutMinHeight: =380
+                  LayoutMinHeight: =680
                   PaddingBottom: =12
                   PaddingLeft: =20
                   PaddingRight: =20
@@ -2108,7 +2102,7 @@ Screens:
             Visible: |-
               =!IsBlank(gSelectedCR.ID) &&
               (
-                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager Approval" && gUserRole = "Manager" &&
+                  (gSelectedCR.ApprovalStatus.Value = "Pending Manager Approval" &&
                       If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectManager.Id, gLiveTarget.ProjectManager.Id) = gCurrentEmployee.ID) ||
                   (gSelectedCR.ApprovalStatus.Value = "Pending Sponsor Approval" && gUserRole = "Sponsor" &&
                       If(gSelectedCR.RequestType.Value = "Create", gSelectedCR.ProjectSponsor.Id, gLiveTarget.ProjectSponsor.Id) = gCurrentEmployee.ID)

@@ -16,7 +16,7 @@ Screens:
                     (ApprovalStatus.Value = "Pending Sponsor" &&
                         ProjectSponsor.Id = gCurrentEmployee.ID
                     ) ||
-                    (gUserRole = "Manager" && ApprovalStatus.Value = "Pending Manager Approval" &&
+                    (ApprovalStatus.Value = "Pending Manager Approval" &&
                         If(
                             RequestType.Value = "Create",
                             ProjectManager.Id = gCurrentEmployee.ID,
@@ -755,9 +755,7 @@ Screens:
                   Text: |-
                     ="Sponsor: " & ThisItem.ProjectSponsor.Value &
                     " | Manager: " & ThisItem.ProjectManager.Value &
-                    If(IsBlank(ThisItem.StartDate), "", " | " & Text(ThisItem.StartDate, "dd/mm/yyyy") & " → " & Text(ThisItem.EndDate, "dd/mm/yyyy")) &
-                    If(IsBlank(ThisItem.BudgetAmount) || ThisItem.BudgetAmount = 0, "", " | Budget: " & Text(ThisItem.BudgetAmount, "[#,###]") & " " & ThisItem.Currency) &
-                    If(IsBlank(ThisItem.ActualCost) || ThisItem.ActualCost = 0, "", " | Actual: " & Text(ThisItem.ActualCost, "[#,###]") & " " & ThisItem.Currency)
+                    If(IsBlank(ThisItem.StartDate), "", " | " & Text(ThisItem.StartDate, "dd/mm/yyyy") & " → " & Text(ThisItem.EndDate, "dd/mm/yyyy"))
                   Width: =Parent.Width - 350
                   X: =16
                   Y: =51

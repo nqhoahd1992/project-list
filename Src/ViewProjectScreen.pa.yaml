@@ -424,6 +424,10 @@ Screens:
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
+                        Visible: |-
+                          =gSelectedProject.RequestedBy.Id = gCurrentEmployee.ID ||
+                          gSelectedProject.ProjectManager.Id = gCurrentEmployee.ID ||
+                          gUserRole = "Sponsor"
                         Width: =220
                       Children:
                         - lblBudgetLabel_2:
@@ -456,6 +460,10 @@ Screens:
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
+                        Visible: |-
+                          =gSelectedProject.RequestedBy.Id = gCurrentEmployee.ID ||
+                          gSelectedProject.ProjectManager.Id = gCurrentEmployee.ID ||
+                          gUserRole = "Sponsor"
                         Width: =220
                       Children:
                         - lblActualCostLabel_2:
