@@ -446,42 +446,6 @@ Screens:
                               Size: =11
                               Text: =Text(gSelectedProject.BudgetAmount, "[#,###]") & " " & gSelectedProject.Currency
                               Width: =220
-                  - colActualCost_2:
-                      Control: GroupContainer@1.5.0
-                      Variant: AutoLayout
-                      Properties:
-                        DropShadow: =DropShadow.None
-                        FillPortions: =0
-                        Height: =46
-                        LayoutDirection: =LayoutDirection.Vertical
-                        LayoutGap: =2
-                        LayoutMinHeight: =60
-                        RadiusBottomLeft: =0
-                        RadiusBottomRight: =0
-                        RadiusTopLeft: =0
-                        RadiusTopRight: =0
-                        Visible: |-
-                          =gSelectedProject.RequestedBy.Id = gCurrentEmployee.ID ||
-                          gSelectedProject.ProjectManager.Id = gCurrentEmployee.ID ||
-                          gUserRole = "Sponsor"
-                        Width: =220
-                      Children:
-                        - lblActualCostLabel_2:
-                            Control: Label@2.5.1
-                            Properties:
-                              Color: =RGBA(136, 135, 128, 1)
-                              Height: =20
-                              Size: =9
-                              Text: ="Actual Cost"
-                              Width: =220
-                        - lblActualCostValue_2:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =24
-                              Size: =11
-                              Text: =If(IsBlank(gSelectedProject.ActualCost), "—", Text(gSelectedProject.ActualCost, "[#,###]") & " " & gSelectedProject.Currency)
-                              Width: =220
                   - colCapexOpex_2:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -650,8 +614,42 @@ Screens:
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
+                  Height: |-
+                    =121 +
+                    If(
+                        Not(IsBlank(gSelectedProject.ProjectID)) &&
+                        CountRows(Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)) > 0,
+                        32 * CountRows(Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)),
+                        24
+                    ) +
+                    28 * CountRows(
+                        GroupBy(
+                            Filter(Procurement_InvoiceData,
+                                Not(IsBlank(gSelectedProject.ProjectID)) &&
+                                ProjectID = gSelectedProject.ProjectID
+                            ),
+                            Currency, GroupedInvoices
+                        )
+                    )
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
+                  LayoutMinHeight: |-
+                    =121 +
+                    If(
+                        Not(IsBlank(gSelectedProject.ProjectID)) &&
+                        CountRows(Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)) > 0,
+                        32 * CountRows(Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)),
+                        24
+                    ) +
+                    28 * CountRows(
+                        GroupBy(
+                            Filter(Procurement_InvoiceData,
+                                Not(IsBlank(gSelectedProject.ProjectID)) &&
+                                ProjectID = gSelectedProject.ProjectID
+                            ),
+                            Currency, GroupedInvoices
+                        )
+                    )
                   PaddingBottom: =12
                   PaddingLeft: =20
                   PaddingRight: =20
@@ -669,9 +667,9 @@ Screens:
                   - lblActualCostDetailLabel_2:
                       Control: Label@2.5.1
                       Properties:
-                        Color: =RGBA(136, 135, 128, 1)
-                        Height: =20
-                        Size: =9
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        Size: =11
                         Text: ="Actual Cost — Procurement Invoices"
                         Width: =Parent.Width
                   - rowActualCostHeader_2:
@@ -692,21 +690,30 @@ Screens:
                             Control: Label@2.5.1
                             Properties:
                               Color: =RGBA(136, 135, 128, 1)
+                              FillPortions: =1
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =9
                               Text: ="Title"
                               Width: =340
+                        - lblActualCostColInvoiceDate_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Invoice Date"
+                              Width: =200
                         - lblActualCostColAmount_2:
                             Control: Label@2.5.1
                             Properties:
-                              Align: =Align.Right
                               Color: =RGBA(136, 135, 128, 1)
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =9
                               Text: ="Total Amount"
-                              Width: =160
+                              Width: =200
                         - lblActualCostColCurrency_2:
                             Control: Label@2.5.1
                             Properties:
@@ -715,46 +722,92 @@ Screens:
                               Height: =24
                               Size: =9
                               Text: ="Currency"
-                              Width: =80
+                              Width: =200
                   - galActualCostInvoices_2:
                       Control: Gallery@2.15.0
                       Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
                       Properties:
                         BorderColor: =RGBA(0, 0, 0, 0)
-                        Height: =160
+                        FillPortions: =0
+                        Height: |-
+                          =32 * CountRows(
+                              Filter(Procurement_InvoiceData,
+                                  Not(IsBlank(gSelectedProject.ProjectID)) &&
+                                  ProjectID = gSelectedProject.ProjectID
+                              )
+                          )
                         Items: |-
                           =Filter(Procurement_InvoiceData,
                               Not(IsBlank(gSelectedProject.ProjectID)) &&
                               ProjectID = gSelectedProject.ProjectID
                           )
+                        LayoutMinHeight: |-
+                          =32 * CountRows(
+                              Filter(Procurement_InvoiceData,
+                                  Not(IsBlank(gSelectedProject.ProjectID)) &&
+                                  ProjectID = gSelectedProject.ProjectID
+                              )
+                          )
                         TemplateSize: =32
-                        Visible: =Not(IsBlank(gSelectedProject.ProjectID))
+                        Visible: |-
+                          =Not(IsBlank(gSelectedProject.ProjectID)) &&
+                          CountRows(
+                              Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)
+                          ) > 0
                         Width: =Parent.Width
                       Children:
-                        - lblInvoiceTitle_2:
-                            Control: Label@2.5.1
+                        - rowActualCostInvoices_2:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
                             Properties:
+                              DropShadow: =DropShadow.None
                               Height: =32
-                              Size: =10
-                              Text: =ThisItem.Title
-                              Width: =340
-                        - lblInvoiceAmount_2:
-                            Control: Label@2.5.1
-                            Properties:
-                              Align: =Align.Right
-                              Height: =32
-                              Size: =10
-                              Text: =Text(ThisItem.TotalAmount, "[#,###]")
-                              Width: =160
-                              X: =340
-                        - lblInvoiceCurrency_2:
-                            Control: Label@2.5.1
-                            Properties:
-                              Height: =32
-                              Size: =10
-                              Text: =ThisItem.Currency
-                              Width: =80
-                              X: =500
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.Width
+                            Children:
+                              - lblInvoiceTitle_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FillPortions: =1
+                                    Height: =32
+                                    PaddingRight: =15
+                                    Size: =10
+                                    Text: =ThisItem.Title
+                                    Width: =200
+                                    Wrap: =false
+                                    X: =40
+                                    Y: =40
+                              - lblInvoiceInvoiceDate_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Height: =32
+                                    Size: =10
+                                    Text: =ThisItem.InvoiceDate
+                                    Width: =200
+                                    X: =40
+                                    Y: =40
+                              - lblInvoiceAmount_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Height: =32
+                                    Size: =10
+                                    Text: =Text(ThisItem.TotalAmount, "[#,###]")
+                                    Width: =200
+                                    X: =40
+                                    Y: =40
+                              - lblInvoiceCurrency_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Height: =32
+                                    Size: =10
+                                    Text: =ThisItem.Currency
+                                    Width: =200
+                                    X: =40
+                                    Y: =40
                   - lblActualCostEmpty_2:
                       Control: Label@2.5.1
                       Properties:
@@ -767,7 +820,7 @@ Screens:
                           CountRows(
                               Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)
                           ) = 0
-                        Width: =Parent.Width
+                        Width: =Parent.Width - 40
                   - rectActualCostDivider_2:
                       Control: Rectangle@2.3.0
                       Properties:
@@ -783,13 +836,23 @@ Screens:
                         Height: =22
                         Size: =9
                         Text: ="Total by Currency"
-                        Width: =Parent.Width
+                        Width: =Parent.Width - 40
                   - galActualCostSummary_2:
                       Control: Gallery@2.15.0
                       Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
                       Properties:
                         BorderColor: =RGBA(0, 0, 0, 0)
-                        Height: =90
+                        FillPortions: =0
+                        Height: |-
+                          =28 * CountRows(
+                              GroupBy(
+                                  Filter(Procurement_InvoiceData,
+                                      Not(IsBlank(gSelectedProject.ProjectID)) &&
+                                      ProjectID = gSelectedProject.ProjectID
+                                  ),
+                                  Currency, GroupedInvoices
+                              )
+                          )
                         Items: |-
                           =AddColumns(
                               GroupBy(
@@ -801,28 +864,28 @@ Screens:
                               ),
                               TotalSum, Sum(GroupedInvoices, TotalAmount)
                           )
+                        LayoutMinHeight: |-
+                          =28 * CountRows(
+                              GroupBy(
+                                  Filter(Procurement_InvoiceData,
+                                      Not(IsBlank(gSelectedProject.ProjectID)) &&
+                                      ProjectID = gSelectedProject.ProjectID
+                                  ),
+                                  Currency, GroupedInvoices
+                              )
+                          )
                         TemplateSize: =28
                         Visible: =Not(IsBlank(gSelectedProject.ProjectID))
                         Width: =Parent.Width
                       Children:
-                        - lblSummaryCurrency_2:
-                            Control: Label@2.5.1
-                            Properties:
-                              FontWeight: =FontWeight.Semibold
-                              Height: =28
-                              Size: =11
-                              Text: =ThisItem.Currency
-                              Width: =160
                         - lblSummaryTotal_2:
                             Control: Label@2.5.1
                             Properties:
-                              Align: =Align.Right
                               FontWeight: =FontWeight.Semibold
                               Height: =28
-                              Size: =11
+                              Size: =10
                               Text: =Text(ThisItem.TotalSum, "[#,###]") & " " & ThisItem.Currency
-                              Width: =260
-                              X: =160
+                              Width: =Parent.Width
             - rowDocuments_2:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
