@@ -138,7 +138,7 @@ Screens:
                   DropShadow: =DropShadow.None
                   Fill: =RGBA(241, 239, 232, 1)
                   FillPortions: =0
-                  Height: =370
+                  Height: =300
                   LayoutDirection: =LayoutDirection.Horizontal
                   LayoutGap: =16
                   LayoutMinHeight: =320
