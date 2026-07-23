@@ -938,84 +938,89 @@ Screens:
                   Height: =36
                   OnSelect: |-
                     =If(
-                        IsBlank(txtProjectName.Text),
-                        Notify("Project Name is required", NotificationType.Error),
-                        If(
-                            IsBlank(cmbProjectType.Selected.Value),
-                            Notify("Project Type is required", NotificationType.Error),
+                        IsBlank(rdoLevel.Selected.Value),
+                        Notify("Please select a Project Level", NotificationType.Error),
                             If(
-                                IsBlank(cmbDepartment.Selected.Value),
-                                Notify("Department is required", NotificationType.Error),
+                                IsBlank(txtProjectName.Text),
+                                Notify("Project Name is required", NotificationType.Error),
                                 If(
-                                    IsBlank(cmbSponsor.Selected.ID),
-                                    Notify("Project Sponsor is required", NotificationType.Error),
+                                    IsBlank(cmbProjectType.Selected.Value),
+                                    Notify("Project Type is required", NotificationType.Error),
                                     If(
-                                        IsBlank(cmbPriority.Selected.Value),
-                                        Notify("Priority is required", NotificationType.Error),
+                                        IsBlank(cmbDepartment.Selected.Value),
+                                        Notify("Department is required", NotificationType.Error),
                                         If(
-                                            IsBlank(cmbCostCenter.Selected.Value),
-                                            Notify("Cost Center is required", NotificationType.Error),
+                                            IsBlank(cmbSponsor.Selected.ID),
+                                            Notify("Project Sponsor is required", NotificationType.Error),
                                             If(
-                                                IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Text) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text) || IsBlank(txtDeliverables.Text),
-                                                Notify("Please fill in all required fields (Start/End Date, Budget Amount, CapEx/OpEx, Strategic Objective, Market, Channel, Project Documents URL, Project Description, Deliverables)", NotificationType.Error),
+                                                IsBlank(cmbPriority.Selected.Value),
+                                                Notify("Priority is required", NotificationType.Error),
                                                 If(
-                                                    StartsWith(rdoLevel.Selected.Value, "Child") && IsBlank(cmbRootProject.Selected.ProjectID),
-                                                Notify("Please select the root project", NotificationType.Error),
-                                                If(
-                                                    dpEndDate.SelectedDate < dpStartDate.SelectedDate,
-                                                    Notify("End Date must be on or after Start Date", NotificationType.Error),
-                                                    With(
-                                                        {wCR: Patch(
-                                                            Project_ChangeRequests,
-                                                            Defaults(Project_ChangeRequests),
-                                                            {
-                                                                Title: "Create - " & txtProjectName.Text & " - " & gCurrentEmployee.Title & " - " & Text(Today(), "dd/mm/yyyy"),
-                                                                RequestType: {Value: "Create"},
-                                                                ApprovalStatus: {Value: "Pending Sponsor"},
-                                                                RequesterEmail: User().Email,
-                                                                RequesterID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
-                                                                ProjectName: txtProjectName.Text,
-                                                                ProjectDescription: txtDescription.Text,
-                                                                Deliverables: txtDeliverables.Text,
-                                                                ProjectType: {Value: cmbProjectType.Selected.Value},
-                                                                Department: cmbDepartment.Selected.Value,
-                                                                ProjectSponsor: {Id: cmbSponsor.Selected.ID, Value: cmbSponsor.Selected.Title},
-                                                                Priority: {Value: cmbPriority.Selected.Value},
-                                                                StartDate: dpStartDate.SelectedDate,
-                                                                EndDate: dpEndDate.SelectedDate,
-                                                                ProjectStatus: {Value: "Not Started"},
-                                                                BudgetAmount: Value(txtBudgetAmount.Text),
-                                                                Currency: currency.Text,
-                                                                CapexOpex: {Value: cmbCapexOpex.Selected.Value},
-                                                                RelatedSKU: ForAll(cmbSKU.SelectedItems, {Id: ID, Value: Title}),
-                                                                Market: {Value: cmbMarket.Selected.Value},
-                                                                Channel: {Value: cmbChannel.Selected.Value},
-                                                                StrategicObjective: {Value: cmbObjective.Selected.Value},
-                                                                CostCenter: {Value: cmbCostCenter.Selected.Value},
-                                                                ProjectDocuments: txtDocsUrl.Text,
-                                                                ProjectLevel: If(StartsWith(rdoLevel.Selected.Value, "Root"), 0, 1),
-                                                                RootProjectID: If(StartsWith(rdoLevel.Selected.Value, "Child"), cmbRootProject.Selected.ProjectID, Blank())
-                                                            }
-                                                        )},
+                                                    IsBlank(cmbCostCenter.Selected.Value),
+                                                    Notify("Cost Center is required", NotificationType.Error),
+                                                    If(
+                                                        IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Text) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text) || IsBlank(txtDeliverables.Text),
+                                                        Notify("Please fill in all required fields (Start/End Date, Budget Amount, CapEx/OpEx, Strategic Objective, Market, Channel, Project Documents URL, Project Description, Deliverables)", NotificationType.Error),
                                                         If(
-                                                            IsBlank(wCR.ID),
-                                                            Notify("Failed to submit the request. Please try again.", NotificationType.Error),
-                                                            Project_Notify.Run(
-                                                                "SubmittedToSponsor",
-                                                                Coalesce(
-                                                                    LookUp('Employee List', ID = cmbSponsor.Selected.ID).Email,
-                                                                    "app.admin@maxbiocare.com"
-                                                                ),
-                                                                wCR.Title,
-                                                                wCR.ID,
-                                                                "Create",
-                                                                txtProjectName.Text,
-                                                                gCurrentEmployee.Title,
-                                                                gCurrentEmployee.Title,
-                                                                ""
-                                                            );
-                                                            Notify("Request submitted. The Project Sponsor will assign a Project Manager next.", NotificationType.Success);
-                                                            Navigate(AllProjectsScreen)
+                                                            StartsWith(rdoLevel.Selected.Value, "Child") && IsBlank(cmbRootProject.Selected.ProjectID),
+                                                        Notify("Please select the root project", NotificationType.Error),
+                                                        If(
+                                                            dpEndDate.SelectedDate < dpStartDate.SelectedDate,
+                                                            Notify("End Date must be on or after Start Date", NotificationType.Error),
+                                                            With(
+                                                                {wCR: Patch(
+                                                                    Project_ChangeRequests,
+                                                                    Defaults(Project_ChangeRequests),
+                                                                    {
+                                                                        Title: "Create - " & txtProjectName.Text & " - " & gCurrentEmployee.Title & " - " & Text(Today(), "dd/mm/yyyy"),
+                                                                        RequestType: {Value: "Create"},
+                                                                        ApprovalStatus: {Value: "Pending Sponsor"},
+                                                                        RequesterEmail: User().Email,
+                                                                        RequesterID: {Id: gCurrentEmployee.ID, Value: gCurrentEmployee.Title},
+                                                                        ProjectName: txtProjectName.Text,
+                                                                        ProjectDescription: txtDescription.Text,
+                                                                        Deliverables: txtDeliverables.Text,
+                                                                        ProjectType: {Value: cmbProjectType.Selected.Value},
+                                                                        Department: cmbDepartment.Selected.Value,
+                                                                        ProjectSponsor: {Id: cmbSponsor.Selected.ID, Value: cmbSponsor.Selected.Title},
+                                                                        Priority: {Value: cmbPriority.Selected.Value},
+                                                                        StartDate: dpStartDate.SelectedDate,
+                                                                        EndDate: dpEndDate.SelectedDate,
+                                                                        ProjectStatus: {Value: "Not Started"},
+                                                                        BudgetAmount: Value(txtBudgetAmount.Text),
+                                                                        Currency: currency.Text,
+                                                                        CapexOpex: {Value: cmbCapexOpex.Selected.Value},
+                                                                        RelatedSKU: ForAll(cmbSKU.SelectedItems, {Id: ID, Value: Title}),
+                                                                        Market: {Value: cmbMarket.Selected.Value},
+                                                                        Channel: {Value: cmbChannel.Selected.Value},
+                                                                        StrategicObjective: {Value: cmbObjective.Selected.Value},
+                                                                        CostCenter: {Value: cmbCostCenter.Selected.Value},
+                                                                        ProjectDocuments: txtDocsUrl.Text,
+                                                                        ProjectLevel: If(StartsWith(rdoLevel.Selected.Value, "Child"), 1, 0),
+                                                                        RootProjectID: If(StartsWith(rdoLevel.Selected.Value, "Child"), cmbRootProject.Selected.ProjectID, Blank())
+                                                                    }
+                                                                )},
+                                                                If(
+                                                                    IsBlank(wCR.ID),
+                                                                    Notify("Failed to submit the request. Please try again.", NotificationType.Error),
+                                                                    Project_Notify.Run(
+                                                                        "SubmittedToSponsor",
+                                                                        Coalesce(
+                                                                            LookUp('Employee List', ID = cmbSponsor.Selected.ID).Email,
+                                                                            "app.admin@maxbiocare.com"
+                                                                        ),
+                                                                        wCR.Title,
+                                                                        wCR.ID,
+                                                                        "Create",
+                                                                        txtProjectName.Text,
+                                                                        gCurrentEmployee.Title,
+                                                                        gCurrentEmployee.Title,
+                                                                        ""
+                                                                    );
+                                                                    Notify("Request submitted. The Project Sponsor will assign a Project Manager next.", NotificationType.Success);
+                                                                    Navigate(AllProjectsScreen)
+                                                                )
+                                                            )
                                                         )
                                                     )
                                                 )
@@ -1025,7 +1030,6 @@ Screens:
                                 )
                             )
                         )
-                    )
                     )
                   PaddingBottom: =5
                   PaddingLeft: =12

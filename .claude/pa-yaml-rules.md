@@ -166,6 +166,8 @@ Layout: ='RadioGroupCanvas.Layout'.Horizontal
 ```
 **Not** `Layout.Horizontal` — that enum does not exist for Radio and will cause a PA error.
 
+**Do not rely on "Radio selects the first item by default" to skip required-field validation.** Confirmed in production (`project-list`'s `CreateProjectScreen`, `rdoLevel`): a real submitted row ended up with `.Selected.Value` genuinely blank at submit time, not the first item. The bug this caused is a general trap, not specific to that one field — a submit formula that branches on `StartsWith(radio.Selected.Value, "SomeOption")` with an `If(cond, A, B)` (two-way, no explicit blank case) silently sends blank state down the **wrong** branch, because `StartsWith(Blank(), "SomeOption")` is `false` just like `StartsWith("OtherOption", "SomeOption")` — the formula can't distinguish "explicitly the other option" from "nothing selected." Concretely: `ProjectLevel: If(StartsWith(rdoLevel.Selected.Value, "Root"), 0, 1)` mapped a blank selection to `1` (Child) — the *else* branch — instead of blocking submit, because there was no `IsBlank(rdoLevel.Selected.Value)` check anywhere in the validation chain. **Rule:** any screen with a required Radio must explicitly validate `IsBlank(radio.Selected.Value)` in its submit guard — same as any other required combo/text field — regardless of what `Items` ordering implies the default should be. If the field also drives a data-shape branch (e.g. `If(StartsWith(..., "X"), valueA, valueB)`), write it so the "else" is the safe/inert value, not the one that implies more required data (here, the fix was flipping to `If(StartsWith(..., "Child"), 1, 0)` so an unvalidated blank falls back to Root, not Child).
+
 ---
 
 ## 6. ComboBox — no `Default` property, use `DefaultSelectedItems`
