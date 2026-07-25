@@ -795,7 +795,7 @@ Screens:
                                   Properties:
                                     Height: =32
                                     Size: =10
-                                    Text: =Text(ThisItem.TotalAmount, "[#,###]")
+                                    Text: =Text(ThisItem.TotalAmount)
                                     Width: =200
                                     X: =40
                                     Y: =40
@@ -884,7 +884,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =28
                               Size: =10
-                              Text: =Text(ThisItem.TotalSum, "[#,###]") & " " & ThisItem.Currency
+                              Text: =Text(ThisItem.TotalSum) & " " & ThisItem.Currency
                               Width: =Parent.Width
             - rowDocuments_2:
                 Control: GroupContainer@1.5.0
