@@ -3,12 +3,35 @@ Screens:
     Properties:
       LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
       OnVisible: |-
-        =Set(gHasPendingCR,
+        =Set(gShowRateInfo, false);
+        Set(gHasPendingCR,
             !IsBlank(
                 LookUp(Project_ChangeRequests,
                     TargetItemID = gSelectedProject.ID &&
                     (ApprovalStatus.Value = "Pending Manager Approval" || ApprovalStatus.Value = "Pending Sponsor Approval")
                 )
+            )
+        );
+        ClearCollect(colChildProjects,
+            Sort(
+                Filter(Project_List,
+                    ProjectLevel = 1 &&
+                    Not(IsBlank(gSelectedProject.ProjectID)) &&
+                    RootProjectID = gSelectedProject.ProjectID
+                ),
+                ProjectID,
+                SortOrder.Ascending
+            )
+        );
+        ClearCollect(colProjectInvoices,
+            Filter(Procurement_InvoiceData,
+                Not(IsBlank(gSelectedProject.ProjectID)) &&
+                ProjectID = gSelectedProject.ProjectID
+            )
+        );
+        ForAll(colChildProjects As childProject,
+            Collect(colProjectInvoices,
+                Filter(Procurement_InvoiceData, ProjectID = childProject.ProjectID)
             )
         )
     Children:
@@ -608,6 +631,205 @@ Screens:
                               Size: =11
                               Text: =If(CountRows(gSelectedProject.RelatedSKU) = 0, "—", Concat(gSelectedProject.RelatedSKU, Value, ", "))
                               Width: =220
+            - rowChildProjects_2:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =90 + 32 * CountRows(colChildProjects)
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =90 + 32 * CountRows(colChildProjects)
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: |-
+                    =gSelectedProject.ProjectLevel = 0 &&
+                    CountRows(colChildProjects) > 0
+                  Width: =Parent.Width
+                Children:
+                  - lblChildProjectsLabel_2:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        Size: =11
+                        Text: ="Child Projects (" & CountRows(colChildProjects) & ")"
+                        Width: =Parent.Width - 40
+                  - rowChildProjectsHeader_2:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =24
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width
+                      Children:
+                        - lblChildColProjectID_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Project ID"
+                              Width: =190
+                        - lblChildColTitle_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Title"
+                              Width: =260
+                        - lblChildColStatus_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Status"
+                        - lblChildColEndDate_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="End Date"
+                        - lblChildColBudget_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Budget"
+                              Width: =200
+                        - lblChildColAction_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: =""
+                              Width: =100
+                  - galChildProjects_2:
+                      Control: Gallery@2.15.0
+                      Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        FillPortions: =0
+                        Height: =32 * CountRows(colChildProjects)
+                        Items: =colChildProjects
+                        LayoutMinHeight: =32 * CountRows(colChildProjects)
+                        TemplateSize: =32
+                        Width: =Parent.Width
+                      Children:
+                        - rowChildProjectItem_2:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Height: =32
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.Width
+                            Children:
+                              - lblChildProjectID_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(83, 74, 183, 1)
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =32
+                                    PaddingRight: =10
+                                    Size: =10
+                                    Text: =Coalesce(ThisItem.ProjectID, "PROJ-PENDING-" & ThisItem.ID)
+                                    Width: =190
+                                    Wrap: =false
+                              - lblChildProjectTitle_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FillPortions: =1
+                                    Height: =32
+                                    PaddingRight: =10
+                                    Size: =10
+                                    Text: =ThisItem.Title
+                                    Width: =260
+                                    Wrap: =false
+                              - lblChildProjectStatus_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: |-
+                                      =Switch(ThisItem.ProjectStatus.Value,
+                                          "Completed", RGBA(15, 110, 86, 1),
+                                          "Deleted", RGBA(163, 45, 45, 1),
+                                          "Cancelled", RGBA(163, 45, 45, 1),
+                                          "On Hold", RGBA(133, 79, 11, 1),
+                                          "In Progress", RGBA(83, 74, 183, 1),
+                                          RGBA(68, 68, 65, 1)
+                                      )
+                                    Fill: |-
+                                      =Switch(ThisItem.ProjectStatus.Value,
+                                          "Completed", RGBA(225, 245, 238, 1),
+                                          "Deleted", RGBA(252, 235, 235, 1),
+                                          "Cancelled", RGBA(252, 235, 235, 1),
+                                          "On Hold", RGBA(250, 238, 218, 1),
+                                          "In Progress", RGBA(225, 220, 252, 1),
+                                          RGBA(241, 239, 232, 1)
+                                      )
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =26
+                                    Size: =9
+                                    Text: =ThisItem.ProjectStatus.Value
+                              - lblChildProjectEndDate_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Height: =32
+                                    Size: =10
+                                    Text: =If(IsBlank(ThisItem.EndDate), "—", Text(ThisItem.EndDate, "dd/mm/yyyy"))
+                              - lblChildProjectBudget_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Height: =32
+                                    PaddingRight: =10
+                                    Size: =10
+                                    Text: |-
+                                      =If(
+                                          IsBlank(ThisItem.BudgetAmount),
+                                          "—",
+                                          Text(ThisItem.BudgetAmount, "[#,###]") & " " & ThisItem.Currency
+                                      )
+                                    Width: =200
+                                    Wrap: =false
+                              - btnViewChildProject_2:
+                                  Control: Button@0.0.45
+                                  Properties:
+                                    Height: =26
+                                    OnSelect: =Set(gSelectedProject, ThisItem); Navigate(ViewProjectScreen)
+                                    Text: ="View"
+                                    Width: =100
             - rowActualCostDetail_2:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -615,39 +837,25 @@ Screens:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
                   Height: |-
-                    =121 +
-                    If(
-                        Not(IsBlank(gSelectedProject.ProjectID)) &&
-                        CountRows(Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)) > 0,
-                        32 * CountRows(Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)),
-                        24
-                    ) +
-                    28 * CountRows(
-                        GroupBy(
-                            Filter(Procurement_InvoiceData,
-                                Not(IsBlank(gSelectedProject.ProjectID)) &&
-                                ProjectID = gSelectedProject.ProjectID
-                            ),
-                            Currency, GroupedInvoices
+                    =If(
+                        CountRows(colProjectInvoices) = 0,
+                        114,
+                        180 +
+                        32 * CountRows(colProjectInvoices) +
+                        28 * CountRows(
+                            GroupBy(colProjectInvoices, Currency, GroupedInvoices)
                         )
                     )
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   LayoutMinHeight: |-
-                    =121 +
-                    If(
-                        Not(IsBlank(gSelectedProject.ProjectID)) &&
-                        CountRows(Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)) > 0,
-                        32 * CountRows(Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)),
-                        24
-                    ) +
-                    28 * CountRows(
-                        GroupBy(
-                            Filter(Procurement_InvoiceData,
-                                Not(IsBlank(gSelectedProject.ProjectID)) &&
-                                ProjectID = gSelectedProject.ProjectID
-                            ),
-                            Currency, GroupedInvoices
+                    =If(
+                        CountRows(colProjectInvoices) = 0,
+                        114,
+                        180 +
+                        32 * CountRows(colProjectInvoices) +
+                        28 * CountRows(
+                            GroupBy(colProjectInvoices, Currency, GroupedInvoices)
                         )
                     )
                   PaddingBottom: =12
@@ -670,8 +878,13 @@ Screens:
                         FontWeight: =FontWeight.Semibold
                         Height: =30
                         Size: =11
-                        Text: ="Actual Cost — Procurement Invoices"
-                        Width: =Parent.Width
+                        Text: |-
+                          ="Actual Cost — Procurement Invoices" &
+                          With(
+                              {wChildRows: CountRows(Filter(colProjectInvoices, ProjectID <> gSelectedProject.ProjectID))},
+                              If(wChildRows > 0, " (incl. child projects)", "")
+                          )
+                        Width: =Parent.Width - 40
                   - rowActualCostHeader_2:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
@@ -686,6 +899,15 @@ Screens:
                         RadiusTopRight: =0
                         Width: =Parent.Width
                       Children:
+                        - lblActualCostColProjectID_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Project ID"
+                              Width: =190
                         - lblActualCostColTitle_2:
                             Control: Label@2.5.1
                             Properties:
@@ -704,7 +926,6 @@ Screens:
                               Height: =24
                               Size: =9
                               Text: ="Invoice Date"
-                              Width: =200
                         - lblActualCostColAmount_2:
                             Control: Label@2.5.1
                             Properties:
@@ -713,7 +934,7 @@ Screens:
                               Height: =24
                               Size: =9
                               Text: ="Total Amount"
-                              Width: =200
+                              Width: =100
                         - lblActualCostColCurrency_2:
                             Control: Label@2.5.1
                             Properties:
@@ -722,38 +943,18 @@ Screens:
                               Height: =24
                               Size: =9
                               Text: ="Currency"
-                              Width: =200
+                              Width: =100
                   - galActualCostInvoices_2:
                       Control: Gallery@2.15.0
                       Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
                       Properties:
                         BorderColor: =RGBA(0, 0, 0, 0)
                         FillPortions: =0
-                        Height: |-
-                          =32 * CountRows(
-                              Filter(Procurement_InvoiceData,
-                                  Not(IsBlank(gSelectedProject.ProjectID)) &&
-                                  ProjectID = gSelectedProject.ProjectID
-                              )
-                          )
-                        Items: |-
-                          =Filter(Procurement_InvoiceData,
-                              Not(IsBlank(gSelectedProject.ProjectID)) &&
-                              ProjectID = gSelectedProject.ProjectID
-                          )
-                        LayoutMinHeight: |-
-                          =32 * CountRows(
-                              Filter(Procurement_InvoiceData,
-                                  Not(IsBlank(gSelectedProject.ProjectID)) &&
-                                  ProjectID = gSelectedProject.ProjectID
-                              )
-                          )
+                        Height: =32 * CountRows(colProjectInvoices)
+                        Items: =colProjectInvoices
+                        LayoutMinHeight: =32 * CountRows(colProjectInvoices)
                         TemplateSize: =32
-                        Visible: |-
-                          =Not(IsBlank(gSelectedProject.ProjectID)) &&
-                          CountRows(
-                              Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)
-                          ) > 0
+                        Visible: =CountRows(colProjectInvoices) > 0
                         Width: =Parent.Width
                       Children:
                         - rowActualCostInvoices_2:
@@ -769,6 +970,27 @@ Screens:
                               RadiusTopRight: =0
                               Width: =Parent.Width
                             Children:
+                              - lblInvoiceProjectID_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: |-
+                                      =If(
+                                          ThisItem.ProjectID = gSelectedProject.ProjectID,
+                                          RGBA(68, 68, 65, 1),
+                                          RGBA(83, 74, 183, 1)
+                                      )
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =32
+                                    PaddingRight: =10
+                                    Size: =10
+                                    Text: |-
+                                      =If(
+                                          ThisItem.ProjectID = gSelectedProject.ProjectID,
+                                          ThisItem.ProjectID,
+                                          "↳ " & ThisItem.ProjectID
+                                      )
+                                    Width: =190
+                                    Wrap: =false
                               - lblInvoiceTitle_2:
                                   Control: Label@2.5.1
                                   Properties:
@@ -787,7 +1009,6 @@ Screens:
                                     Height: =32
                                     Size: =10
                                     Text: =ThisItem.InvoiceDate
-                                    Width: =200
                                     X: =40
                                     Y: =40
                               - lblInvoiceAmount_2:
@@ -796,7 +1017,7 @@ Screens:
                                     Height: =32
                                     Size: =10
                                     Text: =Text(ThisItem.TotalAmount)
-                                    Width: =200
+                                    Width: =100
                                     X: =40
                                     Y: =40
                               - lblInvoiceCurrency_2:
@@ -805,7 +1026,7 @@ Screens:
                                     Height: =32
                                     Size: =10
                                     Text: =ThisItem.Currency
-                                    Width: =200
+                                    Width: =100
                                     X: =40
                                     Y: =40
                   - lblActualCostEmpty_2:
@@ -814,12 +1035,10 @@ Screens:
                         Color: =RGBA(136, 135, 128, 1)
                         Height: =24
                         Size: =10
-                        Text: ="No procurement invoices linked to this project yet."
+                        Text: ="No procurement invoices linked to this project or its child projects yet."
                         Visible: |-
                           =Not(IsBlank(gSelectedProject.ProjectID)) &&
-                          CountRows(
-                              Filter(Procurement_InvoiceData, ProjectID = gSelectedProject.ProjectID)
-                          ) = 0
+                          CountRows(colProjectInvoices) = 0
                         Width: =Parent.Width - 40
                   - rectActualCostDivider_2:
                       Control: Rectangle@2.3.0
@@ -827,6 +1046,7 @@ Screens:
                         BorderColor: =RGBA(0, 0, 0, 0)
                         Fill: =RGBA(210, 209, 199, 1)
                         Height: =1
+                        Visible: =CountRows(colProjectInvoices) > 0
                         Width: =Parent.Width
                   - lblActualCostSummaryLabel_2:
                       Control: Label@2.5.1
@@ -836,6 +1056,7 @@ Screens:
                         Height: =22
                         Size: =9
                         Text: ="Total by Currency"
+                        Visible: =CountRows(colProjectInvoices) > 0
                         Width: =Parent.Width - 40
                   - galActualCostSummary_2:
                       Control: Gallery@2.15.0
@@ -845,37 +1066,19 @@ Screens:
                         FillPortions: =0
                         Height: |-
                           =28 * CountRows(
-                              GroupBy(
-                                  Filter(Procurement_InvoiceData,
-                                      Not(IsBlank(gSelectedProject.ProjectID)) &&
-                                      ProjectID = gSelectedProject.ProjectID
-                                  ),
-                                  Currency, GroupedInvoices
-                              )
+                              GroupBy(colProjectInvoices, Currency, GroupedInvoices)
                           )
                         Items: |-
                           =AddColumns(
-                              GroupBy(
-                                  Filter(Procurement_InvoiceData,
-                                      Not(IsBlank(gSelectedProject.ProjectID)) &&
-                                      ProjectID = gSelectedProject.ProjectID
-                                  ),
-                                  Currency, GroupedInvoices
-                              ),
+                              GroupBy(colProjectInvoices, Currency, GroupedInvoices),
                               TotalSum, Sum(GroupedInvoices, TotalAmount)
                           )
                         LayoutMinHeight: |-
                           =28 * CountRows(
-                              GroupBy(
-                                  Filter(Procurement_InvoiceData,
-                                      Not(IsBlank(gSelectedProject.ProjectID)) &&
-                                      ProjectID = gSelectedProject.ProjectID
-                                  ),
-                                  Currency, GroupedInvoices
-                              )
+                              GroupBy(colProjectInvoices, Currency, GroupedInvoices)
                           )
                         TemplateSize: =28
-                        Visible: =Not(IsBlank(gSelectedProject.ProjectID))
+                        Visible: =CountRows(colProjectInvoices) > 0
                         Width: =Parent.Width
                       Children:
                         - lblSummaryTotal_2:
@@ -886,6 +1089,59 @@ Screens:
                               Size: =10
                               Text: =Text(ThisItem.TotalSum) & " " & ThisItem.Currency
                               Width: =Parent.Width
+                  - rectActualCostGrandDivider_2:
+                      Control: Rectangle@2.3.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        Fill: =RGBA(210, 209, 199, 1)
+                        Height: =1
+                        Visible: =CountRows(colProjectInvoices) > 0
+                        Width: =Parent.Width
+                  - lblActualCostGrandTotal_2:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(83, 74, 183, 1)
+                        FontWeight: =FontWeight.Bold
+                        Height: =28
+                        Size: =11
+                        Text: |-
+                          ="Grand Total: " &
+                          Text(
+                              Sum(
+                                  AddColumns(
+                                      colProjectInvoices,
+                                      AUDAmount,
+                                      TotalAmount /
+                                      Switch(
+                                          Upper(Currency),
+                                          "AUD", 1,
+                                          "USD", 0.7,
+                                          "RM", 3,
+                                          "MYR", 3,
+                                          "SGD", 0.9,
+                                          "VND", 18000,
+                                          "RMB", 4.7,
+                                          "CNY", 4.7,
+                                          1
+                                      )
+                                  ),
+                                  AUDAmount
+                              ),
+                              "[#,###.00]"
+                          ) & " AUD"
+                        Visible: =CountRows(colProjectInvoices) > 0
+                        Width: =Parent.Width - 40
+                  - lblActualCostRateLink_2:
+                      Control: Label@2.5.1
+                      Properties:
+                        Color: =RGBA(83, 74, 183, 1)
+                        Height: =20
+                        OnSelect: =Set(gShowRateInfo, true)
+                        Size: =9
+                        Text: ="View exchange rates"
+                        Underline: =true
+                        Visible: =CountRows(colProjectInvoices) > 0
+                        Width: =180
             - rowDocuments_2:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -1029,3 +1285,136 @@ Screens:
                   OnSelect: =Navigate(AllProjectsScreen)
                   Text: ="Close"
                   Width: =120
+      - rectRateInfoOverlay:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            Fill: =RGBA(0, 0, 0, 0.4)
+            Height: =Parent.Height
+            OnSelect: =Set(gShowRateInfo, false)
+            Visible: =gShowRateInfo
+            Width: =Parent.Width
+      - conRateInfoDialog:
+          Control: GroupContainer@1.5.0
+          Variant: AutoLayout
+          Properties:
+            DropShadow: =DropShadow.Bold
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =380
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =6
+            PaddingBottom: =16
+            PaddingLeft: =24
+            PaddingRight: =24
+            PaddingTop: =16
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            Visible: =gShowRateInfo
+            Width: =420
+            X: =(Parent.Width - 420) / 2
+            Y: =(Parent.Height - 360) / 2
+          Children:
+            - lblRateInfoTitle:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(83, 74, 183, 1)
+                  FontWeight: =FontWeight.Bold
+                  Height: =32
+                  Text: ="Currency Exchange Reference"
+                  Width: =Parent.Width - 48
+            - lblRateInfoSubtitle:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(136, 135, 128, 1)
+                  Height: =22
+                  Size: =9
+                  Text: ="Rates used to convert the Grand Total into AUD."
+                  Width: =Parent.Width - 48
+            - rectRateInfoDivider:
+                Control: Rectangle@2.3.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  Fill: =RGBA(210, 209, 199, 1)
+                  Height: =1
+                  Width: =Parent.Width - 48
+            - lblRateInfoAUD:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =26
+                  Size: =11
+                  Text: ="1 AUD = 1 AUD"
+                  Width: =Parent.Width - 48
+            - lblRateInfoUSD:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =26
+                  Size: =11
+                  Text: ="1 AUD = 0.7 USD"
+                  Width: =Parent.Width - 48
+            - lblRateInfoRM:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =26
+                  Size: =11
+                  Text: ="1 AUD = 3 RM (MYR)"
+                  Width: =Parent.Width - 48
+            - lblRateInfoSGD:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =26
+                  Size: =11
+                  Text: ="1 AUD = 0.9 SGD"
+                  Width: =Parent.Width - 48
+            - lblRateInfoVND:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =26
+                  Size: =11
+                  Text: ="1 AUD = 18,000 VND"
+                  Width: =Parent.Width - 48
+            - lblRateInfoRMB:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =26
+                  Size: =11
+                  Text: ="1 AUD = 4.7 RMB (CNY)"
+                  Width: =Parent.Width - 48
+            - lblRateInfoFootnote:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(136, 135, 128, 1)
+                  Height: =34
+                  Overflow: =Overflow.Scroll
+                  Size: =8
+                  Text: ="Any other currency code is counted at 1:1 with AUD."
+                  Width: =Parent.Width - 48
+            - rowRateInfoActions:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =36
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width - 48
+                Children:
+                  - btnCloseRateInfo:
+                      Control: Button@0.0.45
+                      Properties:
+                        Height: =36
+                        OnSelect: =Set(gShowRateInfo, false)
+                        Text: ="Close"
+                        Width: =100

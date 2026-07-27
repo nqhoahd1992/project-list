@@ -73,5 +73,6 @@ App:
       Set(gLevelFilter, "All");
       Set(gApprovalsTab, "To Approve");
       Set(gHasPendingCR, false);
+      Set(gShowRateInfo, false);
       Set(gAppReady, true)
     Theme: =PowerAppsTheme

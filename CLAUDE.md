@@ -34,7 +34,7 @@ project-list/
     ├── App.pa.yaml                 ← App.OnStart global state
     ├── AllProjectsScreen.pa.yaml   ← home: approved projects gallery
     ├── CreateProjectScreen.pa.yaml ← full form → Create change request
-    ├── ViewProjectScreen.pa.yaml   ← read-only project details (gallery row tap + View button); "Actual Cost" section live-reads Procurement_InvoiceData by ProjectID
+    ├── ViewProjectScreen.pa.yaml   ← read-only project details (gallery row tap + View button); "Child Projects" list (root-only) + "Actual Cost" section reading Procurement_InvoiceData via `colProjectInvoices` (own + child-project invoices, built in OnVisible)
     ├── UpdateProjectScreen.pa.yaml ← Description + Deliverables + End Date only → Update change request (owner-only)
     ├── DeleteProjectScreen.pa.yaml ← confirmation + reason → Delete change request
     └── ApprovalsScreen.pa.yaml     ← shared approval queue (role-filtered) + apply logic
@@ -81,7 +81,12 @@ The numeric part is a global sequence (not per-department/year) — accepted tra
 
 ## Global state (App.OnStart)
 
-`gCurrentEmployee` (Employee List row by `User().Email`) · `gCurrentUser`/`gUserRole` (Project_User, fallback Requester) · `gIsApprover` · `gApprovalsPendingCount` (see below) · `gSelectedProject` (gallery → View/Update/Delete screens) · `gSelectedCR` + `gLiveTarget` (Approvals master-detail; `gLiveTarget` = live master row for diff) · `gShowRejectPanel` · `gShowDeleted` · `gStatusFilter` · `gLevelFilter` · `gApprovalsTab` · `gHasPendingCR` · `gAppReady`.
+`gCurrentEmployee` (Employee List row by `User().Email`) · `gCurrentUser`/`gUserRole` (Project_User, fallback Requester) · `gIsApprover` · `gApprovalsPendingCount` (see below) · `gSelectedProject` (gallery → View/Update/Delete screens) · `gSelectedCR` + `gLiveTarget` (Approvals master-detail; `gLiveTarget` = live master row for diff) · `gShowRejectPanel` · `gShowDeleted` · `gStatusFilter` · `gLevelFilter` · `gApprovalsTab` · `gHasPendingCR` · `gShowRateInfo` (ViewProjectScreen's exchange-rate modal) · `gAppReady`.
+
+`ViewProjectScreen.OnVisible` also builds two screen-local collections:
+
+- **`colChildProjects`** — this project's level-1 children, `Sort(Filter(Project_List, ProjectLevel = 1 && RootProjectID = gSelectedProject.ProjectID), ProjectID)`. Drives the "Child Projects (n)" section (`rowChildProjects_2`, sits between the project-info grid and Actual Cost), shown only when `gSelectedProject.ProjectLevel = 0 && CountRows(colChildProjects) > 0`. Each row lists Project ID / Title / status pill / End Date / Budget + a `View` button that does `Set(gSelectedProject, ThisItem); Navigate(ViewProjectScreen)` to drill into the child. Deleted children are **not** filtered out — the status pill shows `Deleted` instead (filtering them would need the verbose OR-of-every-other-status form, since `<>` isn't delegable here).
+- **`colProjectInvoices`** — the project's own `Procurement_InvoiceData` rows plus every child's rows (`ClearCollect` on `ProjectID = gSelectedProject.ProjectID`, then `ForAll(colChildProjects As childProject, Collect(...))` — reusing the collection above rather than re-querying `Project_List`). Each inner `Filter` is a plain delegable `=` on a Text column, so the invoice reads stay correct at any table size; the per-child fan-out is the same accepted N+1 pattern as the per-row `LookUp` badges. Every formula in the "Actual Cost — Procurement Invoices" section (row gallery, "Total by Currency" `GroupBy`, AUD Grand Total, all the container `Height`/`LayoutMinHeight` math) reads this collection, never `Procurement_InvoiceData` directly — so a root project's Actual Cost totals always include its children's invoices. A child project shows only its own rows (nothing has it as `RootProjectID`).
 
 - **`CountRows` against SharePoint is never delegable, full stop** — Studio flags the delegation warning on the formula itself regardless of which property hosts it (`Text`, `OnStart`, `OnVisible`, `OnSelect` all show it identically; moving the call between them does not suppress it). `gApprovalsPendingCount` is computed with `CountRows(Filter(Project_ChangeRequests, ...))` in `App.OnStart` and refreshed in `AllProjectsScreen.OnVisible` purely to avoid re-querying on every render (perf/freshness), **not** to dodge the warning — the warning is expected and accepted, same as the other delegation caveats below. Accurate only within the app's non-delegable query row limit (default 500, raisable to 2000 in Advanced Settings).
 

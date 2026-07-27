@@ -192,6 +192,30 @@ Layout: ='RadioGroupCanvas.Layout'.Horizontal
 
 ---
 
+## 6a. Button — no `Size` property (font size is not settable)
+
+**Wrong:**
+```yaml
+- myButton:
+    Control: Button@0.0.45
+    Properties:
+      Size: =9                  # ← PA2108: Unknown property 'Size' for control type 'Button@0.0.45'
+```
+
+**Correct:**
+```yaml
+- myButton:
+    Control: Button@0.0.45
+    Properties:
+      Height: =26
+      Text: ="View"
+      Width: =80
+```
+
+**Rule:** `Button@0.0.45` has no `Size` property — unlike `Label@2.5.1`, its font size is not settable from YAML. Confirmed via Studio (`PA2108`) when adding a compact in-gallery `View` button on `ViewProjectScreen`. For a smaller-looking button, shrink `Height`/`Width` only; if you genuinely need small text, use a `Label@2.5.1` with `OnSelect` instead (that pattern is already used for links, e.g. `lblActualCostRateLink_2`). `FillPortions: =0` **is** valid on this control and is still required when it sits in an AutoLayout container with an explicit `Height` (see §Layout rules).
+
+---
+
 ## 6b. ComboBox on a full-record data source: author it as `ModernCombobox@1.1.1` with `ItemDisplayText`
 
 When `Items` is a raw table of records (e.g. `Sort('Employee List', Title, ...)`, `Filter(Project_List, ...)`) rather than `Choices(...)`, a plain `ComboBox@0.0.51` does **not** reliably infer which column to display — observed in Studio rendering the numeric `ID` instead of the name/title in every dropdown option. Studio also silently auto-upgrades any `ComboBox@0.0.51` you paste in to `ModernCombobox@1.1.1` on its own, which doesn't even have a `DisplayFields` property — so author it as `ModernCombobox@1.1.1` directly instead of round-tripping through the legacy control.
