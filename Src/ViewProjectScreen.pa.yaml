@@ -1116,6 +1116,7 @@ Screens:
                                           Upper(Currency),
                                           "AUD", 1,
                                           "USD", 0.7,
+                                          "GBP", 0.5,
                                           "RM", 3,
                                           "MYR", 3,
                                           "SGD", 0.9,
@@ -1300,7 +1301,7 @@ Screens:
           Properties:
             DropShadow: =DropShadow.Bold
             Fill: =RGBA(255, 255, 255, 1)
-            Height: =380
+            Height: =412
             LayoutDirection: =LayoutDirection.Vertical
             LayoutGap: =6
             PaddingBottom: =16
@@ -1314,7 +1315,7 @@ Screens:
             Visible: =gShowRateInfo
             Width: =420
             X: =(Parent.Width - 420) / 2
-            Y: =(Parent.Height - 360) / 2
+            Y: =(Parent.Height - 412) / 2
           Children:
             - lblRateInfoTitle:
                 Control: Label@2.5.1
@@ -1354,6 +1355,14 @@ Screens:
                   Height: =26
                   Size: =11
                   Text: ="1 AUD = 0.7 USD"
+                  Width: =Parent.Width - 48
+            - lblRateInfoGBP:
+                Control: Label@2.5.1
+                Properties:
+                  FontWeight: =FontWeight.Semibold
+                  Height: =26
+                  Size: =11
+                  Text: ="1 AUD = 0.5 GBP"
                   Width: =Parent.Width - 48
             - lblRateInfoRM:
                 Control: Label@2.5.1

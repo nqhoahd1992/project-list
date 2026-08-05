@@ -72,7 +72,7 @@ Required ⚠: `ProjectStatus`, `ProjectLevel`.
 | `ProjectStatus` ⚠ | Choice | `Not Started` (default), `In Planning`, `In Progress`, `On Hold`, `Completed`, `Cancelled`, `Deleted` — **`Deleted` is the soft-delete value**, hidden from All Projects by default |
 | `BudgetAmount` | **Number** (not Currency) | Total budget, in whatever unit `Currency` (below) says — no separate Budget Approved flag — dropped by decision, Project Status covers it |
 | `ActualCost` | **Number** (not Currency) | Spend to date, in whatever unit `Currency` (below) says — **never written by the app**; reserved for the future `Project_SyncActualCost` flow (see approval-workflow-plan.md). Always rendered read-only |
-| `Currency` | Text | 3-letter code (`AUD`/`MYR`/`SGD`/`VND`) applying to both `BudgetAmount` and `ActualCost` on this row — plain Text like `Department`, not a Choice column. Set once at Create time (copied from the CR's own `Currency`, itself derived from the form's Market selection — see `CreateProjectScreen.pa.yaml`'s `currency` control) and never changed afterward; `ActualCost` (whenever the future sync flow starts writing it) reuses this same field rather than carrying its own currency |
+| `Currency` | Text | 3-letter code applying to both `BudgetAmount` and `ActualCost` on this row — plain Text like `Department`, not a Choice column. Set once at Create time (copied from the CR's own `Currency`, itself picked freely from `CreateProjectScreen.pa.yaml`'s `ddCurrency` dropdown — `AUD`/`USD`/`GBP`/`MYR`/`SGD`/`VND`/`CNY`, where Market only *suggests* a default) and never changed afterward; `ActualCost` (whenever the future sync flow starts writing it) reuses this same field rather than carrying its own currency |
 | `CapexOpex` | Choice | `CapEx`, `OpEx`, `Mixed` |
 | `RelatedSKU` | Lookup→`Product_Database_SKU_Master` (multi) | Table of `{Id, Value}` (→Title) — allow multiple values; verify the target list's Title/display column before wiring the picker |
 | `Market` | Choice | `AU`, `MY`, `SG`, `VN` — no longer the source `Currency` is derived from at display time (that coupling was removed); `Currency` is now its own stored field, only *initially populated* from Market's mapping at Create |
@@ -131,7 +131,7 @@ Same column names and **identical Choice value sets** as `Project_List` (keep th
 | `ProjectManager` | Lookup→Employee List — **blank on submit**; set by the `ProjectSponsor` right after, via `ApprovalsScreen`'s "Assign Manager" tab (`ApprovalStatus` flips `Pending Sponsor` → `Pending Manager Approval` in that same Patch). Picker sources the full `Employee List` (not scoped to `Project_User` `Role.Value = "Manager"`, unlike `ProjectSponsor` below — see 2026-07-23 model change) |
 | `StartDate`, `EndDate` | Date |
 | `BudgetAmount` | **Number** (not Currency) |
-| `Currency` | Text — same convention as `Project_List.Currency` above; set at Create time from the form's `currency` control, carried through unchanged on Update/Delete CRs (not user-editable on those screens) |
+| `Currency` | Text — same convention as `Project_List.Currency` above; set at Create time from the form's `ddCurrency` dropdown (free choice, Market only pre-selects a suggestion), carried through unchanged on Update/Delete CRs (not user-editable on those screens) |
 | `RelatedSKU` | Lookup→Product_Database_SKU_Master (multi) |
 | `ProjectDocuments` | Text (URL) |
 | `ProjectLevel` | Number (0/1) |

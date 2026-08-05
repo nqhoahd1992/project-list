@@ -421,6 +421,7 @@ Screens:
                               InputTextPlaceholder: ="Choose an option"
                               ItemDisplayText: =ThisItem.Value
                               Items: =Choices(Project_ChangeRequests.Market)
+                              OnChange: =Reset(ddCurrency)
                               SelectMultiple: =false
                               Size: =0
                               Width: =Parent.Width
@@ -512,22 +513,22 @@ Screens:
                                     Width: =Parent.Width
                                     X: =40
                                     Y: =40
-                              - currency:
-                                  Control: ModernText@1.0.0
+                              - ddCurrency:
+                                  Control: ModernCombobox@1.1.1
                                   Properties:
-                                    Align: =Align.Center
-                                    Fill: =RGBA(214, 221, 224, 1)
-                                    FontWeight: =FontWeight.Semibold
+                                    AllowExternalSelectedItems: =false
+                                    DefaultSelectedItems: |-
+                                      =Table({Value: Switch(cmbMarket.Selected.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", "AUD")})
+                                    FontWeight: =""
                                     Height: =40
+                                    InputTextPlaceholder: ="Currency"
+                                    ItemDisplayText: =ThisItem.Value
+                                    Items: =["AUD", "USD", "GBP", "MYR", "SGD", "VND", "CNY"]
                                     LayoutMinHeight: =16
                                     LayoutMinWidth: =16
-                                    PaddingBottom: =0
-                                    PaddingLeft: =0
-                                    PaddingRight: =0
-                                    PaddingTop: =0
-                                    Size: =13
-                                    Text: =Switch(cmbMarket.Selected.Value, "AU", "AUD", "MY", "MYR", "SG", "SGD", "VN", "VND", "")
-                                    Width: =100
+                                    SelectMultiple: =false
+                                    Size: =0
+                                    Width: =120
             - rowBusiness:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
@@ -959,8 +960,8 @@ Screens:
                                                     IsBlank(cmbCostCenter.Selected.Value),
                                                     Notify("Cost Center is required", NotificationType.Error),
                                                     If(
-                                                        IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Text) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text) || IsBlank(txtDeliverables.Text),
-                                                        Notify("Please fill in all required fields (Start/End Date, Budget Amount, CapEx/OpEx, Strategic Objective, Market, Channel, Project Documents URL, Project Description, Deliverables)", NotificationType.Error),
+                                                        IsBlank(dpStartDate.SelectedDate) || IsBlank(dpEndDate.SelectedDate) || IsBlank(txtBudgetAmount.Text) || IsBlank(ddCurrency.Selected.Value) || IsBlank(cmbCapexOpex.Selected.Value) || IsBlank(cmbObjective.Selected.Value) || IsBlank(cmbMarket.Selected.Value) || IsBlank(cmbChannel.Selected.Value) || IsBlank(txtDocsUrl.Text) || IsBlank(txtDescription.Text) || IsBlank(txtDeliverables.Text),
+                                                        Notify("Please fill in all required fields (Start/End Date, Budget Amount, Currency, CapEx/OpEx, Strategic Objective, Market, Channel, Project Documents URL, Project Description, Deliverables)", NotificationType.Error),
                                                         If(
                                                             StartsWith(rdoLevel.Selected.Value, "Child") && IsBlank(cmbRootProject.Selected.ProjectID),
                                                         Notify("Please select the root project", NotificationType.Error),
@@ -988,7 +989,7 @@ Screens:
                                                                         EndDate: dpEndDate.SelectedDate,
                                                                         ProjectStatus: {Value: "Not Started"},
                                                                         BudgetAmount: Value(txtBudgetAmount.Text),
-                                                                        Currency: currency.Text,
+                                                                        Currency: ddCurrency.Selected.Value,
                                                                         CapexOpex: {Value: cmbCapexOpex.Selected.Value},
                                                                         RelatedSKU: ForAll(cmbSKU.SelectedItems, {Id: ID, Value: Title}),
                                                                         Market: {Value: cmbMarket.Selected.Value},
