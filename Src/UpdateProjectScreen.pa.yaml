@@ -216,6 +216,7 @@ Screens:
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
+                        Visible: =false
                         Width: =200
                       Children:
                         - lblStatusLabel_1:
@@ -266,7 +267,7 @@ Screens:
                               Size: =11
                               Text: =Text(gSelectedProject.StartDate, "dd/mm/yyyy") & " → " & Text(gSelectedProject.EndDate, "dd/mm/yyyy")
                               Width: =240
-                  - colBudget:
+                  - colLevel_2:
                       Control: GroupContainer@1.5.0
                       Variant: AutoLayout
                       Properties:
@@ -275,28 +276,27 @@ Screens:
                         Height: =46
                         LayoutDirection: =LayoutDirection.Vertical
                         LayoutGap: =2
-                        LayoutMinHeight: =80
                         RadiusBottomLeft: =0
                         RadiusBottomRight: =0
                         RadiusTopLeft: =0
                         RadiusTopRight: =0
                         Width: =200
                       Children:
-                        - lblBudgetLabel:
+                        - lblLevelLabel_2:
                             Control: Label@2.5.1
                             Properties:
                               Color: =RGBA(136, 135, 128, 1)
                               Height: =20
                               Size: =9
-                              Text: ="Budget / Actual Cost"
+                              Text: ="Level"
                               Width: =200
-                        - lblBudgetValue:
+                        - lblLevelValue_1:
                             Control: Label@2.5.1
                             Properties:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =Text(gSelectedProject.BudgetAmount, "[#,###]") & " / " & If(IsBlank(gSelectedProject.ActualCost), "—", Text(gSelectedProject.ActualCost, "[#,###]")) & " " & gSelectedProject.Currency
+                              Text: =If(gSelectedProject.ProjectLevel = 1, "Child of " & gSelectedProject.RootProjectID, "Root")
                               Width: =200
             - rowCurrentDescription:
                 Control: GroupContainer@1.5.0

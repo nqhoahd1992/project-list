@@ -467,7 +467,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =11
-                              Text: =Text(gSelectedProject.BudgetAmount, "[#,###]") & " " & gSelectedProject.Currency
+                              Text: =Text(gSelectedProject.BudgetAmount, "#,###.00") & " " & gSelectedProject.Currency
                               Width: =220
                   - colCapexOpex_2:
                       Control: GroupContainer@1.5.0
@@ -921,14 +921,17 @@ Screens:
                         - lblActualCostColInvoiceDate_2:
                             Control: Label@2.5.1
                             Properties:
+                              Align: =Align.Center
                               Color: =RGBA(136, 135, 128, 1)
                               FontWeight: =FontWeight.Semibold
                               Height: =24
                               Size: =9
                               Text: ="Invoice Date"
+                              Width: =120
                         - lblActualCostColAmount_2:
                             Control: Label@2.5.1
                             Properties:
+                              Align: =Align.Right
                               Color: =RGBA(136, 135, 128, 1)
                               FontWeight: =FontWeight.Semibold
                               Height: =24
@@ -951,7 +954,7 @@ Screens:
                         BorderColor: =RGBA(0, 0, 0, 0)
                         FillPortions: =0
                         Height: =32 * CountRows(colProjectInvoices)
-                        Items: =colProjectInvoices
+                        Items: =Sort(colProjectInvoices, InvoiceDate, SortOrder.Ascending)
                         LayoutMinHeight: =32 * CountRows(colProjectInvoices)
                         TemplateSize: =32
                         Visible: =CountRows(colProjectInvoices) > 0
@@ -998,7 +1001,9 @@ Screens:
                                     Height: =32
                                     PaddingRight: =15
                                     Size: =10
+                                    TabIndex: =0
                                     Text: =ThisItem.Title
+                                    Tooltip: =ThisItem.Title
                                     Width: =200
                                     Wrap: =false
                                     X: =40
@@ -1006,17 +1011,20 @@ Screens:
                               - lblInvoiceInvoiceDate_2:
                                   Control: Label@2.5.1
                                   Properties:
+                                    Align: =Align.Center
                                     Height: =32
                                     Size: =10
-                                    Text: =ThisItem.InvoiceDate
+                                    Text: =Text(ThisItem.InvoiceDate, "dd/mm/yyyy")
+                                    Width: =120
                                     X: =40
                                     Y: =40
                               - lblInvoiceAmount_2:
                                   Control: Label@2.5.1
                                   Properties:
+                                    Align: =Align.Right
                                     Height: =32
                                     Size: =10
-                                    Text: =Text(ThisItem.TotalAmount)
+                                    Text: =Text(ThisItem.TotalAmount, "#,###.00")
                                     Width: =100
                                     X: =40
                                     Y: =40
@@ -1087,7 +1095,7 @@ Screens:
                               FontWeight: =FontWeight.Semibold
                               Height: =28
                               Size: =10
-                              Text: =Text(ThisItem.TotalSum) & " " & ThisItem.Currency
+                              Text: =Text(ThisItem.TotalSum, "#,###.00") & " " & ThisItem.Currency
                               Width: =Parent.Width
                   - rectActualCostGrandDivider_2:
                       Control: Rectangle@2.3.0
@@ -1128,7 +1136,7 @@ Screens:
                                   ),
                                   AUDAmount
                               ),
-                              "[#,###.00]"
+                              "#,###.00"
                           ) & " AUD"
                         Visible: =CountRows(colProjectInvoices) > 0
                         Width: =Parent.Width - 40
@@ -1177,16 +1185,19 @@ Screens:
                         Color: =RGBA(83, 74, 183, 1)
                         FontWeight: =FontWeight.Semibold
                         Height: =28
+                        OnSelect: =If(Not(IsBlank(gSelectedProject.ProjectDocuments)), Launch(gSelectedProject.ProjectDocuments, {}, LaunchTarget.New))
                         Size: =11
                         Text: =If(IsBlank(gSelectedProject.ProjectDocuments), "—", gSelectedProject.ProjectDocuments)
+                        Underline: =Not(IsBlank(gSelectedProject.ProjectDocuments))
                         Width: =Parent.Width - 40
+                        Wrap: =false
             - rowCurrentDescription_2:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
                   DropShadow: =DropShadow.None
                   FillPortions: =0
-                  Height: =110
+                  Height: =80
                   LayoutDirection: =LayoutDirection.Vertical
                   LayoutGap: =4
                   LayoutMinHeight: =150

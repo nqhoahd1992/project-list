@@ -619,7 +619,7 @@ Screens:
                   Size: =10
                   Text: =If(ThisItem.ProjectLevel = 1, "↳ " & ThisItem.RootProjectID, "Root")
                   Width: =180
-                  X: =1036
+                  X: =Parent.Width - 200
                   Y: =10
             - lblPendingChangeBadge:
                 Control: Label@2.5.1
@@ -769,35 +769,6 @@ Screens:
                         Width: =30
                         X: =40
                         Y: =40
-            - lblProjectStatus:
-                Control: Label@2.5.1
-                Properties:
-                  Align: =Align.Center
-                  Color: |-
-                    =Switch(ThisItem.ProjectStatus.Value,
-                        "Completed", RGBA(15, 110, 86, 1),
-                        "Deleted", RGBA(163, 45, 45, 1),
-                        "Cancelled", RGBA(163, 45, 45, 1),
-                        "On Hold", RGBA(133, 79, 11, 1),
-                        "In Progress", RGBA(83, 74, 183, 1),
-                        RGBA(68, 68, 65, 1)
-                    )
-                  Fill: |-
-                    =Switch(ThisItem.ProjectStatus.Value,
-                        "Completed", RGBA(225, 245, 238, 1),
-                        "Deleted", RGBA(252, 235, 235, 1),
-                        "Cancelled", RGBA(252, 235, 235, 1),
-                        "On Hold", RGBA(250, 238, 218, 1),
-                        "In Progress", RGBA(225, 220, 252, 1),
-                        RGBA(241, 239, 232, 1)
-                    )
-                  FontWeight: =FontWeight.Semibold
-                  Height: =28
-                  Size: =10
-                  Text: =ThisItem.ProjectStatus.Value
-                  Width: =120
-                  X: =1226
-                  Y: =10
             - lblProjectMeta:
                 Control: Label@2.5.1
                 Properties:
@@ -805,7 +776,8 @@ Screens:
                   Height: =24
                   Size: =11
                   Text: |-
-                    ="Sponsor: " & ThisItem.ProjectSponsor.Value &
+                    ="Requester: " & ThisItem.RequestedBy.Value &
+                    " | Sponsor: " & ThisItem.ProjectSponsor.Value &
                     " | Manager: " & ThisItem.ProjectManager.Value &
                     If(IsBlank(ThisItem.StartDate), "", " | " & Text(ThisItem.StartDate, "dd/mm/yyyy") & " → " & Text(ThisItem.EndDate, "dd/mm/yyyy"))
                   Width: =Parent.Width - 350
