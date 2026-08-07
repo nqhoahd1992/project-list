@@ -704,6 +704,7 @@ Screens:
                               Height: =24
                               Size: =9
                               Text: ="Status"
+                              Visible: =false
                         - lblChildColEndDate_2:
                             Control: Label@2.5.1
                             Properties:
@@ -803,6 +804,7 @@ Screens:
                                     Height: =26
                                     Size: =9
                                     Text: =ThisItem.ProjectStatus.Value
+                                    Visible: =false
                               - lblChildProjectEndDate_2:
                                   Control: Label@2.5.1
                                   Properties:
@@ -819,7 +821,7 @@ Screens:
                                       =If(
                                           IsBlank(ThisItem.BudgetAmount),
                                           "—",
-                                          Text(ThisItem.BudgetAmount, "[#,###]") & " " & ThisItem.Currency
+                                          Text(ThisItem.BudgetAmount, "#,###.00") & " " & ThisItem.Currency
                                       )
                                     Width: =200
                                     Wrap: =false
