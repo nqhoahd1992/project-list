@@ -2233,6 +2233,7 @@ Screens:
                                                     "R&D", "RD",
                                                     "HR", "HR",
                                                     "Operations", "OP",
+                                                    "Technical Production", "TP",
                                                     "GN"
                                                 ) & "-" & Text(Year(Today())) & "-" & Text(wNew.ID, "000")
                                         }
