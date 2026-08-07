@@ -697,6 +697,7 @@ Screens:
                               BorderStyle: =""
                               Font: =""
                               FontWeight: =""
+                              Format: ="dd/mm/yyyy"
                               Height: =40
                               Placeholder: ="Choose a date"
                               Size: =0
@@ -728,6 +729,7 @@ Screens:
                               BorderStyle: =""
                               Font: =""
                               FontWeight: =""
+                              Format: ="dd/mm/yyyy"
                               Height: =40
                               Placeholder: ="Choose a date"
                               Size: =0
