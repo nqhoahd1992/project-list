@@ -31,9 +31,31 @@ Screens:
         );
         ForAll(colChildProjects As childProject,
             Collect(colProjectInvoices,
-                Filter(Procurement_InvoiceData, ProjectID = childProject.ProjectID)
+                Filter(Procurement_InvoiceData,
+                    Not(IsBlank(childProject.ProjectID)) &&
+                    ProjectID = childProject.ProjectID
+                )
             )
-        )
+        );
+        ClearCollect(colRelatedProjects,
+            Sort(
+                Sort(
+                    Filter(Project_List,
+                        gSelectedProject.ProjectLevel = 1 &&
+                        Not(IsBlank(gSelectedProject.RootProjectID)) &&
+                        (
+                            ProjectID = gSelectedProject.RootProjectID ||
+                            RootProjectID = gSelectedProject.RootProjectID
+                        )
+                    ),
+                    ProjectID,
+                    SortOrder.Ascending
+                ),
+                ProjectLevel,
+                SortOrder.Ascending
+            )
+        );
+        RemoveIf(colRelatedProjects, ID = gSelectedProject.ID)
     Children:
       - rectHeader_5:
           Control: Rectangle@2.3.0
@@ -722,6 +744,15 @@ Screens:
                               Size: =9
                               Text: ="Budget"
                               Width: =200
+                        - lblChildColCost_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Actual Cost (AUD)"
+                              Width: =200
                         - lblChildColAction_2:
                             Control: Label@2.5.1
                             Properties:
@@ -825,7 +856,237 @@ Screens:
                                       )
                                     Width: =200
                                     Wrap: =false
+                              - lblChildProjectCost_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =32
+                                    PaddingRight: =10
+                                    Size: =10
+                                    Text: |-
+                                      =With(
+                                          {wChildInvoices: Filter(colProjectInvoices, ProjectID = ThisItem.ProjectID)},
+                                          If(
+                                              IsBlank(ThisItem.ProjectID) || CountRows(wChildInvoices) = 0,
+                                              "—",
+                                              Text(
+                                                  Sum(
+                                                      AddColumns(
+                                                          wChildInvoices,
+                                                          AUDAmount,
+                                                          TotalAmount /
+                                                          Switch(
+                                                              Upper(Currency),
+                                                              "AUD", 1,
+                                                              "USD", 0.7,
+                                                              "GBP", 0.5,
+                                                              "RM", 3,
+                                                              "MYR", 3,
+                                                              "SGD", 0.9,
+                                                              "VND", 18000,
+                                                              "RMB", 4.7,
+                                                              "CNY", 4.7,
+                                                              1
+                                                          )
+                                                      ),
+                                                      AUDAmount
+                                                  ),
+                                                  "#,###.00"
+                                              ) & " AUD"
+                                          )
+                                      )
+                                    Width: =200
+                                    Wrap: =false
                               - btnViewChildProject_2:
+                                  Control: Button@0.0.45
+                                  Properties:
+                                    Height: =26
+                                    OnSelect: =Set(gSelectedProject, ThisItem); Navigate(ViewProjectScreen)
+                                    Text: ="View"
+                                    Width: =100
+            - rowRelatedProjects_2:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =90 + 32 * CountRows(colRelatedProjects)
+                  LayoutDirection: =LayoutDirection.Vertical
+                  LayoutGap: =4
+                  LayoutMinHeight: =90 + 32 * CountRows(colRelatedProjects)
+                  PaddingBottom: =12
+                  PaddingLeft: =20
+                  PaddingRight: =20
+                  PaddingTop: =12
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: |-
+                    =gSelectedProject.ProjectLevel = 1 &&
+                    CountRows(colRelatedProjects) > 0
+                  Width: =Parent.Width
+                Children:
+                  - lblRelatedProjectsLabel_2:
+                      Control: Label@2.5.1
+                      Properties:
+                        FontWeight: =FontWeight.Semibold
+                        Height: =30
+                        Size: =11
+                        Text: |-
+                          ="Related Projects — root " & gSelectedProject.RootProjectID &
+                          " (" & CountRows(colRelatedProjects) & ")"
+                        Width: =Parent.Width - 40
+                  - rowRelatedProjectsHeader_2:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        DropShadow: =DropShadow.None
+                        FillPortions: =0
+                        Height: =24
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width
+                      Children:
+                        - lblRelatedColRelation_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Relation"
+                              Width: =100
+                        - lblRelatedColProjectID_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Project ID"
+                              Width: =190
+                        - lblRelatedColTitle_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FillPortions: =1
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Title"
+                              Width: =260
+                        - lblRelatedColEndDate_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="End Date"
+                        - lblRelatedColBudget_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: ="Budget"
+                              Width: =200
+                        - lblRelatedColAction_2:
+                            Control: Label@2.5.1
+                            Properties:
+                              Color: =RGBA(136, 135, 128, 1)
+                              FontWeight: =FontWeight.Semibold
+                              Height: =24
+                              Size: =9
+                              Text: =""
+                              Width: =100
+                  - galRelatedProjects_2:
+                      Control: Gallery@2.15.0
+                      Variant: BrowseLayout_Vertical_TwoTextOneImageVariant_ver5.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        FillPortions: =0
+                        Height: =32 * CountRows(colRelatedProjects)
+                        Items: =colRelatedProjects
+                        LayoutMinHeight: =32 * CountRows(colRelatedProjects)
+                        TemplateSize: =32
+                        Width: =Parent.Width
+                      Children:
+                        - rowRelatedProjectItem_2:
+                            Control: GroupContainer@1.5.0
+                            Variant: AutoLayout
+                            Properties:
+                              DropShadow: =DropShadow.None
+                              Height: =32
+                              LayoutAlignItems: =LayoutAlignItems.Center
+                              LayoutDirection: =LayoutDirection.Horizontal
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Width: =Parent.Width
+                            Children:
+                              - lblRelatedRelation_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Align: =Align.Center
+                                    Color: =If(ThisItem.ProjectLevel = 0, RGBA(68, 68, 65, 1), RGBA(83, 74, 183, 1))
+                                    Fill: =If(ThisItem.ProjectLevel = 0, RGBA(241, 239, 232, 1), RGBA(237, 235, 254, 1))
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =24
+                                    Size: =9
+                                    Text: =If(ThisItem.ProjectLevel = 0, "Root", "Sibling")
+                                    Width: =90
+                                    Wrap: =false
+                              - lblRelatedProjectID_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Color: =RGBA(83, 74, 183, 1)
+                                    FontWeight: =FontWeight.Semibold
+                                    Height: =32
+                                    PaddingLeft: =10
+                                    PaddingRight: =10
+                                    Size: =10
+                                    Text: =Coalesce(ThisItem.ProjectID, "PROJ-PENDING-" & ThisItem.ID)
+                                    Width: =190
+                                    Wrap: =false
+                              - lblRelatedProjectTitle_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    FillPortions: =1
+                                    Height: =32
+                                    PaddingRight: =10
+                                    Size: =10
+                                    Text: =ThisItem.Title
+                                    Tooltip: =ThisItem.Title
+                                    Width: =260
+                                    Wrap: =false
+                              - lblRelatedProjectEndDate_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Height: =32
+                                    Size: =10
+                                    Text: =If(IsBlank(ThisItem.EndDate), "—", Text(ThisItem.EndDate, "dd/mm/yyyy"))
+                              - lblRelatedProjectBudget_2:
+                                  Control: Label@2.5.1
+                                  Properties:
+                                    Height: =32
+                                    PaddingRight: =10
+                                    Size: =10
+                                    Text: |-
+                                      =If(
+                                          IsBlank(ThisItem.BudgetAmount),
+                                          "—",
+                                          Text(ThisItem.BudgetAmount, "#,###.00") & " " & ThisItem.Currency
+                                      )
+                                    Width: =200
+                                    Wrap: =false
+                              - btnViewRelatedProject_2:
                                   Control: Button@0.0.45
                                   Properties:
                                     Height: =26
